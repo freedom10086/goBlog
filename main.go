@@ -41,6 +41,8 @@ func main() {
 
 	//fmt.Println(isok, message)
 
+	fmt.Println(models.Md5_password("justfrsdgfxfdxfsice"))
+
 	mux := http.NewServeMux()
 
 	for _, route := range router.Routes {

@@ -14,14 +14,14 @@ import (
 )
 
 /*
-CREATE TABLE IF NOT EXISTS `post` (
-        `tid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-        `uid` integer NOT NULL DEFAULT 0 ,
-        `fid` integer NOT NULL DEFAULT 0 ,
-        `title` varchar(255) NOT NULL DEFAULT '' ,
-        `content` varchar(5000) NOT NULL DEFAULT '' ,
-        `created` datetime NOT NULL,
-        `updated` datetime,
+CREATE TABLE IF NOT EXISTS `user` (
+        `uid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+        `username` varchar(20) NOT NULL UNIQUE ,
+        `password` varchar(50) NOT NULL,
+        `email` varchar(30) NOT NULL DEFAULT '' ,
+        `regtime` datetime NOT NULL,
+        `sites` varchar(30) NOT NULL DEFAULT '' ,
+        `sex` integer NOT NULL DEFAULT 0 ,
         `author` varchar(30) NOT NULL DEFAULT '' ,
         `tags` varchar(100) NOT NULL DEFAULT '' ,
         `status` tinyint NOT NULL DEFAULT 0 ,
@@ -95,7 +95,7 @@ func GetUser(uid int) (*User, error) {
 }
 
 //存入数据库 md5(password)
-func md5_password(password string) string {
+func Md5_password(password string) string {
 	md5pass := fmt.Sprintf("%x", md5.Sum([]byte(password)))
 
 	return md5pass
@@ -107,7 +107,7 @@ type TokenData struct {
 	Expires  time.Time
 }
 
-//生成TOKEN
+//生成TOKEN base64(data+hmac(data,SecretKey))
 func GenToken(username string, timeout int) string {
 
 	data := &TokenData{
@@ -143,7 +143,6 @@ func ValidToken(token string) (bool, string) {
 	decode_token, err := base64.URLEncoding.DecodeString(token)
 
 	if err != nil {
-		fmt.Println(err)
 		return false, "decode error"
 	}
 
