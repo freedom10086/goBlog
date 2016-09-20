@@ -2,7 +2,6 @@ package controls
 
 import (
 	"crypto/hmac"
-	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -18,13 +17,6 @@ import (
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "hello this is user!!")
-}
-
-//存入数据库 md5(password)
-func Md5_password(password string) string {
-	md5pass := fmt.Sprintf("%x", md5.Sum([]byte(password)))
-
-	return md5pass
 }
 
 type TokenData struct {

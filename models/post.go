@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"log"
 	"time"
@@ -57,30 +58,29 @@ func DelPost(tid int) error {
 
 func GetPost(tid int) (*Post, error) {
 	//查询数据
-	rows, err := db.Query("SELECT  `uid`, `fid`, `title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `tags`, `status` FROM `post` WHERE `tid` = ?",
+	row := db.QueryRow("SELECT  `uid`, `fid`, `title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `tags`, `status` FROM `post` WHERE `tid` = ?",
 		tid)
 
-	if err != nil {
-		return nil, err
-	}
 	post := &Post{Tid: tid}
 
-	if rows.Next() {
-		var timestr string
-		err = rows.Scan(&post.Uid, &post.Fid, &post.Title, &post.Content, &timestr, &post.Updated, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
+	var timestr string
+	err := row.Scan(&post.Uid, &post.Fid, &post.Title, &post.Content, &timestr, &post.Updated, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
+	switch {
+	case err == sql.ErrNoRows:
+		err = errors.New("no post that tid is " + string(tid))
+	case err != nil:
+		log.Fatal(err)
+	default:
 		loc := time.Local
 		post.Created, err = time.ParseInLocation("2006-01-02 15:04:05", timestr, loc)
-
 		//add view count
 		if _, err2 := db.Exec("UPDATE `post` SET  `views` = `views`+ 1  WHERE `tid` = ?", tid); err2 != nil {
 			log.Fatal(err2)
 		}
-
-		return post, err
+		return post, nil
 	}
 
-	err = errors.New("no post")
-	return post, err
+	return nil, err
 }
 
 func GetPosts(limit int) ([]*Post, error) {
@@ -91,7 +91,7 @@ func GetPosts(limit int) ([]*Post, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	defer rows.Close()
 	posts := make([]*Post, 0)
 
 	for rows.Next() {

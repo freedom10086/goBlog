@@ -1,27 +1,31 @@
 package models
 
 import (
+	"crypto/md5"
 	"errors"
+	"fmt"
 	"time"
 )
 
 /*
+DROP TABLE IF EXISTS `user`
+
 CREATE TABLE IF NOT EXISTS `user` (
         `uid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-        `username` varchar(20) NOT NULL UNIQUE ,
+        `username` varchar(20) UNIQUE NOT NULL,
         `password` varchar(50) NOT NULL,
         `email` varchar(30) NOT NULL DEFAULT '' ,
         `regtime` datetime NOT NULL,
         `sites` varchar(30) NOT NULL DEFAULT '' ,
-        `sex` integer NOT NULL DEFAULT 0 ,
-        `author` varchar(30) NOT NULL DEFAULT '' ,
-        `tags` varchar(100) NOT NULL DEFAULT '' ,
+        `sex` tinyint NOT NULL DEFAULT 0 ,
+        `description` varchar(150) NOT NULL DEFAULT '' ,
+        `exp` integer NOT NULL DEFAULT 0 ,
         `status` tinyint NOT NULL DEFAULT 0 ,
-		`views` integer NOT NULL DEFAULT 0 ,
-        `replys` integer NOT NULL DEFAULT 0
+		`birthday` date NOT NULL DEFAULT '0000-00-00' ,
+        `phone` varchar(20) NOT NULL DEFAULT '',
+		`position` varchar(100) NOT NULL DEFAULT ''
     ) ENGINE=InnoDB;
-    CREATE INDEX `post_cid` ON `post` (`fid`);
-    CREATE INDEX `post_views` ON `post` (`views`);
+    CREATE INDEX `user_username` ON `user` (`username`);
 */
 
 type User struct {
@@ -40,11 +44,32 @@ type User struct {
 	Position    string
 }
 
-func AddUser(username, password, email string) error {
+func Login(username, password string) (bool, error) {
+	md5pass := Md5_password(password)
 
+	var uid int
+	err := db.QueryRow("SELECT `uid` FROM `user` WHERE `username`=? AND `password` = ?",
+		username, md5pass).Scan(&uid)
+	if err != nil {
+		return false, err
+	} else {
+		fmt.Println(uid)
+		return true, nil
+	}
+}
+
+//存入数据库 md5(password)
+func Md5_password(password string) string {
+	md5pass := fmt.Sprintf("%x", md5.Sum([]byte(password)))
+
+	return md5pass
+}
+
+func AddUser(username, password, email string) error {
+	md5pass := Md5_password(password)
 	_, err := db.Exec(
 		"INSERT INTO `user` (`username`,`password`,`email`,`regtime`) VALUES (?,?,?,?)",
-		username, password, email, time.Now())
+		username, md5pass, email, time.Now())
 	return err
 }
 

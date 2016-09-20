@@ -1,7 +1,6 @@
 package main
 
 import (
-	"goweb/controls"
 	"goweb/models"
 	"goweb/router"
 	"io"
@@ -43,7 +42,15 @@ func main() {
 
 	//fmt.Println(models.Md5_password("justfrsdgfxfdxfsice"))
 
-	go controls.SendValidMail("1770626192@qq.com", "hehe")
+	//go controls.SendValidMail("1770626192@qq.com", "hehe")
+
+	//err := models.AddUser("hehe2", "password", "2351386755@qq.com")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	ok, _ := models.Login("hehe2", "password")
+	log.Fatal(ok)
 
 	mux := http.NewServeMux()
 
