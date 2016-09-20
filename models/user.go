@@ -1,15 +1,7 @@
 package models
 
 import (
-	"crypto/hmac"
-	"crypto/md5"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"goweb/conf"
-	"math/rand"
 	"time"
 )
 
@@ -92,83 +84,4 @@ func GetUser(uid int) (*User, error) {
 
 	err = errors.New("no user")
 	return user, err
-}
-
-//存入数据库 md5(password)
-func Md5_password(password string) string {
-	md5pass := fmt.Sprintf("%x", md5.Sum([]byte(password)))
-
-	return md5pass
-}
-
-type TokenData struct {
-	Username string
-	Salt     string
-	Expires  time.Time
-}
-
-//生成TOKEN base64(data+hmac(data,SecretKey))
-func GenToken(username string, timeout int) string {
-
-	data := &TokenData{
-		Username: username,
-		Salt:     Krand(10),
-		Expires:  time.Now().Add(time.Second * time.Duration(timeout)),
-	}
-
-	mac := hmac.New(sha256.New, []byte(conf.SecretKey))
-	strdata, _ := json.Marshal(data)
-	mac.Write(strdata)
-	signature := mac.Sum(nil)
-
-	return base64.URLEncoding.EncodeToString([]byte(string(strdata) + string(signature)))
-}
-
-// 随机字符串
-func Krand(size int) string {
-	kinds, result := [][]int{[]int{10, 48}, []int{26, 97}, []int{26, 65}}, make([]byte, size)
-	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < size; i++ {
-		ikind := rand.Intn(3)
-		scope, base := kinds[ikind][0], kinds[ikind][1]
-		result[i] = uint8(base + rand.Intn(scope))
-	}
-	return string(result)
-}
-
-//valid token
-func ValidToken(token string) (bool, string) {
-
-	fmt.Println(len(token))
-	decode_token, err := base64.URLEncoding.DecodeString(token)
-
-	if err != nil {
-		return false, "decode error"
-	}
-
-	totallen := len(decode_token)
-	payload := decode_token[:totallen-32]
-	signature := decode_token[totallen-32:]
-
-	mac := hmac.New(sha256.New, []byte(conf.SecretKey))
-	mac.Write([]byte(payload))
-	my_signature := mac.Sum(nil)
-
-	if hmac.Equal(signature, my_signature) {
-
-		data := &TokenData{}
-		err := json.Unmarshal([]byte(payload), &data)
-
-		if err != nil {
-			return false, "Unmarshal faild"
-		}
-		if data.Expires.Before(time.Now()) {
-			return false, "time is expires"
-		}
-
-		return true, data.Username
-
-	} else {
-		return false, "signature not equal"
-	}
 }

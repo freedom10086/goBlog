@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"goweb/controls"
 	"goweb/models"
 	"goweb/router"
 	"io"
@@ -41,7 +41,9 @@ func main() {
 
 	//fmt.Println(isok, message)
 
-	fmt.Println(models.Md5_password("justfrsdgfxfdxfsice"))
+	//fmt.Println(models.Md5_password("justfrsdgfxfdxfsice"))
+
+	go controls.SendValidMail("1770626192@qq.com", "hehe")
 
 	mux := http.NewServeMux()
 
