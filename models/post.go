@@ -12,10 +12,10 @@ CREATE TABLE IF NOT EXISTS `post` (
         `tid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
         `uid` integer NOT NULL DEFAULT 0 ,
         `fid` integer NOT NULL DEFAULT 0 ,
-        `title` varchar(255) NOT NULL DEFAULT '' ,
+        `title` varchar(255) NOT NULL ,
         `content` varchar(5000) NOT NULL DEFAULT '' ,
         `created` datetime NOT NULL,
-        `updated` datetime,
+        `updated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
         `author` varchar(30) NOT NULL DEFAULT '' ,
         `tags` varchar(100) NOT NULL DEFAULT '' ,
         `status` tinyint NOT NULL DEFAULT 0 ,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `post` (
 type Post struct {
 	Tid     int
 	Uid     int
-	Fid     int
+	Cid     int
 	Title   string
 	Content string
 	Created time.Time
@@ -64,7 +64,7 @@ func GetPost(tid int) (*Post, error) {
 	post := &Post{Tid: tid}
 
 	var timestr string
-	err := row.Scan(&post.Uid, &post.Fid, &post.Title, &post.Content, &timestr, &post.Updated, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
+	err := row.Scan(&post.Uid, &post.Cid, &post.Title, &post.Content, &timestr, &post.Updated, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
 	switch {
 	case err == sql.ErrNoRows:
 		err = errors.New("no post that tid is " + string(tid))
@@ -98,7 +98,7 @@ func GetPosts(limit int) ([]*Post, error) {
 		var timestr string
 		var updatestr string
 		post := &Post{}
-		err = rows.Scan(&post.Tid, &post.Uid, &post.Fid, &post.Title, &post.Content, &timestr, &updatestr, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
+		err = rows.Scan(&post.Tid, &post.Uid, &post.Cid, &post.Title, &post.Content, &timestr, &updatestr, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
 		loc := time.Local
 
 		post.Created, err = time.ParseInLocation("2006-01-02 15:04:05", timestr, loc)

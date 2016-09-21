@@ -49,8 +49,7 @@ func main() {
 	//	log.Fatal(err)
 	//}
 
-	ok, _ := models.Login("hehe2", "password")
-	log.Fatal(ok)
+	//models.Login("hehe2", "password")
 
 	mux := http.NewServeMux()
 

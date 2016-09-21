@@ -35,11 +35,11 @@ func GenToken(username string, timeout int) string {
 	}
 
 	mac := hmac.New(sha256.New, []byte(conf.SecretKey))
-	strdata, _ := json.Marshal(data)
-	mac.Write(strdata)
+	bytedata, _ := json.Marshal(data)
+	mac.Write(bytedata)
 	signature := mac.Sum(nil)
 
-	return base64.URLEncoding.EncodeToString([]byte(string(strdata) + string(signature)))
+	return base64.URLEncoding.EncodeToString(append(bytedata, signature...))
 }
 
 // 随机字符串

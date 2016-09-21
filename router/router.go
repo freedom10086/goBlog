@@ -14,4 +14,5 @@ type Route struct {
 var Routes = []Route{
 	{"/", controls.HomeHandler},
 	{"/user", controls.UserHandler},
+	{"/post", controls.PostHandler},
 }

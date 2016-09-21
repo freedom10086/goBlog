@@ -51,6 +51,7 @@ func Login(username, password string) (bool, error) {
 	err := db.QueryRow("SELECT `uid` FROM `user` WHERE `username`=? AND `password` = ?",
 		username, md5pass).Scan(&uid)
 	if err != nil {
+		fmt.Println(err)
 		return false, err
 	} else {
 		fmt.Println(uid)
