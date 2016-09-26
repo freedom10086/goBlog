@@ -1,111 +1,187 @@
 package models
 
 import (
-	"database/sql"
-	"errors"
 	"log"
 	"time"
 )
 
 /*
 CREATE TABLE IF NOT EXISTS `post` (
-        `tid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+		`cid` integer NOT NULL DEFAULT 0 ,
+		`pid` integer NOT NULL DEFAULT 0 ,
         `uid` integer NOT NULL DEFAULT 0 ,
-        `fid` integer NOT NULL DEFAULT 0 ,
-        `title` varchar(255) NOT NULL ,
+        `title` varchar(255) NOT NULL DEFAULT '',
         `content` varchar(5000) NOT NULL DEFAULT '' ,
         `created` datetime NOT NULL,
         `updated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
         `author` varchar(30) NOT NULL DEFAULT '' ,
-        `tags` varchar(100) NOT NULL DEFAULT '' ,
         `status` tinyint NOT NULL DEFAULT 0 ,
 		`views` integer NOT NULL DEFAULT 0 ,
-        `replys` integer NOT NULL DEFAULT 0
+        `replys` integer NOT NULL DEFAULT 0,
+		`lastpost` datetime NOT NULL'
     ) ENGINE=InnoDB;
     CREATE INDEX `post_cid` ON `post` (`fid`);
     CREATE INDEX `post_views` ON `post` (`views`);
 */
+
 type Post struct {
-	Tid     int
-	Uid     int
-	Cid     int
-	Title   string
-	Content string
-	Created time.Time
-	Updated time.Time
-	Views   int
-	Replys  int
-	Author  string
-	Tags    string
-	Status  int
+	Id       int //id
+	Pid      int //主题--一般回复 0+(id)回复
+	Title    string
+	Content  string
+	Created  time.Time
+	Updated  time.Time
+	Views    int
+	Replys   int
+	Status   int //0--open 1--close
+	User     User
+	Category Category
+	Comments []*Comment
 }
 
-func AddPost(uid, fid int, title, content string) error {
-	author := "author" + string(uid)
-	timenow := time.Now()
+type Comment struct {
+	Id       int
+	Pid      int
+	Content  string
+	Created  time.Time
+	Updated  time.Time
+	Replys   int
+	User     User
+	Comments []*Comment
+}
+
+//发布主题
+func AddPost(cid, uid int, title, content, author string) error {
 	_, err := db.Exec(
-		"INSERT INTO `post` (`uid`,`fid`,`title`,`content`,`created`,`updated`,`author`) VALUES (?,?,?,?,?,?,?)",
-		uid, fid, title, content, timenow, timenow, author)
+		"INSERT INTO `post` (`cid`,`pid`,`uid`,`title`,`content`,`created`,`author`) VALUES (?,?,?,?,?,?,?)",
+		cid, 0, uid, title, content, time.Now(), author)
+
+	if err != nil {
+		return nil
+	}
+	//更新category计数
+	_, err = db.Exec("UPDATE `category` SET `posts` = `posts` + 1 WHERE cid = ?",
+		cid)
 	return err
 }
 
-func DelPost(tid int) error {
+//发表回复 回复对象--id为pid
+func AddComment(cid, pid, uid int, content, author string) error {
+	//todo 检查status看看是否可以回复
+
 	_, err := db.Exec(
-		"DELETE FROM post WHERE tid = ?",
-		tid)
-	return err
-}
-
-func GetPost(tid int) (*Post, error) {
-	//查询数据
-	row := db.QueryRow("SELECT  `uid`, `fid`, `title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `tags`, `status` FROM `post` WHERE `tid` = ?",
-		tid)
-
-	post := &Post{Tid: tid}
-
-	var timestr string
-	err := row.Scan(&post.Uid, &post.Cid, &post.Title, &post.Content, &timestr, &post.Updated, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
-	switch {
-	case err == sql.ErrNoRows:
-		err = errors.New("no post that tid is " + string(tid))
-	case err != nil:
-		log.Fatal(err)
-	default:
-		loc := time.Local
-		post.Created, err = time.ParseInLocation("2006-01-02 15:04:05", timestr, loc)
-		//add view count
-		if _, err2 := db.Exec("UPDATE `post` SET  `views` = `views`+ 1  WHERE `tid` = ?", tid); err2 != nil {
-			log.Fatal(err2)
-		}
-		return post, nil
+		"INSERT INTO `post` (`cid`,`pid`,`uid`,`content`,`created`,`author`) VALUES (?,?,?,?,?,?)",
+		cid, pid, uid, content, time.Now(), author)
+	if err != nil {
+		return err
 	}
 
-	return nil, err
+	_, err = db.Exec(
+		"UPDATE `post` SET  `replys` = `replys`+ 1  WHERE `id` = ?",
+		pid)
+	return err
 }
 
-func GetPosts(limit int) ([]*Post, error) {
-	//查询数据
-	rows, err := db.Query("SELECT `tid`, `uid`, `fid`, `title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `tags`, `status` FROM `post` LIMIT  ?",
-		limit)
+//获得文章根据id
+func GetPost(id int) (*Post, error) {
+
+	row := db.QueryRow("SELECT  `cid`, `pid`,`uid`,`title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `status` FROM `post` WHERE `id` = ?",
+		id)
+
+	post := &Post{Id: id}
+	err := row.Scan(
+		&post.Category.Cid, &post.Pid,
+		&post.User.Uid, &post.Title,
+		&post.Content, &post.Created,
+		&post.Updated, &post.Views,
+		&post.Replys, &post.User.Username,
+		&post.Status)
+
+	//sql.ErrNoRows
+	if err != nil {
+		return nil, err
+	}
+
+	//这是主题 增加阅读量
+	if post.Pid == 0 {
+		if _, err = db.Exec("UPDATE `post` SET  `views` = `views`+ 1  WHERE `id` = ?", id); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	//获得回复
+	if post.Replys > 0 {
+		post.Comments, err = GetComments(id)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return post, nil
+}
+
+//获得某一文章的所有评论/或者某一评论的子评论
+func GetComments(id int) ([]*Comment, error) {
+
+	rows, err := db.Query(
+		"SELECT `id`,`uid`,`content`,`created`,`updated`,replys` FROM `post` WHERE `pid` = ?",
+		id)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	posts := make([]*Post, 0)
-
+	comments := make([]*Comment, 10)
 	for rows.Next() {
-		var timestr string
-		var updatestr string
-		post := &Post{}
-		err = rows.Scan(&post.Tid, &post.Uid, &post.Cid, &post.Title, &post.Content, &timestr, &updatestr, &post.Views, &post.Replys, &post.Author, &post.Tags, &post.Status)
-		loc := time.Local
-
-		post.Created, err = time.ParseInLocation("2006-01-02 15:04:05", timestr, loc)
-		post.Updated, err = time.ParseInLocation("2006-01-02 15:04:05", updatestr, loc)
+		comment := &Comment{}
+		err = rows.Scan(
+			&comment.Id,
+			&comment.User.Uid,
+			&comment.Content,
+			&comment.Created,
+			&comment.Updated,
+			&comment.Replys)
 
 		if err != nil {
 			log.Fatal(err)
+		}
+		continue
+		comments = append(comments, comment)
+	}
+
+	return comments, err
+
+}
+
+//获得某一cid的文章列表
+func GetPosts(cid, limit, offset int) ([]*Post, error) {
+	//查询数据
+	rows, err := db.Query(
+		"SELECT `id`,`uid`,`title`, `content`,"+
+			"`created`, `updated`, `views`, `replys`,"+
+			"`author`, `status` FROM `post` WHERE "+
+			"`cid` = ? AND `pid` = 0 ORDER BY `id` DESC LIMIT ? OFFSET ? ",
+		cid, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	posts := make([]*Post, limit)
+
+	for rows.Next() {
+		post := &Post{}
+		err = rows.Scan(
+			&post.Category.Cid, &post.Pid,
+			&post.User.Uid, &post.Title,
+			&post.Content, &post.Created,
+			&post.Updated, &post.Views,
+			&post.Replys, &post.User.Username,
+			&post.Status)
+
+		if err != nil {
+			log.Fatal(err)
+			continue
 		}
 
 		posts = append(posts, post)
@@ -114,11 +190,43 @@ func GetPosts(limit int) ([]*Post, error) {
 	return posts, err
 }
 
-func ModifyPost(tid int, title, content, tags string) error {
+//删除主题
+func DelPost(id int) error {
+	_, err := db.Exec(
+		"DELETE FROM `post` WHERE id = ? or pid = ?",
+		id, id)
+	if err != nil {
+		return err
+	}
+
+	//更新category计数
+	_, err = db.Exec("UPDATE `category` SET `posts` = `posts` - 1 WHERE cid = ?",
+		id)
+
+	return err
+}
+
+//删除回复
+func DelComment(id, pid int) error {
+	err := DelPost(id)
+	if err != nil {
+		return err
+	}
+
+	//更新回复计数
+	_, err = db.Exec(
+		"UPDATE `post` SET  `replys` = (SELECT COUNT(*) FROM `post` WHERE `pid` = ?)  WHERE `id` = ?",
+		pid, pid)
+
+	return err
+}
+
+//修改主题或者回复
+func ModifyPost(id int, title, content string) error {
 
 	_, err := db.Exec(
-		"UPDATE `post` SET  `title` = ?, `content` = ?, `updated` = ?, `tags` = ? WHERE `tid` = ?",
-		title, content, time.Now(), tags, tid)
+		"UPDATE `post` SET  `title` = ?, `content` = ?, `updated` = ? WHERE `id` = ?",
+		title, content, time.Now(), id)
 
 	return err
 }

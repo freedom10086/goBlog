@@ -24,6 +24,7 @@ type Category struct {
 	Posts       int
 }
 
+//新增category
 func AddCate(name, description string) error {
 	_, err := db.Exec(
 		"INSERT INTO `category` (`name`,`description`) VALUES (?,?)",
@@ -31,13 +32,20 @@ func AddCate(name, description string) error {
 	return err
 }
 
+//删除category 里面的帖子怎么办？
+//所以最好不要删除category
 func DelCate(cid int) error {
 	_, err := db.Exec(
 		"DELETE FROM `category` WHERE cid = ?",
 		cid)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("DELETE FROM `post` WHERE `cid` = ?")
 	return err
 }
 
+//获得category
 func GetCate(cid int) (*Category, error) {
 	//查询数据
 	row := db.QueryRow("SELECT  `name`, `description` FROM `category` WHERE `cid` = ?",
@@ -54,6 +62,7 @@ func GetCate(cid int) (*Category, error) {
 	return nil, err
 }
 
+//获得所有category
 func GetCates() ([]*Category, error) {
 	//查询数据
 	rows, err := db.Query("SELECT `cid`, `name`, `description`, `posts` FROM `category` ", nil)
@@ -77,6 +86,7 @@ func GetCates() ([]*Category, error) {
 	return cates, err
 }
 
+//修改category
 func ModifyCate(cid int, name, description string) error {
 
 	_, err := db.Exec(

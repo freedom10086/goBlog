@@ -13,6 +13,10 @@ func init() {
 }
 
 func main() {
+
+	//todo 合并评论和主题
+	//一些model重写
+
 	//fmt.Println("=====start server=====")
 	//err := models.AddPost(0, 0, "title2", "fuckyou2")
 

@@ -91,6 +91,7 @@ func ValidToken(token string) (bool, string) {
 	}
 }
 
+//发送邮箱
 func SendToMail(to, subject, content string) error {
 	user := "2351386755@qq.com"
 	password := "StrikeFreedom"
@@ -109,6 +110,7 @@ func SendToMail(to, subject, content string) error {
 	return err
 }
 
+//发送验证邮箱
 func SendValidMail(to, username string) error {
 	sub := "valid your email"
 	timeout := 20
