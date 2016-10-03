@@ -7,10 +7,10 @@ import (
 
 /*
 CREATE TABLE IF NOT EXISTS `post` (
-	    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+	    `tid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
 		`cid` integer NOT NULL DEFAULT 0 ,
-		`pid` integer NOT NULL DEFAULT 0 ,
         `uid` integer NOT NULL DEFAULT 0 ,
+		`type` integer NOT NULL DEFAULT 0 ,
         `title` varchar(255) NOT NULL DEFAULT '',
         `content` varchar(5000) NOT NULL DEFAULT '' ,
         `created` datetime NOT NULL,
@@ -23,11 +23,12 @@ CREATE TABLE IF NOT EXISTS `post` (
     ) ENGINE=InnoDB;
     CREATE INDEX `post_cid` ON `post` (`fid`);
     CREATE INDEX `post_views` ON `post` (`views`);
+	CREATE INDEX `post_lastpost` ON `post` (`lastpost`);
+	CREATE INDEX `post_type` ON `post` (`type`);
 */
 
 type Post struct {
 	Id       int //id
-	Pid      int //主题--一般回复 0+(id)回复
 	Title    string
 	Content  string
 	Created  time.Time
@@ -37,17 +38,6 @@ type Post struct {
 	Status   int //0--open 1--close
 	User     User
 	Category Category
-	Comments []*Comment
-}
-
-type Comment struct {
-	Id       int
-	Pid      int
-	Content  string
-	Created  time.Time
-	Updated  time.Time
-	Replys   int
-	User     User
 	Comments []*Comment
 }
 

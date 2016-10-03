@@ -9,7 +9,7 @@ import (
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 
-	post, err := models.GetPosts(10)
+	post, err := models.GetPosts(10, 100, 0)
 	if err != nil {
 		io.WriteString(w, err.Error())
 

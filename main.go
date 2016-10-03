@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"goweb/models"
 	"goweb/router"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 func init() {
@@ -54,6 +56,32 @@ func main() {
 	//}
 
 	//models.Login("hehe2", "password")
+
+	/*
+		发送post请求
+
+
+		//这里添加post的body内容
+		postUrl := "https://sms.yunpian.com/v2/sms/single_send.json"
+		apikey := "744653c93c6355e2dd705a06a6724cdc"
+		mobile := "18706798706"
+		text := "【出驾学车】您的验证码是6666"
+
+		data := make(url.Values)
+		data["apikey"] = []string{apikey}
+		data["mobile"] = []string{mobile}
+		data["text"] = []string{text}
+
+		//把post表单发送给目标服务器
+		res, err := http.PostForm(postUrl, data)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		defer res.Body.Close()
+
+		fmt.Println("post send success")
+	*/
 
 	mux := http.NewServeMux()
 
