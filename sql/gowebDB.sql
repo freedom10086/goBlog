@@ -1,8 +1,12 @@
 ---------------------------------------------------
 -------论坛系统数据库设计--2351386755@qq.com---------
 ----------------2016-10-03-------------------------
-
-
+/*
+todo
+1.系统提醒表
+2.被关注消息表
+3.版块置顶表
+*/
 ----------------------------------------------------------------------------------
 -------------------------------数据表定义------------------------------------------
 ----------------------------------------------------------------------------------
@@ -71,17 +75,18 @@ INSERT INTO `post`(`cid`,`uid`,`author`,`title`,`content`) VALUES ('1','1','hehe
 DELETE FROM `post` WHERE `tid` = 3;
 */
 
-
+DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
 	`id` int NOT NULL AUTO_INCREMENT COMMENT '评论表id',
 	`tid` int NOT NULL COMMENT '帖子id',
 	`pid` int NOT NULL DEFAULT 0 COMMENT '父评论id 0-一般回复0+回复某个回复（楼中楼）',
 	`uid` int NOT NULL COMMENT '用户id',
-	`touid` int NOT NULL COMMENT '回复对象uid',
+	`tuid` int NOT NULL COMMENT '回复对象uid',
 	`author` varchar(25) NOT NULL DEFAULT '' COMMENT '用户名',
 	`content` varchar(2000) NOT NULL DEFAULT '' COMMENT '内容',
 	`created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发表时间',
 	`updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '编辑时间',
+	`isread` tinyint NOT NULL DEFAULT 0 COMMENT '是否已读0未读1已读',
 	`replys` int NOT NULL DEFAULT 0 COMMENT '回复计数大于0表示有楼中楼回复',
 	PRIMARY KEY (`id`) ,
 	INDEX `comment_tid` (`tid`),
@@ -89,7 +94,7 @@ CREATE TABLE `comment` (
 	INDEX `comment_pid` (`pid`),
 	FOREIGN KEY (`tid`) REFERENCES `post` (`tid`) ON DELETE CASCADE,
 	FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE,
-	FOREIGN KEY (`touid`) REFERENCES `user` (`uid`) ON DELETE CASCADE
+	FOREIGN KEY (`tuid`) REFERENCES `user` (`uid`) ON DELETE CASCADE
 );
 /*
 INSERT INTO `comment`(`tid`,`uid`,`author`,`content`) VALUES ('1','1','hehe01','comment08');
@@ -107,13 +112,14 @@ CREATE TABLE `star` (
 	FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE
 );
 
-CREATE TABLE `message` (
-	`id` int NOT NULL AUTO_INCREMENT COMMENT '回复消息表id',
+DROP TABLE IF EXISTS `atmessage`;
+CREATE TABLE `atmessage` (
+	`id` int NOT NULL AUTO_INCREMENT COMMENT '回复和@表 id',
 	`uid` int NOT NULL COMMENT '我的uid',
 	`fuid` int NOT NULL COMMENT '来自用户uid',
 	`fauthor` varchar(25) NOT NULL DEFAULT '' COMMENT '来自用户名',
-	`type` tinyint NOT NULL DEFAULT 0 COMMENT '0回复消息 1@消息 2被关注消息 3系统消息',
-	`fromid` int NOT NULL COMMENT '可能来自tid也可能来自别的id具体看type对应关系',
+	`tid` int NOT NULL COMMENT '来自文章id'
+	`cid` int NOT NULL COMMENT '来自文章评论id'
 	`title` varchar(50) NOT NULL DEFAULT '',
 	`content` varchar(200) NOT NULL DEFAULT '' COMMENT '消息内容',
 	`isread` tinyint NOT NULL DEFAULT 0 COMMENT '是否已读0未读1已读',
@@ -121,13 +127,15 @@ CREATE TABLE `message` (
 	PRIMARY KEY (`id`) ,
 	INDEX `msg_uid` (`uid`),
 	INDEX `msg_from` (`fuid`),
-	FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE
+	FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE,
+	FOREIGN KEY (`fuid`) REFERENCES `user` (`uid`) ON DELETE CASCADE
 );
 
 CREATE TABLE `follow` (
 	`id` int NOT NULL AUTO_INCREMENT,
 	`uid` int NOT NULL COMMENT '我的uid',
 	`tuid` int NOT NULL COMMENT '对方uid',
+	`name` varchar(25) NOT NULL COMMENT '我的名字，方便查询关注我的';
 	`tname` varchar(25) NOT NULL DEFAULT '' COMMENT '对方用户名',
 	`note` varchar(25) NOT NULL DEFAULT '' COMMENT '备注名',
 	`relation` tinyint NOT NULL DEFAULT 0 COMMENT '关注表还没想好冗余',
@@ -153,48 +161,81 @@ CREATE TABLE `chat` (
 	FOREIGN KEY (`recieve`) REFERENCES `user` (`uid`) ON DELETE CASCADE
 );
 
-------------------------------------------------------------------------------------
--------------------------------触发器定义--------------------------------------------
-------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
+#-------------------------------触发器定义--------------------------------------------
+#------------------------------------------------------------------------------------
 #发表文章 更新category计数 更新用户经验值+3
 CREATE TRIGGER `t_post_add` After INSERT ON `post` FOR EACH ROW BEGIN
 	update `user` set `exp` = `exp` + 3,`posts` = `posts` + 1 where `uid` = new.uid;
-	update `category` set `posts` = `posts` + 1, `todayposts` = `todayposts` + 1 where `cid` = new.cid;
+	update `category` set `posts` = `posts` + 1,`lastpost` = new.created, `todayposts` = `todayposts` + 1 where `cid` = new.cid;
 END;
 
 #删除文章 更新category计数 更新用户经验值-3
+DROP TRIGGER IF EXISTS `t_post_del`;
 CREATE TRIGGER `t_post_del` After DELETE ON `post` FOR EACH ROW BEGIN
-	update `category` set `posts` = `posts` -1 ,`todayposts` = `todayposts` + 1 where `cid` = old.cid;
+	update `category` set `posts` = `posts` -1 ,`todayposts` = `todayposts` - 1 where `cid` = old.cid;
 	update `user` set `exp` = `exp` - 3,`posts` = `posts` -1 where `uid` = old.uid;
 END;
 
+#增加之前
+CREATE TRIGGER `t_comment_add_b` Before INSERT ON `comment` FOR EACH ROW BEGIN
+	if new.uid = new.tuid then
+		set new.isread = '1';
+	end if;
+END;
+
 #增加评论
-CREATE TRIGGER `t_comment_add` After INSERT ON `comment` FOR EACH ROW BEGIN
+CREATE TRIGGER `t_comment_add_a` After INSERT ON `comment` FOR EACH ROW BEGIN
 	update `user` set `exp` = `exp` + 1,`replys` = `replys` + 1 where `uid` = new.uid; #增加经验值
 	update `post` set `replys` = `replys` + 1,`lastreply` = new.created where `tid` = new.tid;
+	if new.isread = 0 AND new.uid <> new.tuid then
+		UPDATE `user` SET `messages` = `messages` + 1 where `uid` = new.tuid;
+	end if;
 END;
 
 #删除评论
 CREATE TRIGGER `t_comment_del` After DELETE ON `comment` FOR EACH ROW BEGIN
 	update `user` set `exp` = `exp` - 1,`replys` = `replys` - 1 where `uid` = old.uid;
 	update `post` set `replys` = `replys` - 1 where `tid` = old.tid;
+	if old.isread = 0 then #这条消息未读 则减一
+		update `user` set `messages` = `messages` - 1 where `uid` = old.tuid;
+	end if;
 END;
 
-#增加消息
-CREATE TRIGGER `t_message_add` After INSERT ON `message` FOR EACH ROW BEGIN
-	update `user` set `messages` = `messages` + 1 where uid = new.uid;
+#编辑评论
+CREATE TRIGGER `t_comment_upd` After UPDATE ON `comment` FOR EACH ROW BEGIN
+	if old.isread = 0 AND new.isread = 1 then
+		UPDATE `user` SET `messages` = `messages` - 1 where `uid` = old.tuid;
+	end if;
 END;
 
-#消息已读
-CREATE TRIGGER `t_message_read` After UPDATE ON `message` FOR EACH ROW BEGIN
+#增加@消息之前
+CREATE TRIGGER `t_atmsg_add_b` Before INSERT ON `atmessage` FOR EACH ROW BEGIN
+	if new.uid = new.fuid then
+		set new.isread = '1';
+	end if;
+END;
+
+#增加@消息
+CREATE TRIGGER `t_atmsg_add_a` After INSERT ON `atmessage` FOR EACH ROW BEGIN
+	if new.isread = 0 AND new.uid <> new.fuid then
+		update `user` set `messages` = `messages` + 1 where uid = new.uid;
+	end if;
+END;
+
+#@消息已读
+CREATE TRIGGER `t_atmsg_upd` After UPDATE ON `atmessage` FOR EACH ROW BEGIN
 	if old.isread = 0 AND new.isread = 1 then
 		UPDATE `user` SET `messages` = `messages` - 1 WHERE `uid` = old.uid;
  	end if;
 END;
 
+
 #增加聊天消息
 CREATE TRIGGER `t_chat_add` After INSERT ON `chat` FOR EACH ROW BEGIN
-	update `user` set `messages` = `messages` + 1 where uid = new.recieve;
+	if new.send <> new.recieve then
+		update `user` set `messages` = `messages` + 1 where uid = new.recieve;
+	end if;
 END;
 
 #聊天消息已读
@@ -204,11 +245,11 @@ CREATE TRIGGER `t_chat_read` After UPDATE ON `chat` FOR EACH ROW BEGIN
  	end if;
 END;
 
-------------------------------------------------------------------------------------
--------------------------------计划任务定义------------------------------------------
-------------------------------------------------------------------------------------
---查询手否开启 show variables like '%event%';
---开启 SET PERSIST GLOBAL event_scheduler = ON; mysql 8 可以持久化SET PERSIST
+#------------------------------------------------------------------------------------
+#-------------------------------计划任务定义------------------------------------------
+#------------------------------------------------------------------------------------
+#查询手否开启 show variables like '%event%';
+#开启 SET PERSIST GLOBAL event_scheduler = ON; mysql 8 可以持久化SET PERSIST
 DROP EVENT IF EXISTS `event_aday`;
 CREATE EVENT `event_aday`
 ON SCHEDULE EVERY 1 DAY STARTS '2016-10-01 00:00:00'
@@ -217,8 +258,7 @@ ENABLE
 DO update `category` SET `todayposts` = 0 WHERE 1;
 
 
------存储过程-----
-
+#-----存储过程-----
 #新增分类
 CREATE PROCEDURE cate_add(
 	IN in_title varchar(25),
@@ -292,7 +332,7 @@ BEGIN
 END;
 
 #发表文章
-DROP PROCEDURE IF EXISTS p_add_post;
+DROP PROCEDURE IF EXISTS post_add;
 CREATE PROCEDURE post_add(
 	IN in_cid int,
 	IN in_uid int,
@@ -331,40 +371,50 @@ BEGIN
 	update `post` set `status` = '0' where `tid` = in_tid;
 END;
 
-#添加评论
-DROP PROCEDURE IF EXISTS `comment_add`;
-CREATE PROCEDURE comment_add(
+#添加评论 回复楼主
+DROP PROCEDURE IF EXISTS `comment_add_lz`;
+CREATE PROCEDURE comment_add_lz(
+	IN in_tid int,
+	IN in_uid int,
+	IN in_content varchar(2000))
+BEGIN
+	set @author = (select `username` from `user` where `uid` = in_uid);
+	select `uid`,`title` INTO @tuid,@title from `post` where `tid` = in_tid;
+	INSERT INTO `comment`(`tid`,`uid`,`tuid`,`author`,`content`,`isread`) VALUES (in_tid,in_uid,@tuid,@author,in_content,@isread);
+END;
+
+#楼中楼回复
+DROP PROCEDURE IF EXISTS `comment_add_cz`;
+CREATE PROCEDURE comment_add_cz(
 	IN in_tid int,
 	IN in_pid int,
 	IN in_uid int,
-	IN in_tuid int,
 	IN in_content varchar(2000))
 BEGIN
-	IF in_pid >= 0 THEN 
-		IF in_pid > 0 THEN #楼中楼回复
-			update `comment` set `replys` = `replys` + 1  where `id` = in_pid;
-		END IF;
-		
+	select `uid` INTO @czuid from `comment` where `id` = in_pid AND `tid` = in_tid;
+	if @czuid is not null then
 		set @author = (select `username` from `user` where `uid` = in_uid);
-		INSERT INTO `comment`(`tid`,`pid`,`uid`,`tuid`,`author`,`content`) VALUES (in_tid,in_pid,in_uid,in_tuid,@author,in_content);
-		
-		#增加消息
-		set @title = (select `title` from `post` where `tid` = in_tid);
+		INSERT INTO `comment`(`tid`,`pid`,`uid`,`tuid`,`author`,`content`) VALUES (in_tid,in_pid,in_uid,@czuid,@author,in_content);
+		update `comment` set `replys` = `replys` + 1  where `id` = in_pid;
 		set @lastid = LAST_INSERT_ID();
-		INSERT INTO `message`(`uid`,`fuid`,`fauthor`,`type`,`fromid`,`title`,`content`) VALUES (in_tuid,in_uid,@author,'0',@lastid,@title,in_content);
+		select `title`,`uid` INTO @title,@lzuid from `post` where `tid` = in_tid;
+		if @lzuid <> @czuid THEN #发送@给层主
+			INSERT INTO `atmessage`(`uid`,`fuid`,`fauthor`,`tid`,`cid`,`title`,`content`) VALUES (@czuid,in_uid,@author,in_tid,@lastid,@title,in_content);
+		end if;
 	END IF;
 END;
 
 #删除评论
+DROP PROCEDURE IF EXISTS `comment_del`;
 CREATE PROCEDURE comment_del(IN in_id int)
 BEGIN
-	select @tid = `tid`,@pid = `pid`,@uid = `uid`,@replys = `replys` from `comment` where `id` = in_id;
+	select `tid`,`pid`,`uid`,`replys` INTO @tid,@pid,@uid,@replys from `comment` where `id` = in_id;
+	delete from `comment` where `id` = in_id;
 	if @pid >0 then #楼中楼
 		update `comment` set `replys` = `replys`-1 where `id` = @pid;
 	elseif @replys > 0 then #pid = 0,一般回复 且有子回复删除他们
 		delete from `comment` where `pid` = in_id;
 	end if;
-	delete from `comment` where `id` = in_id;
 END;
 
 #编辑评论
@@ -375,49 +425,86 @@ BEGIN
 	update `comment` set `content` = in_content,`updated` = now() where `id` = in_id;
 END;
 
+#回复消息已读
+CREATE PROCEDURE comment_read_s(IN in_id int)
+BEGIN
+	UPDATE `comment`SET `isread` = 1 WHERE `id` = in_id;
+END;
+
+#某篇回复消息全部已读
+CREATE PROCEDURE comment_read_t(
+	IN in_uid int,
+	IN in_tid int)
+BEGIN
+	UPDATE `comment`SET `isread` = 1 WHERE `uid` = in_uid AND `tid` = in_tid;
+END;
+
+#回复消息全部已读
+CREATE PROCEDURE comment_read_a(IN in_uid int)
+BEGIN
+	UPDATE `comment`SET `isread` = 1 WHERE `uid` = in_uid; 
+END;
+
 #收藏文章
+DROP PROCEDURE IF EXISTS `star_add`;
 CREATE PROCEDURE star_add(
 	IN in_uid int,
-	IN in_tid int,
-	IN in_title varchar(50))
+	IN in_tid int)
 BEGIN
-	INSERT INTO `star`(`uid`,`tid`,`title`) VALUES (in_uid,in_tid,in_title);
+	set @title = (select `title` from `post` where `tid` = in_tid);
+	if @title is not null then
+		INSERT INTO `star`(`uid`,`tid`,`title`) VALUES (in_uid,in_tid,@title);
+	end if;
 END;
 
 #取消收藏文章
-CREATE PROCEDURE star_del(
+CREATE PROCEDURE star_del_bytid(
 	IN in_uid int,
 	IN in_tid int)
 BEGIN
 	DELETE FROM `star` WHERE `uid` = in_uid AND `tid` = in_tid;
 END;
 
-#添加消息
-CREATE PROCEDURE message_add(
-	IN in_uid int,
-	IN in_fuid int,
-	IN in_type tinyint,
-	IN in_fromid int,
-	IN in_title varchar(50),
+#取消收藏文章
+CREATE PROCEDURE star_del_byid(IN in_id int)
+BEGIN
+	DELETE FROM `star` WHERE `id` = in_id;
+END;
+
+#添加被@消息
+DROP PROCEDURE IF EXISTS `reply_add_at`;
+CREATE PROCEDURE reply_add_at(
+	IN in_myuid int,
+	IN in_tuid int,
+	IN in_tid int,#为评论id
+	IN in_commentid int,
 	IN in_content varchar(200))
 BEGIN
-	set @author = (select `username` from `user` where `uid` = in_uid);
-	INSERT INTO `message`(`uid`,`fuid`,`fauthor`,`type`,`fromid`,`title`,`content`)
-	VALUES (in_uid,in_fuid,@author,in_type,in_fromid,in_title,in_content);
+	if in_myuid <> in_tuid then
+		set @author = (select `username` from `user` where `uid` = in_myuid);
+		select `title` INTO @title from `post` where `tid` = in_tid;
+		INSERT INTO `atmessage`(`uid`,`fuid`,`fauthor`,`tid`,`cid`,`title`,`content`) VALUES (in_tuid,in_myuid,@author,in_tid,in_commentid,@title,in_content);
+	end if;
 END;
 
-#消息已读
-CREATE PROCEDURE message_read(IN in_id int)
+#@消息已读
+CREATE PROCEDURE atmsg_read_s(IN in_id int)
 BEGIN
-	UPDATE `message`SET `isread` = 1 WHERE `id` = in_id;
+	UPDATE `atmessage`SET `isread` = 1 WHERE `id` = in_id; 
 END;
 
-#某一类消息全部已读
-CREATE PROCEDURE message_read(
+#某篇文章@消息全部已读
+CREATE PROCEDURE atmsg_read_t(
 	IN in_uid int,
-	IN in_type tinyint)
+	IN in_tid int)
 BEGIN
-	UPDATE `message`SET `isread` = 1 WHERE `uid` = in_uid AND `type` = in_type; 
+	UPDATE `atmessage`SET `isread` = 1 WHERE `uid` = in_uid AND `tid` = in_tid; 
+END;
+
+#@消息全部已读
+CREATE PROCEDURE atmsg_read_a(IN in_uid int)
+BEGIN
+	UPDATE `atmessage`SET `isread` = 1 WHERE `uid` = in_uid; 
 END;
 
 
@@ -427,12 +514,11 @@ CREATE PROCEDURE follow_add(
 	IN in_tuid int,
 	IN in_note varchar(25))
 BEGIN
-	set @tauthor = (select `username` from `user` where `uid` = in_tuid);
-	set @fauthor = (select `username` from `user` where `uid` = in_uid);
-	INSERT INTO `follow`(`uid`,`tuid`,`tname`,`note`) VALUES (in_uid,in_tuid,@tauthor,in_note);
-
-	#增加消息
-	INSERT INTO `message`(`uid`,`fuid`,`fauthor`,`type`,`fromid`) VALUES (in_tuid,in_uid,@fauthor,'2',LAST_INSERT_ID());
+	if in_uid <> in_tuid then
+		set @tauthor = (select `username` from `user` where `uid` = in_tuid);
+		set @author = (select `username` from `user` where `uid` = in_uid);
+	INSERT INTO `follow`(`uid`,`tuid`,`name`,`tname`,`note`) VALUES (in_uid,in_tuid,@author,@tauthor,in_note);
+	end if;
 END;
 
 #取消关注
