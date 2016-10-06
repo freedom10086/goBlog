@@ -116,7 +116,7 @@ func SendValidMail(to, username string) error {
 	timeout := 20
 	token := GenToken(username, timeout)
 	content := "welcome regiest " + conf.SiteName + "!!" +
-		"\r\n click " + conf.Host + "/email?token=" + token + " to valid your email<" + to + ">" +
+		"\r\n click " + conf.SiteAddr + conf.SitePort + "/email?token=" + token + " to valid your email<" + to + ">" +
 		"\r\n\r\n attention: please valided in " + string(timeout) + " minutes."
 	return SendToMail(to, sub, content)
 }

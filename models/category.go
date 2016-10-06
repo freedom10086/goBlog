@@ -2,71 +2,71 @@ package models
 
 import (
 	"log"
+	"time"
 )
-
-/*
-
-DROP TABLE IF EXISTS `category`
-
-CREATE TABLE IF NOT EXISTS `category` (
-        `cid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-        `name` varchar(50) NOT NULL ,
-        `description` varchar(100) NOT NULL DEFAULT '' ,
-        `posts` integer NOT NULL DEFAULT 0
-    ) ENGINE=InnoDB;
-    CREATE INDEX `category_name` ON `category` (`name`);
-*/
 
 type Category struct {
 	Cid         int
-	Name        string
+	Title       string
 	Description string
 	Posts       int
+	ToadyPosts  int
+	LastPost    time.Time
+	Created     time.Time
 }
 
 //新增category
 func AddCate(name, description string) error {
-	_, err := db.Exec(
-		"INSERT INTO `category` (`name`,`description`) VALUES (?,?)",
-		name, description)
+	res, err := db.Exec(
+		"call cate_add(?,?);",
+		name,
+		description)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }
 
 //删除category 里面的帖子怎么办？
 //所以最好不要删除category
 func DelCate(cid int) error {
-	_, err := db.Exec(
-		"DELETE FROM `category` WHERE cid = ?",
+	res, err := db.Exec(
+		"call cate_del(?);",
 		cid)
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("DELETE FROM `post` WHERE `cid` = ?")
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }
 
 //获得category
 func GetCate(cid int) (*Category, error) {
-	//查询数据
-	row := db.QueryRow("SELECT  `name`, `description` FROM `category` WHERE `cid` = ?",
-		cid)
 
 	cate := &Category{Cid: cid}
-
-	err := row.Scan(&cate.Name, &cate.Description, &cate.Posts)
-
-	if err == nil {
-		return cate, nil
+	err := db.QueryRow(
+		"SELECT  `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category` WHERE `cid` = ?",
+		cid).Scan(&cate.Title, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.LastPost, &cate.Created)
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, err
+	return cate, err
 }
 
 //获得所有category
 func GetCates() ([]*Category, error) {
 	//查询数据
-	rows, err := db.Query("SELECT `cid`, `name`, `description`, `posts` FROM `category` ", nil)
-
+	rows, err := db.Query("SELECT `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category`")
 	if err != nil {
 		return nil, err
 	}
@@ -75,23 +75,30 @@ func GetCates() ([]*Category, error) {
 
 	for rows.Next() {
 		cate := &Category{}
-		err = rows.Scan(&cate.Cid, &cate.Name, &cate.Description, &cate.Posts)
+		err = rows.Scan(&cate.Title, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.LastPost, &cate.Created)
 		if err != nil {
 			log.Fatal(err)
 			continue
 		}
 		cates = append(cates, cate)
 	}
-
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
 	return cates, err
 }
 
 //修改category
 func ModifyCate(cid int, name, description string) error {
-
-	_, err := db.Exec(
-		"UPDATE `category` SET  `name` = ?, `description` = ? WHERE `tid` = ?",
-		name, description, cid)
-
+	res, err := db.Exec(
+		"call cate_edit(?,?,?)",
+		cid, name, description)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }

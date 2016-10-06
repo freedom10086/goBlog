@@ -1,31 +1,8 @@
 package models
 
 import (
-	"log"
 	"time"
 )
-
-/*
-CREATE TABLE IF NOT EXISTS `post` (
-	    `tid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-		`cid` integer NOT NULL DEFAULT 0 ,
-        `uid` integer NOT NULL DEFAULT 0 ,
-		`type` integer NOT NULL DEFAULT 0 ,
-        `title` varchar(255) NOT NULL DEFAULT '',
-        `content` varchar(5000) NOT NULL DEFAULT '' ,
-        `created` datetime NOT NULL,
-        `updated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-        `author` varchar(30) NOT NULL DEFAULT '' ,
-        `status` tinyint NOT NULL DEFAULT 0 ,
-		`views` integer NOT NULL DEFAULT 0 ,
-        `replys` integer NOT NULL DEFAULT 0,
-		`lastpost` datetime NOT NULL'
-    ) ENGINE=InnoDB;
-    CREATE INDEX `post_cid` ON `post` (`fid`);
-    CREATE INDEX `post_views` ON `post` (`views`);
-	CREATE INDEX `post_lastpost` ON `post` (`lastpost`);
-	CREATE INDEX `post_type` ON `post` (`type`);
-*/
 
 type Post struct {
 	Id       int //id
@@ -41,6 +18,7 @@ type Post struct {
 	Comments []*Comment
 }
 
+/*
 //发布主题
 func AddPost(cid, uid int, title, content, author string) error {
 	_, err := db.Exec(
@@ -220,3 +198,4 @@ func ModifyPost(id int, title, content string) error {
 
 	return err
 }
+*/

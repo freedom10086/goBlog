@@ -55,7 +55,7 @@ CREATE TABLE `post` (
 	`uid` int NOT NULL  COMMENT '用户id',
 	`author` varchar(25) NOT NULL DEFAULT '' COMMENT '用户名',
 	`title` varchar(50) NOT NULL DEFAULT '' COMMENT '标题',
-	`content` varchar(5000) NOT NULL DEFAULT '' COMMENT '内容',
+	`content` varchar(8000) NOT NULL DEFAULT '' COMMENT '内容',
 	`type` tinyint NOT NULL DEFAULT 0 COMMENT '类型0-一般，1-管理员加精华',
 	`status` tinyint NOT NULL DEFAULT 0 COMMENT '0-正常，1-不可回复2不可查看',
 	`views` int NOT NULL DEFAULT 0 COMMENT '查看数',
@@ -83,7 +83,7 @@ CREATE TABLE `comment` (
 	`uid` int NOT NULL COMMENT '用户id',
 	`tuid` int NOT NULL COMMENT '回复对象uid',
 	`author` varchar(25) NOT NULL DEFAULT '' COMMENT '用户名',
-	`content` varchar(2000) NOT NULL DEFAULT '' COMMENT '内容',
+	`content` varchar(5000) NOT NULL DEFAULT '' COMMENT '内容',
 	`created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发表时间',
 	`updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '编辑时间',
 	`isread` tinyint NOT NULL DEFAULT 0 COMMENT '是否已读0未读1已读',
@@ -121,7 +121,7 @@ CREATE TABLE `atmessage` (
 	`tid` int NOT NULL COMMENT '来自文章id'
 	`cid` int NOT NULL COMMENT '来自文章评论id'
 	`title` varchar(50) NOT NULL DEFAULT '',
-	`content` varchar(200) NOT NULL DEFAULT '' COMMENT '消息内容',
+	`content` varchar(50) NOT NULL DEFAULT '' COMMENT '消息内容',
 	`isread` tinyint NOT NULL DEFAULT 0 COMMENT '是否已读0未读1已读',
 	`created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '时间',
 	PRIMARY KEY (`id`) ,
@@ -260,6 +260,7 @@ DO update `category` SET `todayposts` = 0 WHERE 1;
 
 #-----存储过程-----
 #新增分类
+DROP PROCEDURE IF EXISTS `cate_add`;
 CREATE PROCEDURE cate_add(
 	IN in_title varchar(25),
 	IN in_des varchar(150))
@@ -337,7 +338,7 @@ CREATE PROCEDURE post_add(
 	IN in_cid int,
 	IN in_uid int,
 	IN in_title varchar(50),
-	IN in_content varchar(5000))
+	IN in_content varchar(8000))
 BEGIN
 	set @author = (select `username` from `user` where `uid` = in_uid);
 	INSERT INTO `post`(`cid`,`uid`,`author`,`title`,`content`) VALUES (in_cid,in_uid,@author,in_title,in_content);
@@ -347,7 +348,7 @@ END;
 CREATE PROCEDURE post_edit(
 	IN in_tid int,
 	IN in_title varchar(50),
-	IN in_content varchar(5000))
+	IN in_content varchar(8000))
 BEGIN
 	set @timenow = now();
 	update `post` set `title` = in_title,`content` = in_content,`updated` = @timenow,`lastreply` = @timenow where `tid` = in_tid;
@@ -376,7 +377,7 @@ DROP PROCEDURE IF EXISTS `comment_add_lz`;
 CREATE PROCEDURE comment_add_lz(
 	IN in_tid int,
 	IN in_uid int,
-	IN in_content varchar(2000))
+	IN in_content varchar(5000))
 BEGIN
 	set @author = (select `username` from `user` where `uid` = in_uid);
 	select `uid`,`title` INTO @tuid,@title from `post` where `tid` = in_tid;
@@ -389,7 +390,7 @@ CREATE PROCEDURE comment_add_cz(
 	IN in_tid int,
 	IN in_pid int,
 	IN in_uid int,
-	IN in_content varchar(2000))
+	IN in_content varchar(5000))
 BEGIN
 	select `uid` INTO @czuid from `comment` where `id` = in_pid AND `tid` = in_tid;
 	if @czuid is not null then
@@ -399,7 +400,7 @@ BEGIN
 		set @lastid = LAST_INSERT_ID();
 		select `title`,`uid` INTO @title,@lzuid from `post` where `tid` = in_tid;
 		if @lzuid <> @czuid THEN #发送@给层主
-			INSERT INTO `atmessage`(`uid`,`fuid`,`fauthor`,`tid`,`cid`,`title`,`content`) VALUES (@czuid,in_uid,@author,in_tid,@lastid,@title,in_content);
+			INSERT INTO `atmessage`(`uid`,`fuid`,`fauthor`,`tid`,`cid`,`title`,`content`) VALUES (@czuid,in_uid,@author,in_tid,@lastid,@title,left(in_content,50));
 		end if;
 	END IF;
 END;
@@ -420,7 +421,7 @@ END;
 #编辑评论
 CREATE PROCEDURE comment_edit(
 	IN in_id int,
-	IN in_content varchar(2000))
+	IN in_content varchar(5000))
 BEGIN
 	update `comment` set `content` = in_content,`updated` = now() where `id` = in_id;
 END;
@@ -483,7 +484,7 @@ BEGIN
 	if in_myuid <> in_tuid then
 		set @author = (select `username` from `user` where `uid` = in_myuid);
 		select `title` INTO @title from `post` where `tid` = in_tid;
-		INSERT INTO `atmessage`(`uid`,`fuid`,`fauthor`,`tid`,`cid`,`title`,`content`) VALUES (in_tuid,in_myuid,@author,in_tid,in_commentid,@title,in_content);
+		INSERT INTO `atmessage`(`uid`,`fuid`,`fauthor`,`tid`,`cid`,`title`,`content`) VALUES (in_tuid,in_myuid,@author,in_tid,in_commentid,@title,left(in_content,50));
 	end if;
 END;
 
