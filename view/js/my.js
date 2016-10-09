@@ -109,6 +109,9 @@ $.fn.insertAtCousor = function(myValue){
     this.value += myValue;
     this.focus();
   }
+
+  //刷新preview
+  textchange();
 }
 
 $.fn.isLineStart = function(){
@@ -390,7 +393,36 @@ var toolbarHandlers = {
   },
 
   emoji : function() {
-    //todo
+    var smiley_container =  $("#smiley_container");
+    if(smiley_container.length <= 0){
+      var strFace, labFace;
+      strFace = '<div id="smiley_container" style="position:absolute;display:none;z-index:999;" class="smiley">' +
+              '<table border="0" cellspacing="0" cellpadding="0"><tr>';
+      for(var i=1; i<=33; i++){
+        labFace = 'tb'+i;
+        strFace += '<td><img src="smiley/tieba/tb'+i+'.png" onclick="insertSmiley(\'' + labFace + '\');"/></td>';
+        if( i % 9 == 0 ) strFace += '</tr><tr>';
+      }
+
+      strFace += '</tr></table></div>';
+      editor.append(strFace);
+      $("#smiley_container").hide();
+    }
+    smiley_container =  $("#smiley_container")
+    var paddingsize = 8;
+    var iconbtn =  toolbar.find(".fa[name=emoji]");
+
+    var tops = iconbtn.offset().top+iconbtn.height();
+    var lefts = iconbtn.offset().left - smiley_container.width()/2;
+  
+    smiley_container.css({
+        left :lefts+paddingsize*2,
+        top :tops+paddingsize*2,
+        position:"absolute"
+    });
+
+    iconbtn.parent().toggleClass("active");
+    smiley_container.toggle();
   },
 
   watch : function() {
@@ -451,7 +483,6 @@ function  setToolbarHandler() {
 
         if (name !== "watch" && name !== "preview"  && name !== "fullscreen"){
             inputaera.focus();
-            textchange();
         }
 
         return false;
@@ -626,4 +657,17 @@ function showhidepreview(){
             showhidepreview();
       });
     }
+}
+
+function insertSmiley(name){
+  var currurl = window.location.href;
+  currurl = currurl.substring(0,currurl.lastIndexOf("/"))
+  var imgurl = currurl+"/smiley/tieba/"+name+".png";
+  var str = "![表情]("+imgurl+")"
+  var nextline = "";
+    if(!inputaera.isLineStart()){
+      nextline = "\n";
+    }
+  inputaera.insertAtCousor(nextline+str);
+  
 }

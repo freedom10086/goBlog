@@ -179,6 +179,25 @@ html,body *{
   background-color: #999;
 }
 
+.smiley{
+  margin-top:4px;
+  background:#fff;
+  padding:5px;
+  border:1px #dfe6f6 solid;
+}
+.smiley table td{
+  padding:0px;
+}
+.smiley table td img{
+  cursor:pointer;border:1px #fff solid;
+  width: 30px;
+  height: 30px;
+  margin: 3px;
+}
+.smiley table td img:hover{
+  border:1px #0066cc solid;
+}
+
 
 /*! prefixes.scss v0.1.0 | Author: Pandao | https://github.com/pandao/prefixes.scss | MIT license | Copyright (c) 2015 */
 /*!
