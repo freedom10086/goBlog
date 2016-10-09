@@ -2,198 +2,209 @@ package models
 
 import (
 	//"log"
+	"log"
 	"time"
 )
 
 type Comment struct {
-	Id       int
-	Pid      int
-	Content  string
-	Created  time.Time
-	Updated  time.Time
-	Replys   int
-	User     User
-	Comments []*Comment
+	Id      int
+	User    User
+	Tid     int
+	Pid     int
+	Tuid    int
+	Content string
+	Created time.Time
+	Updated time.Time
+	IsRead  int
+	Replys  int
 }
 
-/*
-//发布主题
-func AddPost(cid, uid int, title, content, author string) error {
-	_, err := db.Exec(
-		"INSERT INTO `post` (`cid`,`pid`,`uid`,`title`,`content`,`created`,`author`) VALUES (?,?,?,?,?,?,?)",
-		cid, 0, uid, title, content, time.Now(), author)
+//发表回复回复楼主
+func AddCommentLz(tid, uid int, content string) error {
+	if PostCanReply(tid) {
+		res, err := db.Exec("call comment_add_lz(?,?,?)",
+			tid, uid, content)
+		if err != nil {
+			return err
+		}
 
-	if err != nil {
-		return nil
-	}
-	//更新category计数
-	_, err = db.Exec("UPDATE `category` SET `posts` = `posts` + 1 WHERE cid = ?",
-		cid)
-	return err
-}
-
-//发表回复 回复对象--id为pid
-func AddComment(cid, pid, uid int, content, author string) error {
-	//todo 检查status看看是否可以回复
-
-	_, err := db.Exec(
-		"INSERT INTO `post` (`cid`,`pid`,`uid`,`content`,`created`,`author`) VALUES (?,?,?,?,?,?)",
-		cid, pid, uid, content, time.Now(), author)
-	if err != nil {
+		rowCnt, err := res.RowsAffected()
+		if err != nil && rowCnt < 1 {
+			return ErrNoAff
+		}
 		return err
+	} else {
+		return ErrReply
 	}
-
-	_, err = db.Exec(
-		"UPDATE `post` SET  `replys` = `replys`+ 1  WHERE `id` = ?",
-		pid)
-	return err
 }
 
-//获得文章根据id
-func GetPost(id int) (*Post, error) {
+//发表回复回复层主
+func AddCommentCz(tid, pid, uid int, content string) error {
+	if PostCanReply(tid) {
+		res, err := db.Exec("call comment_add_cz(?,?,?,?)",
+			tid, pid, uid, content)
+		if err != nil {
+			return err
+		}
 
-	row := db.QueryRow("SELECT  `cid`, `pid`,`uid`,`title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `status` FROM `post` WHERE `id` = ?",
-		id)
+		rowCnt, err := res.RowsAffected()
+		if err != nil && rowCnt < 1 {
+			return ErrNoAff
+		}
+		return err
+	} else {
+		return ErrReply
+	}
+}
 
-	post := &Post{Id: id}
-	err := row.Scan(
-		&post.Category.Cid, &post.Pid,
-		&post.User.Uid, &post.Title,
-		&post.Content, &post.Created,
-		&post.Updated, &post.Views,
-		&post.Replys, &post.User.Username,
-		&post.Status)
-
-	//sql.ErrNoRows
+//获得评论
+func GetComment(id int) (*Comment, error) {
+	comment := &Comment{Id: id}
+	err := db.QueryRow(
+		"SELECT  `tid`,`pid`,`uid`,`tuid`,`author`,`content`,`created`,`updated`,`isread`,`replys` FROM `comment` WHERE `id` = ?",
+		id).Scan(&comment.Tid, &comment.Pid, &comment.User.Uid, &comment.Tuid, &comment.User.Username,
+		&comment.Content, &comment.Created, &comment.Updated, &comment.IsRead, &comment.Replys)
 	if err != nil {
 		return nil, err
 	}
 
-	//这是主题 增加阅读量
-	if post.Pid == 0 {
-		if _, err = db.Exec("UPDATE `post` SET  `views` = `views`+ 1  WHERE `id` = ?", id); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	//获得回复
-	if post.Replys > 0 {
-		post.Comments, err = GetComments(id)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	return post, nil
+	return comment, nil
 }
 
 //获得某一文章的所有评论/或者某一评论的子评论
-func GetComments(id int) ([]*Comment, error) {
+func GetComments(tid int) ([]*Comment, error) {
 
 	rows, err := db.Query(
-		"SELECT `id`,`uid`,`content`,`created`,`updated`,replys` FROM `post` WHERE `pid` = ?",
-		id)
-
+		"SELECT `id`,`pid`,`uid`,`tuid`,`author`,`content`,`created`,`updated`,`isread`,`replys` FROM `comment` WHERE `tid` = ?", tid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	comments := make([]*Comment, 10)
 	for rows.Next() {
-		comment := &Comment{}
-		err = rows.Scan(
-			&comment.Id,
-			&comment.User.Uid,
-			&comment.Content,
-			&comment.Created,
-			&comment.Updated,
-			&comment.Replys)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		continue
-		comments = append(comments, comment)
-	}
-
-	return comments, err
-
-}
-
-//获得某一cid的文章列表
-func GetPosts(cid, limit, offset int) ([]*Post, error) {
-	//查询数据
-	rows, err := db.Query(
-		"SELECT `id`,`uid`,`title`, `content`,"+
-			"`created`, `updated`, `views`, `replys`,"+
-			"`author`, `status` FROM `post` WHERE "+
-			"`cid` = ? AND `pid` = 0 ORDER BY `id` DESC LIMIT ? OFFSET ? ",
-		cid, limit, offset)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	posts := make([]*Post, limit)
-
-	for rows.Next() {
-		post := &Post{}
-		err = rows.Scan(
-			&post.Category.Cid, &post.Pid,
-			&post.User.Uid, &post.Title,
-			&post.Content, &post.Created,
-			&post.Updated, &post.Views,
-			&post.Replys, &post.User.Username,
-			&post.Status)
-
+		comment := &Comment{Tid: tid}
+		err = rows.Scan(&comment.Id, &comment.Pid, &comment.User.Uid, &comment.Tuid, &comment.User.Username,
+			&comment.Content, &comment.Created, &comment.Updated, &comment.IsRead, &comment.Replys)
 		if err != nil {
 			log.Fatal(err)
 			continue
 		}
-
-		posts = append(posts, post)
+		comments = append(comments, comment)
 	}
-
-	return posts, err
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return comments, err
 }
 
-//删除主题
-func DelPost(id int) error {
-	_, err := db.Exec(
-		"DELETE FROM `post` WHERE id = ? or pid = ?",
-		id, id)
+//获得某一楼楼中楼评论
+func GetCommentsLzl(tid, id int) ([]*Comment, error) {
+	//todo	是不是不用tid查询更快？？
+	rows, err := db.Query(
+		"SELECT `id`,`uid`,`tuid`,`author`,`content`,`created`,`updated`,`isread`,`replys` FROM `comment` WHERE `tid` = ? AND `pid` = ?", tid, id)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	//更新category计数
-	_, err = db.Exec("UPDATE `category` SET `posts` = `posts` - 1 WHERE cid = ?",
-		id)
-
-	return err
+	defer rows.Close()
+	comments := make([]*Comment, 3)
+	for rows.Next() {
+		comment := &Comment{Tid: tid, Pid: id}
+		err = rows.Scan(&comment.Id, &comment.User.Uid, &comment.Tuid, &comment.User.Username,
+			&comment.Content, &comment.Created, &comment.Updated, &comment.IsRead, &comment.Replys)
+		if err != nil {
+			log.Fatal(err)
+			continue
+		}
+		comments = append(comments, comment)
+	}
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return comments, err
 }
 
 //删除回复
-func DelComment(id, pid int) error {
-	err := DelPost(id)
+func DelComment(id int) error {
+	res, err := db.Exec(
+		"call comment_del(?);", id)
 	if err != nil {
 		return err
 	}
-
-	//更新回复计数
-	_, err = db.Exec(
-		"UPDATE `post` SET  `replys` = (SELECT COUNT(*) FROM `post` WHERE `pid` = ?)  WHERE `id` = ?",
-		pid, pid)
-
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }
 
-//修改主题或者回复
-func ModifyPost(id int, title, content string) error {
+//修改回复
+func ModifyComment(id int, content string) error {
 
-	_, err := db.Exec(
-		"UPDATE `post` SET  `title` = ?, `content` = ?, `updated` = ? WHERE `id` = ?",
-		title, content, time.Now(), id)
+	res, err := db.Exec("call comment_edit(?,?)", id, content)
 
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }
-*/
+
+//回复消息已读
+func SetReadComment_s(id int) error {
+	res, err := db.Exec("call comment_read_s(?)", id)
+
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//某篇回复消息全部已读
+func SetReadComment_t(uid, tid int) error {
+	res, err := db.Exec("call comment_read_t(?,?)", uid, tid)
+
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//某人回复消息全部已读
+func SetReadComment_a(uid int) error {
+	res, err := db.Exec("call comment_read_a(?)", uid)
+
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}

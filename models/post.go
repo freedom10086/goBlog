@@ -1,93 +1,179 @@
 package models
 
 import (
+	"log"
 	"time"
 )
 
+//单一post
 type Post struct {
-	Id       int //id
-	Title    string
-	Content  string
-	Created  time.Time
-	Updated  time.Time
-	Views    int
-	Replys   int
-	Status   int //0--open 1--close
-	User     User
-	Category Category
+	Tid       int //id
+	Cid       int
+	User      User
+	Title     string
+	Content   string
+	Type      int
+	Status    int
+	Views     int
+	Replys    int
+	Created   time.Time
+	Updated   time.Time
+	Lastreply time.Time
+}
+
+//带回复
+type Article struct {
+	Post     Post //id
 	Comments []*Comment
 }
 
-/*
-//发布主题
-func AddPost(cid, uid int, title, content, author string) error {
-	_, err := db.Exec(
-		"INSERT INTO `post` (`cid`,`pid`,`uid`,`title`,`content`,`created`,`author`) VALUES (?,?,?,?,?,?,?)",
-		cid, 0, uid, title, content, time.Now(), author)
-
+//查看一篇文章是否可以回复
+func PostCanReply(tid int) bool {
+	status := 2
+	err := db.QueryRow(
+		"SELECT  `status` FROM `post` WHERE `tid` = ?", tid).Scan(&status)
 	if err != nil {
-		return nil
+		log.Fatal(err)
+		return false
 	}
-	//更新category计数
-	_, err = db.Exec("UPDATE `category` SET `posts` = `posts` + 1 WHERE cid = ?",
-		cid)
-	return err
+
+	return status == 0
 }
 
-//发表回复 回复对象--id为pid
-func AddComment(cid, pid, uid int, content, author string) error {
-	//todo 检查status看看是否可以回复
+//发布主题
+func AddPost(cid, uid int, title, content string) error {
+	res, err := db.Exec(
+		"call post_add(?,?,?,?)", cid, uid, title, content)
 
-	_, err := db.Exec(
-		"INSERT INTO `post` (`cid`,`pid`,`uid`,`content`,`created`,`author`) VALUES (?,?,?,?,?,?)",
-		cid, pid, uid, content, time.Now(), author)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec(
-		"UPDATE `post` SET  `replys` = `replys`+ 1  WHERE `id` = ?",
-		pid)
+	rowCnt, err := res.RowsAffected()
+	if err != nil && rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }
 
-//获得文章根据id
-func GetPost(id int) (*Post, error) {
 
-	row := db.QueryRow("SELECT  `cid`, `pid`,`uid`,`title`, `content`, `created`, `updated`, `views`, `replys`, `author`, `status` FROM `post` WHERE `id` = ?",
-		id)
+//获得文章带回复
+func GetArticle(tid int)(*Article,error){
+	row := db.QueryRow(
+		"SELECT `cid`,`uid`,`author`,`title`, `content`,"+
+			"`type`,`status`,`created`, `updated`,"+
+			"`views`, `replys`,`lastreply`"+
+			" FROM `post` WHERE `tid` = ?",tid)
 
-	post := &Post{Id: id}
+	post := &Post{Tid: tid}
 	err := row.Scan(
-		&post.Category.Cid, &post.Pid,
-		&post.User.Uid, &post.Title,
-		&post.Content, &post.Created,
-		&post.Updated, &post.Views,
-		&post.Replys, &post.User.Username,
-		&post.Status)
+		&post.Cid, &post.User.Uid,&post.User.Username, &post.Title,&post.Content,
+		&post.Type,&post.Status,&post.Created,&post.Updated,
+		&post.Views,&post.Replys,&post.Lastreply)
 
 	//sql.ErrNoRows
 	if err != nil {
 		return nil, err
 	}
 
-	//这是主题 增加阅读量
-	if post.Pid == 0 {
-		if _, err = db.Exec("UPDATE `post` SET  `views` = `views`+ 1  WHERE `id` = ?", id); err != nil {
-			log.Fatal(err)
-		}
+	comments,err := GetComments(tid)
+	if err != nil {
+		log.Fatal(err)
+		comments = nil
 	}
 
-	//获得回复
-	if post.Replys > 0 {
-		post.Comments, err = GetComments(id)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	return post, nil
+	artcle :=&Article{Post:post,Comments:comments}
+	return artcle,nil
 }
 
+//按照创建顺序倒叙
+func GetPostNewCreate(cid,limit,offset int) ([]*Post, error){
+	return GetPosts(cid, limit, offset,"create")
+}
+
+//按照最后回复顺序倒叙
+func GetPostNewReply(cid,limit,offset int) ([]*Post, error){
+	return GetPosts(cid, limit, offset,"new")
+}
+
+//按照最近7天热帖排序
+func GetPostHot(cid,limit,offset int) ([]*Post, error){
+	return GetPosts(cid, limit, offset,"hot")
+}
+
+//获得某一cid的文章列表 按照发布时间倒叙
+func GetPosts(cid, limit, offset int,order string) ([]*Post, error) {
+	//查询数据
+	where  := "ORDER BY `tid` DESC"
+	switch order {
+	case "create":
+		where = "ORDER BY `tid` DESC"
+	case "hot":
+		//最近7天的热帖
+		where = "AND DATEDIFF(NOW(),`lastreply`)< 7 ORDER BY `replys` DESC,`lastreply` DESC"
+	case "new":
+		//新帖
+		where = "ORDER BY `lastreply` DESC"
+	default:
+		//新帖
+		where = "ORDER BY `lastreply` DESC"
+	}
+	
+	rows, err := db.Query(
+		"SELECT `tid`,`uid`,`author`,`title`, `content`,"+
+			"`type`,`status`,`created`, `updated`,"+
+			"`views`, `replys`,`lastreply`"+
+			" FROM `post` WHERE `cid` = ? "+where +" LIMIT ? OFFSET ?",
+		cid, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	posts := make([]*Post, limit)
+
+	for rows.Next() {
+		post := &Post{Cid:cid}
+		err = rows.Scan(
+			&post.Tid, &post.User.Uid,&post.User.Username, &post.Title,&post.Content,
+			&post.Type,&post.Status,&post.Created,&post.Updated,
+			&post.Views,&post.Replys,&post.Lastreply)
+
+		if err != nil {
+			log.Fatal(err)
+			continue
+		}
+
+		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return posts, err
+}
+
+
+//删除主题
+func DelPost(id int) error {
+	res, err := db.Exec("call post_del(?)",
+		id, id)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+
+
+/*
 //获得某一文章的所有评论/或者某一评论的子评论
 func GetComments(id int) ([]*Comment, error) {
 

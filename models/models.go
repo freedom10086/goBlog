@@ -11,6 +11,7 @@ import (
 
 var db *sql.DB
 var ErrNoAff = errors.New("Insert error no data affected!")
+var ErrReply = errors.New("此文章无法回复!")
 
 func InitDB() {
 	var err error
