@@ -10,8 +10,9 @@ import (
 )
 
 var db *sql.DB
-var ErrNoAff = errors.New("Insert error no data affected!")
+var ErrNoAff = errors.New("操作失败!")
 var ErrReply = errors.New("此文章无法回复!")
+var ErrLogin = errors.New("账号异常,你没有权限登陆!")
 
 func InitDB() {
 	var err error

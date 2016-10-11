@@ -27,19 +27,6 @@ type Article struct {
 	Comments []*Comment
 }
 
-//查看一篇文章是否可以回复
-func PostCanReply(tid int) bool {
-	status := 2
-	err := db.QueryRow(
-		"SELECT  `status` FROM `post` WHERE `tid` = ?", tid).Scan(&status)
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-
-	return status == 0
-}
-
 //发布主题
 func AddPost(cid, uid int, title, content string) error {
 	res, err := db.Exec(
@@ -56,6 +43,88 @@ func AddPost(cid, uid int, title, content string) error {
 	return err
 }
 
+
+//删除主题
+func DelPost(id int) error {
+	res, err := db.Exec("call post_del(?)",
+		id, id)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//编辑文章
+func EditPost(tid int,title, content string){
+	res, err := db.Exec("call post_edit(?,?,?)",
+		tid, title,content)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+
+}
+
+//禁止回复文章
+func PostCloseComment(tid int){
+	res, err := db.Exec("call post_close_c(?)",
+		tid)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//允许回复文章
+func PostOpenComment(tid int){
+	res, err := db.Exec("call post_open_c(?)",
+		tid)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	log.Println("aff", rowCnt)
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//查看一篇文章是否可以回复
+func PostCanReply(tid int) bool {
+	status := 2
+	err := db.QueryRow(
+		"SELECT  `status` FROM `post` WHERE `tid` = ?", tid).Scan(&status)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return status == 0
+}
 
 //获得文章带回复
 func GetArticle(tid int)(*Article,error){
@@ -154,134 +223,7 @@ func GetPosts(cid, limit, offset int,order string) ([]*Post, error) {
 }
 
 
-//删除主题
-func DelPost(id int) error {
-	res, err := db.Exec("call post_del(?)",
-		id, id)
-	if err != nil {
-		return err
-	}
-	rowCnt, err := res.RowsAffected()
-	log.Println("aff", rowCnt)
-	if err != nil {
-		return err
-	} else if rowCnt < 1 {
-		return ErrNoAff
-	}
-	return err
-}
 
 
 
-/*
-//获得某一文章的所有评论/或者某一评论的子评论
-func GetComments(id int) ([]*Comment, error) {
 
-	rows, err := db.Query(
-		"SELECT `id`,`uid`,`content`,`created`,`updated`,replys` FROM `post` WHERE `pid` = ?",
-		id)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	comments := make([]*Comment, 10)
-	for rows.Next() {
-		comment := &Comment{}
-		err = rows.Scan(
-			&comment.Id,
-			&comment.User.Uid,
-			&comment.Content,
-			&comment.Created,
-			&comment.Updated,
-			&comment.Replys)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		continue
-		comments = append(comments, comment)
-	}
-
-	return comments, err
-
-}
-
-//获得某一cid的文章列表
-func GetPosts(cid, limit, offset int) ([]*Post, error) {
-	//查询数据
-	rows, err := db.Query(
-		"SELECT `id`,`uid`,`title`, `content`,"+
-			"`created`, `updated`, `views`, `replys`,"+
-			"`author`, `status` FROM `post` WHERE "+
-			"`cid` = ? AND `pid` = 0 ORDER BY `id` DESC LIMIT ? OFFSET ? ",
-		cid, limit, offset)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	posts := make([]*Post, limit)
-
-	for rows.Next() {
-		post := &Post{}
-		err = rows.Scan(
-			&post.Category.Cid, &post.Pid,
-			&post.User.Uid, &post.Title,
-			&post.Content, &post.Created,
-			&post.Updated, &post.Views,
-			&post.Replys, &post.User.Username,
-			&post.Status)
-
-		if err != nil {
-			log.Fatal(err)
-			continue
-		}
-
-		posts = append(posts, post)
-	}
-
-	return posts, err
-}
-
-//删除主题
-func DelPost(id int) error {
-	_, err := db.Exec(
-		"DELETE FROM `post` WHERE id = ? or pid = ?",
-		id, id)
-	if err != nil {
-		return err
-	}
-
-	//更新category计数
-	_, err = db.Exec("UPDATE `category` SET `posts` = `posts` - 1 WHERE cid = ?",
-		id)
-
-	return err
-}
-
-//删除回复
-func DelComment(id, pid int) error {
-	err := DelPost(id)
-	if err != nil {
-		return err
-	}
-
-	//更新回复计数
-	_, err = db.Exec(
-		"UPDATE `post` SET  `replys` = (SELECT COUNT(*) FROM `post` WHERE `pid` = ?)  WHERE `id` = ?",
-		pid, pid)
-
-	return err
-}
-
-//修改主题或者回复
-func ModifyPost(id int, title, content string) error {
-
-	_, err := db.Exec(
-		"UPDATE `post` SET  `title` = ?, `content` = ?, `updated` = ? WHERE `id` = ?",
-		title, content, time.Now(), id)
-
-	return err
-}
-*/

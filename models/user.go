@@ -2,71 +2,62 @@ package models
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"log"
 	"time"
 )
-
-/*
-DROP TABLE IF EXISTS `user`
-
-CREATE TABLE IF NOT EXISTS `user` (
-        `uid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-        `username` varchar(20) UNIQUE NOT NULL,
-        `password` varchar(50) NOT NULL,
-        `email` varchar(30) NOT NULL DEFAULT '' ,
-        `regtime` datetime NOT NULL,
-        `sites` varchar(30) NOT NULL DEFAULT '' ,
-        `sex` tinyint NOT NULL DEFAULT 0 ,
-        `description` varchar(150) NOT NULL DEFAULT '' ,
-        `exp` integer NOT NULL DEFAULT 0 ,
-        `status` tinyint NOT NULL DEFAULT 0 ,
-		`birthday` date NOT NULL DEFAULT '0000-00-00' ,
-        `phone` varchar(20) NOT NULL DEFAULT '',
-		`position` varchar(100) NOT NULL DEFAULT ''
-    ) ENGINE=InnoDB;
-    CREATE INDEX `user_username` ON `user` (`username`);
-	CREATE INDEX `user_email` ON `user` (`email`);
-*/
 
 type User struct {
 	Uid         int
 	Username    string
 	Password    string
 	Email       string
-	Regtime     time.Time
-	Sites       string
 	Sex         int
 	Description string
 	Exp         int
-	Status      int //0--needvalidemail 1--ok  2--block
-	Birthday    time.Time
+	Sites       string
+	Messages    int
+	Posts       int
+	Replys      int
 	Phone       string
-	Position    string
+	Regtime     time.Time
+	Birthday    time.Time
 }
 
-//登陆
-func Login(username, password string) (*User, error) {
+//添加用户
+func AddUser(username, password, email string, sex int) error {
 	md5pass := Md5_password(password)
+	res, err := db.Exec("call user_reg(?,?,?,?)",
+		username, md5pass, email, sex)
+	if err != nil {
+		return err
+	}
 
+	rowCnt, err := res.RowsAffected()
+	if err != nil && rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//登陆 //Status //0-正常 1-禁止访问
+func UserLogin(username, password string) (*User, error) {
+	md5pass := Md5_password(password)
 	user := &User{}
-
-	err := db.QueryRow("SELECT `uid` `status` FROM `user` WHERE `username`=?  AND `password` = ?",
-		username, md5pass).Scan(&user.Uid, &user.Status)
+	status := 0
+	err := db.QueryRow("SELECT `uid`,`username`,`email`,`sex`,`exp`,`messages`,`posts`,`replys`,`description`, `status` FROM `user`"+
+		" WHERE (`username`=?  AND `password` = ?) OR (`email` = ? AND `password` = ?)", username, md5pass, username, md5pass).Scan(
+		&user.Uid, &user.Username, &user.Email, &user.Sex, &user.Exp, &user.Messages, &user.Posts, &user.Replys, &user.Description, &status)
 
 	switch {
 	case err != nil:
 		log.Fatal(err)
 		return nil, err
-	case user.Status == 0:
-		return nil, errors.New("you need valid your email !!")
-
-	case user.Status == 1:
-		user, err = GetUser(user.Uid)
+	case status == 0:
+		user, err = GetUserById(user.Uid)
 		return user, err
 	default:
-		return nil, errors.New("you dont have permission to access that !!")
+		return nil, ErrLogin
 	}
 }
 
@@ -77,66 +68,134 @@ func Md5_password(password string) string {
 	return md5pass
 }
 
-//添加用户
-func AddUser(username, password, email string) error {
-	md5pass := Md5_password(password)
-	_, err := db.Exec(
-		"INSERT INTO `user` (`username`,`password`,`email`,`regtime`) VALUES (?,?,?,?)",
-		username, md5pass, email, time.Now())
-	return err
-}
-
 //删除用户
 func DelUser(uid int) error {
-	_, err := db.Exec(
-		"DELETE FROM `user` WHERE uid = ?",
-		uid)
+	res, err := db.Exec("call user_del(?)", uid)
+	rowCnt, err := res.RowsAffected()
+	if err != nil && rowCnt < 1 {
+		return ErrNoAff
+	}
 	return err
 }
 
 //更新用户
-func UpdateUser(uid int, email, sites, description, phone, position string, sex int, birthday time.Time) error {
-	_, err := db.Exec(
-		"UPDATE `user` SET  `email` = ?, `sites` = ?, `description` = ?, `phone` = ?,`position` = ?,`sex` = ?,`birthday` = ? WHERE `uid` = ?",
-		email, sites, description, phone, position, sex, birthday, uid)
+func UpdateUser(uid int, sites, description, phone string, sex int, birthday time.Time) error {
+	res, err := db.Exec("call user_edit(?,?,?,?,?,?)",
+		uid, sex, description, sites, birthday, phone)
+	if err != nil {
+		return err
+	}
+
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//禁止用户
+func BlockUser(uid int) error {
+	res, err := db.Exec("call user_bolck(?)", uid)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//允许用户
+func OpenUser(uid int) error {
+	res, err := db.Exec("call user_open(?)", uid)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+	return err
+}
+
+//修改密码
+func ChangePass(uid int, oldpass, newpass string) error {
+	uidout := -1
+	status := 0
+	err := db.QueryRow("SELECT `uid`,`username`, `status` FROM `user` WHERE `uid`=?  AND `password` = ?", uid, oldpass).Scan(
+		&uidout, &status)
+	if err != nil {
+		return err
+	}
+
+	if status != 0 {
+		return ErrLogin
+	}
+
+	res, err := db.Exec("call user_changepass(?,?)", uid, newpass)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if rowCnt < 1 {
+		return ErrNoAff
+	}
+
 	return err
 }
 
 //根据uid查询用户
-func GetUser(uid int) (*User, error) {
+func GetUserById(uid int) (*User, error) {
 
-	//查询数据
-	row := db.QueryRow("SELECT  `username`, `email`, `regtime`, `sites`, `sex`, `description`, `exp`, `status`, `birthday`,`phone`,`position` FROM `user` WHERE `uid` = ?",
-		uid)
-
-	var timestr string
-	var timestrbir string
-
-	user := &User{Uid: uid}
-	err := row.Scan(&user.Username, &user.Email, &timestr, &user.Sites, &user.Sex, &user.Description, &user.Exp, &user.Status, &timestrbir, &user.Phone, &user.Position)
+	auser := &User{Uid: uid}
+	err := db.QueryRow("SELECT `username`,`email`,`sex`,`exp`,`messages`,`posts`,`replys`,`description`, `sites`,`phone`,`regtime` "+
+		"FROM `user` WHERE `uid` = ?", uid).Scan(
+		&auser.Username, &auser.Email, &auser.Sex, &auser.Exp, &auser.Messages, &auser.Posts, &auser.Replys,
+		&auser.Description, &auser.Sites, &auser.Phone, &auser.Replys)
 
 	if err != nil {
 		return nil, err
 	}
-	loc := time.Local
-	user.Regtime, err = time.ParseInLocation(time.RFC822, timestr, loc)
-	user.Birthday, err = time.ParseInLocation(time.RFC822, timestr, loc)
-	return user, err
+	//user.Regtime, err = time.ParseInLocation(time.RFC822, timestr, loc)
+	return auser, nil
+}
+
+//根据uid查询用户
+func GetUserByName(username string) (*User, error) {
+
+	auser := &User{Username: username}
+	err := db.QueryRow("SELECT `uid`,`email`,`sex`,`exp`,`messages`,`posts`,`replys`,`description`, `sites`,`phone`,`regtime` "+
+		"FROM `user` WHERE `username` = ?", username).Scan(
+		&auser.Uid, &auser.Email, &auser.Sex, &auser.Exp, &auser.Messages, &auser.Posts, &auser.Replys,
+		&auser.Description, &auser.Sites, &auser.Phone, &auser.Replys)
+
+	if err != nil {
+		return nil, err
+	}
+	//user.Regtime, err = time.ParseInLocation(time.RFC822, timestr, loc)
+	return auser, nil
 }
 
 //获得所有用户
 func GetUsers(order bool, limit, offset int) ([]*User, error) {
-
 	orderstr := "ASC"
 	if !order {
 		orderstr = "DESC"
 	}
-
 	rows, err := db.Query(
 		"SELECT `uid`,`username`,`email`, `regtime`,"+
-			"`sites`, `sex`, `description`, `exp`,"+
-			"`status`, `birthday`,`phone`,`position` FROM `user` "+
-			"ORDER BY `uid` ? LIMIT ? OFFSET ? ",
+			" `sites`, `sex`, `description`, `exp`,"+
+			" `birthday`,`phone`,`posts`,`replys` FROM `user`"+
+			" ORDER BY `uid` ? LIMIT ? OFFSET ? ",
 		orderstr, limit, offset)
 
 	if err != nil {
@@ -150,8 +209,7 @@ func GetUsers(order bool, limit, offset int) ([]*User, error) {
 		err = rows.Scan(
 			&user.Uid, &user.Username, &user.Email, &user.Regtime,
 			&user.Sites, &user.Sex, &user.Description, &user.Exp,
-			&user.Status, &user.Birthday, &user.Phone, &user.Position,
-		)
+			&user.Birthday, &user.Phone, &user.Posts,&user.Replys)
 
 		if err != nil {
 			log.Fatal(err)
@@ -161,5 +219,45 @@ func GetUsers(order bool, limit, offset int) ([]*User, error) {
 		users = append(users, user)
 	}
 
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return users, err
+}
+
+
+//获得所有被禁止的user
+func GetBlockUsers(limit, offset int)([]*User, error){
+	rows, err := db.Query(
+		"SELECT `uid`,`username`,`email`, `regtime`,"+
+			" `sites`, `sex`, `description`, `exp`,"+
+			" `posts`,`replys` FROM `user`"+
+			" WHERE `status` <> 0  LIMIT ? OFFSET ? ",
+		limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	users := make([]*User, limit)
+
+	for rows.Next() {
+		user := &User{}
+		err = rows.Scan(
+			&user.Uid, &user.Username, &user.Email, &user.Regtime,
+			&user.Sites, &user.Sex, &user.Description, &user.Exp,
+			&user.Posts,&user.Replys)
+
+		if err != nil {
+			log.Fatal(err)
+			continue
+		}
+
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
 	return users, err
 }
