@@ -166,7 +166,7 @@ var editor           = $("#myeditor");
 var preview          = $("#preview");
 var inputholder      = $("#inputholder");
 var toolbar          = $("#toolbar");
-var inputaera            = $("#input");
+var inputaera        = $("#input");
 var fullscreen = false;
 var isOnlyshowInput = false;
 
@@ -622,7 +622,12 @@ function showhideInput(){
 
 var isOnlyShowPreview = false;
 function showhidepreview(){
-    var closeBtn =  editor.find(".editormd-preview-close-btn");
+    var closeBtn =  editor.find(".editormd-close-btn");
+    if(closeBtn.length <= 0){
+      var btn_html = '<a href="javascript:;" class="fa fa-close editormd-close-btn"></a>';
+      editor.append(btn_html);
+      closeBtn =  editor.find(".editormd-close-btn");
+    }
 
     if(isOnlyShowPreview){
       //正常状态
@@ -649,7 +654,7 @@ function showhidepreview(){
      var lefts = editor.offset().left;
 
      closeBtn.css({
-        left :lefts+paddingsize*2,
+        left :lefts-paddingsize*4+editorw-closeBtn.width(),
         top :tops+paddingsize*2
      })
      closeBtn.show().bind(
