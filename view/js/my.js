@@ -1,29 +1,6 @@
 /**
  * Created by yang on 2016/10/7.
  */
-
-function textchange(){
-  var input=document.getElementById("input").value;
-  marked(input, function (err, content) {
-    if (err) throw err;
-    document.getElementById('preview').innerHTML = content;
-  });
-}
-
-function scrollbar_l(){
-  var scrool = document.getElementById('input').scrollTop;
-  var scroolh = document.getElementById('input').scrollHeight;
-  var nDivHight = document.getElementById('input').offsetHeight;
-  var persent = scrool/(scroolh-nDivHight);
-
-  var scroolh_r = document.getElementById('preview').scrollHeight;
-  var nDivHight_r = document.getElementById('preview').offsetHeight;
-
-  var scrool_top_r = persent*(scroolh_r-nDivHight_r);
-  document.getElementById('preview').scrollTop = scrool_top_r;
-}
-
-
 $.fn.getCursorPosition = function(){
     if(this.lengh == 0) return -1;
     return $(this).getSelectionStart();
@@ -111,7 +88,7 @@ $.fn.insertAtCousor = function(myValue){
   }
 
   //刷新preview
-  textchange();
+  markedinputstr();
 }
 
 $.fn.isLineStart = function(){
@@ -162,13 +139,115 @@ $.fn.lineEndPos = function(){
   return i;
 }
 
-var editor           = $("#myeditor");
-var preview          = $("#preview");
-var inputholder      = $("#inputholder");
-var toolbar          = $("#toolbar");
-var inputaera        = $("#input");
-var fullscreen = false;
-var isOnlyshowInput = false;
+
+var toobarIcons = ["undo", "redo", "|", "bold", "del", "italic", "quote", "|", 
+            "h1", "h2", "h3", "|", "list-ul", "list-ol", "hr", "|","link", "image", 
+            "code", "code-block", "table", "datetime", "emoji", "|",
+            "watch", "preview", "fullscreen"];
+
+var toobarIconsName = {
+            undo             : "撤销（Ctrl+Z）",
+            redo             : "重做（Ctrl+Y）",
+            bold             : "粗体",
+            del              : "删除线",
+            italic           : "斜体",
+            quote            : "引用",
+            h1               : "标题1",
+            h2               : "标题2",
+            h3               : "标题3",
+            "list-ul"        : "无序列表",
+            "list-ol"        : "有序列表",
+            hr               : "横线",
+            link             : "链接",
+            image            : "添加图片",
+            code             : "行内代码",
+            "code-block"     : "代码块（多语言风格）",
+            table            : "添加表格",
+            datetime         : "日期时间",
+            emoji            : "Emoji表情",
+            watch            : "关闭实时预览",
+            unwatch          : "开启实时预览",
+            preview          : "全窗口预览HTML（按 Shift + ESC还原）",
+            fullscreen       : "全屏（按ESC还原）"};
+
+var toolbarIconsClass  =  {
+            undo             : "fa-undo",
+            redo             : "fa-repeat",
+            bold             : "fa-bold",
+            del              : "fa-strikethrough",
+            italic           : "fa-italic",
+            quote            : "fa-quote-left",
+            h1               : "editormd-bold",
+            h2               : "editormd-bold",
+            h3               : "editormd-bold",
+            "list-ul"        : "fa-list-ul",
+            "list-ol"        : "fa-list-ol",
+            hr               : "fa-minus",
+            link             : "fa-link",
+            image            : "fa-picture-o",
+            code             : "fa-code",
+            "code-block"     : "fa-file-code-o",
+            table            : "fa-table",
+            datetime         : "fa-clock-o",
+            emoji            : "fa-smile-o",
+            watch            : "fa-eye-slash",
+            unwatch          : "fa-eye",
+            preview          : "fa-desktop",
+            fullscreen       : "fa-arrows-alt"};    
+
+var editor,preview,inputholder,toolbar,inputaera;
+var fullscreen       = false;
+var isOnlyshowInput  = false;
+
+function createToolBar(){
+  editor = $("#myeditor");
+  preview = $("#preview");
+  inputholder = $("#inputholder");
+  toolbar = $("#toolbar");
+  inputaera = $("#input");
+
+  var menu = '<ul class="editormd-menu">';
+  for (var i = 0, len = toobarIcons.length; i < len; i++){
+      var name = toobarIcons[i];
+      if (name === "|"){
+          menu += "<li class=\"divider\" unselectable=\"on\">|</li>";
+      }else{
+          var isHeader = (/h(\d)/.test(name));
+          var index    = name;
+          var title     = toobarIconsName[index];
+          var iconClass = toolbarIconsClass[index];
+
+          var menuItem = "<li><a href=\"javascript:;\" title=\"" + title + "\" unselectable=\"on\">";
+          menuItem += "<i class=\"fa " + iconClass + "\" name=\""+name+"\" unselectable=\"on\">"+((isHeader) ? name.toUpperCase() :"") + "</i></a></li>";
+          menu+=menuItem;
+      }
+  }
+  menu += "</ul>"
+  toolbar.html(menu);
+  setToolbarHandler();
+}
+
+function markedinputstr(){
+  var inputstr = document.getElementById("input").value;
+  marked(inputstr, function (err, content) {
+    if(err) throw err;
+    document.getElementById("preview").innerHTML = content;
+  });
+}
+
+function scrollbar_l(){
+  var inputaera = document.getElementById("input");
+  var scrool = inputaera.scrollTop;
+  var scroolh = inputaera.scrollHeight;
+  var nDivHight = inputaera.offsetHeight;
+  var persent = scrool/(scroolh-nDivHight);
+
+  var preview  = document.getElementById("preview");
+  var scroolh_r = preview.scrollHeight;
+  var nDivHight_r = preview.offsetHeight;
+  var scrool_top_r = persent*(scroolh_r-nDivHight_r);
+  preview.scrollTop = scrool_top_r;
+}
 
 var toolbarHandlers = {
   undo : function() {
@@ -393,8 +472,9 @@ var toolbarHandlers = {
   },
 
   emoji : function() {
-    var smiley_container =  $("#smiley_container");
-    if(smiley_container.length <= 0){
+    var paddingsize = 8;
+    var smileybox = document.getElementById("smiley_container");
+    if(!smileybox){
       var strFace, labFace;
       strFace = '<div id="smiley_container" style="position:absolute;display:none;z-index:999;" class="smiley">' +
               '<table border="0" cellspacing="0" cellpadding="0"><tr>';
@@ -403,26 +483,73 @@ var toolbarHandlers = {
         strFace += '<td><img src="smiley/tieba/tb'+i+'.png" onclick="insertSmiley(\'' + labFace + '\');"/></td>';
         if( i % 9 == 0 ) strFace += '</tr><tr>';
       }
-
       strFace += '</tr></table></div>';
       editor.append(strFace);
-      $("#smiley_container").hide();
+      smileybox = document.getElementById("smiley_container");
     }
-    smiley_container =  $("#smiley_container")
-    var paddingsize = 8;
+
     var iconbtn =  toolbar.find(".fa[name=emoji]");
-
-    var tops = iconbtn.offset().top+iconbtn.height();
-    var lefts = iconbtn.offset().left - smiley_container.width()/2;
-  
-    smiley_container.css({
-        left :lefts+paddingsize*2,
-        top :tops+paddingsize*2,
-        position:"absolute"
-    });
-
     iconbtn.parent().toggleClass("active");
-    smiley_container.toggle();
+
+    if(smileybox.style.display=="none"){
+      smileybox.style.display = 'block';
+      var tops = iconbtn.offset().top+iconbtn.height();
+      var lefts = iconbtn.offset().left - smileybox.offsetWidth/2;
+      smileybox.style.left = (lefts+paddingsize*2)+'px';
+      smileybox.style.top = (tops+paddingsize*2)+'px';
+      
+      //拖拽
+      smileybox.onmousedown = function(ev){
+        var oEvent = ev||event;
+        var mx = oEvent.clientX;
+        var my = oEvent.clientY;
+
+        var disX = mx - smileybox.offsetLeft;
+        var disY = my - smileybox.offsetTop;
+
+        document.onmousemove = function(ev){
+          var oEvent = ev||event;
+          var mx = oEvent.clientX;
+          var my = oEvent.clientY;
+
+          var x = mx-disX;
+          var y = my - disY;
+
+          if(x<0){
+            x = 0;
+          }else if(x>document.documentElement.clientWidth - smileybox.offsetWidth){
+            x = document.documentElement.clientWidth - smileybox.offsetWidth;
+          }
+          if(y<0){
+            y = 0;
+          }else if(y>document.documentElement.clientHeight - smileybox.offsetHeight){
+            y = document.documentElement.clientHeight - smileybox.offsetHeight;
+          }
+          smileybox.style.left = x+'px';
+          smileybox.style.top = y+'px';
+        }
+
+        document.onmouseup = function(){
+          document.onmousemove = null;
+          document.onmouseup = null;
+        }
+
+        return false;
+      }
+
+      //失去焦点消失
+      var input = document.getElementById("input");
+      input.onmousedown = function(){
+        iconbtn.parent().toggleClass("active");
+        smileybox.style.display = 'none';
+        input.onmousedown = null;
+        document.onmousedown = null;
+      }
+
+    }else{
+      smileybox.style.display = 'none';
+      smileybox.onmousedown = null;
+    }
   },
 
   watch : function() {
@@ -438,31 +565,6 @@ var toolbarHandlers = {
     enterFullscreen();
   },
 };
-
-
-/**
- * 鼠标和触摸事件的判断/选择方法
- * MouseEvent or TouchEvent type switch
- *
- * @param   {String} [mouseEventType="click"]    供选择的鼠标事件
- * @param   {String} [touchEventType="touchend"] 供选择的触摸事件
- * @returns {String} EventType                   返回事件类型名称
- */
-
-function mouseOrTouch(mouseEventType, touchEventType) {
-  mouseEventType = mouseEventType || "click";
-  touchEventType = touchEventType || "touchend";
-
-  var eventType  = mouseEventType;
-
-  try {
-    document.createEvent("TouchEvent");
-    eventType = touchEventType;
-  } catch(e) {}
-
-  return eventType;
-};
-
 
 /**
  * 工具栏图标事件处理器
@@ -488,6 +590,30 @@ function  setToolbarHandler() {
         return false;
 
     });
+};
+
+
+/**
+ * 鼠标和触摸事件的判断/选择方法
+ * MouseEvent or TouchEvent type switch
+ *
+ * @param   {String} [mouseEventType="click"]    供选择的鼠标事件
+ * @param   {String} [touchEventType="touchend"] 供选择的触摸事件
+ * @returns {String} EventType                   返回事件类型名称
+ */
+
+function mouseOrTouch(mouseEventType, touchEventType) {
+  mouseEventType = mouseEventType || "click";
+  touchEventType = touchEventType || "touchend";
+
+  var eventType  = mouseEventType;
+
+  try {
+    document.createEvent("TouchEvent");
+    eventType = touchEventType;
+  } catch(e) {}
+
+  return eventType;
 };
 
 

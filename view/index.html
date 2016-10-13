@@ -9,75 +9,67 @@
   <link rel="stylesheet" href="styles/font-awesome.css">
   <script src="js/marked.js"></script>
   <script src="js/highlight.pack.js"></script>
+  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/my.js"></script>
 </head>
 <body style="margin: 0;padding: 0">
 	<h1 id="title" style="text-align:center;">Markdown 在线编辑器 --by:yang</h1>
 	<div id="myeditor" class="myeditor">
 		<div id = "inputholder" style="float:left;">
 			<div id="toolbar" class="editormd-toolbar">
-				<ul class="editormd-menu">
-					<li><a href="javascript:;" title="撤销（Ctrl+Z）" unselectable="on"><i class="fa fa-undo" name="undo" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="重做（Ctrl+Y）" unselectable="on"><i class="fa fa-repeat" name="redo" unselectable="on"></i></a></li>
-					<li class="divider" unselectable="on">|</li>
-					<li><a href="javascript:;" title="粗体" unselectable="on"><i class="fa fa-bold" name="bold" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="删除线" unselectable="on"><i class="fa fa-strikethrough" name="del" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="斜体" unselectable="on"><i class="fa fa-italic" name="italic" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="引用" unselectable="on"><i class="fa fa-quote-left" name="quote" unselectable="on"></i></a></li>
-					<li class="divider" unselectable="on">|</li>
-					<li><a href="javascript:;" title="标题1" unselectable="on"><i class="fa editormd-bold" name="h1" unselectable="on">H1</i></a></li>
-					<li><a href="javascript:;" title="标题2" unselectable="on"><i class="fa editormd-bold" name="h2" unselectable="on">H2</i></a></li>
-					<li><a href="javascript:;" title="标题3" unselectable="on"><i class="fa editormd-bold" name="h3" unselectable="on">H3</i></a></li>
-					<li class="divider" unselectable="on">|</li>
-					<li><a href="javascript:;" title="无序列表" unselectable="on"><i class="fa fa-list-ul" name="list-ul" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="有序列表" unselectable="on"><i class="fa fa-list-ol" name="list-ol" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="横线" unselectable="on"><i class="fa fa-minus" name="hr" unselectable="on"></i></a></li>
-					<li class="divider" unselectable="on">|</li>
-					<li><a href="javascript:;" title="链接" unselectable="on"><i class="fa fa-link" name="link" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="添加图片" unselectable="on"><i class="fa fa-picture-o" name="image" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="行内代码" unselectable="on"><i class="fa fa-code" name="code" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="代码块" unselectable="on"><i class="fa fa-file-code-o" name="code-block" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="添加表格" unselectable="on"><i class="fa fa-table" name="table" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="日期时间" unselectable="on"><i class="fa fa-clock-o" name="datetime" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="Emoji表情" unselectable="on"><i class="fa fa-smile-o" name="emoji" unselectable="on"></i></a></li>
-					<li class="divider" unselectable="on">|</li>
-					<li><a href="javascript:;" title="关闭实时预览" unselectable="on"><i class="fa fa-eye-slash" name="watch" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="全窗口预览HTML" unselectable="on"><i class="fa fa-desktop" name="preview" unselectable="on"></i></a></li>
-					<li><a href="javascript:;" title="全屏（按ESC还原）" unselectable="on"><i class="fa fa-arrows-alt" name="fullscreen" unselectable="on"></i></a></li>
-				</ul>
+				
 			</div>
-			<textarea id = "input"  oninput="textchange()" onscroll="scrollbar_l()"></textarea>
+			<textarea id = "input"></textarea>
 		</div>
 		<div id="preview" class="markdown-body" style="float:right;overflow-y:auto;"></div>
 	</div>
 
 	<script>
-	 	addEventListener('load', function() {
-	  		console.log("hello");
-	  		setToolbarHandler();
-	  		setViewSizes();
-		});
+		//窗口载入完成
+		window.onload = function(){
+			console.log("hello");
+
+			document.getElementById('input').innerHTML = '# Marked in browser\n\nRendered by **marked**.\n```go\npackage main\nimport (\n    "fmt";\n    "io";\n    "os"\n    "bufio"\n    "bytes"\n)\nfunc main() {\n    fmt.Println("Hello, 世界")\n    var r io.Reader\n    r = os.Stdin\n    r = bufio.NewReader(r)\n    r = new(bytes.Buffer)\n} \n```';
+
+		  	createToolBar();
+		  	setViewSizes();
+
+		  	marked.setOptions({
+			  highlight: function (code,lang) {
+			  	if (lang && hljs.getLanguage(lang)) {
+		      		try {
+		      			console.log(lang);
+		        		return hljs.highlight(lang, code).value;
+		      		} catch (err) {
+		      			console.log(err);
+		      		}
+	    		}
+			    try {
+			      	return hljs.highlightAuto(code).value;
+			    } catch (err) {
+			    	console.log(err);
+			    }
+
+	    		return code; 
+			}});
+
+			markedinputstr();
+			var inputaera = document.getElementById("input");
+			
+			inputaera.oninput = function(){
+				markedinputstr();
+			}
+
+			inputaera.onscroll = function(){
+				scrollbar_l();
+			}
+		}
 
 		//窗口大小改变
 		window.onresize = function(){
 			setViewSizes();
 		}
 
-		var markdownString = '# Marked in browser\n\nRendered by **marked**.\n```go\npackage main\nimport (\n    "fmt";\n    "io";\n    "os"\n    "bufio"\n    "bytes"\n)\nfunc main() {\n    fmt.Println("Hello, 世界")\n    var r io.Reader\n    r = os.Stdin\n    r = bufio.NewReader(r)\n    r = new(bytes.Buffer)\n} \n```';
-
-		marked.setOptions({
-		  highlight: function (code) {
-		    return hljs.highlightAuto(code).value;
-		  }
-		});
-		document.getElementById('input').innerHTML = markdownString;
-		// Using async version of marked
-		marked(markdownString, function (err, content) {
-		  	if (err) throw err;
-		  	document.getElementById('preview').innerHTML = content;
-			console.log("marked finish");
-		});
 	</script>
-	<script src="js/jquery-3.1.1.min.js"></script>
-	<script src="js/my.js"></script>
 </body>
 </html>
