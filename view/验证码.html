@@ -4,22 +4,22 @@
     <title>验证码</title>
 </head>
 <body>
-    <p>Verification:</p>  
+    <h1>测试验证码</h1>
     <p>
-      <input type="text" class="topAlign" id="verify" name="verify" value="" required>  
+      <input type="text" class="topAlign" id="verify" name="verify" value="" required>
       <canvas width="100" height="25" id="verifyCanvas" style="border: 1px solid #ccc"></canvas>
-    </p>  
+    </p>
 
 
     <script type="text/javascript">
       function createYZM (){
-        var canvas = document.getElementById("verifyCanvas");  
+        var canvas = document.getElementById("verifyCanvas");
         var context = canvas.getContext("2d");
         context.clearRect(0, 0, canvas.width, canvas.height)
-        
-        var random = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R',  
+
+        var random = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R',
              'S','T','U','V','W','X','Y','Z'];
-        var colors = ["red","green","brown","blue","orange","purple","black"]; 
+        var colors = ["red","green","brown","blue","orange","purple","black"];
         var code=[];
         for(var i = 0; i < 4; i++) {
           var index = Math.floor(Math.random()*36);
@@ -27,24 +27,22 @@
         }
 
         context.beginPath();
-        
-
-        // Sprinkle in some random dots  
+        // Sprinkle in some random dots
         for (var i = 0; i < 10; i++) {
-            var px = Math.floor(Math.random() * canvas.width);  
-            var py = Math.floor(Math.random() * canvas.height);  
-            context.moveTo(px, py);  
+            var px = Math.floor(Math.random() * canvas.width);
+            var py = Math.floor(Math.random() * canvas.height);
+            context.moveTo(px, py);
             context.lineTo(px+1, py+1);
             context.strokeStyle = colors[Math.floor(Math.random()*colors.length)];
             context.lineWidth = Math.floor(Math.random() * 2);
-            context.stroke();  
+            context.stroke();
         }
 
         for(var j =0;j<2;j++){
             //随机线条
-            context.moveTo(0, Math.floor(Math.random() * canvas.height));//随机线的起点x坐标是画布x坐标0位置，y坐标是画布高度的随机数  
-            context.lineTo(canvas.width, Math.floor(Math.random() * canvas.height));//随机线的终点x坐标是画布宽度，y坐标是画布高度的随机数  
-            context.lineWidth = 0.3;//随机线宽  
+            context.moveTo(0, Math.floor(Math.random() * canvas.height));//随机线的起点x坐标是画布x坐标0位置，y坐标是画布高度的随机数
+            context.lineTo(canvas.width, Math.floor(Math.random() * canvas.height));//随机线的终点x坐标是画布宽度，y坐标是画布高度的随机数
+            context.lineWidth = 0.3;//随机线宽
             context.strokeStyle = colors[Math.floor(Math.random()*colors.length)];
             context.stroke();//描边，即起点描到终点
         }
@@ -68,15 +66,15 @@
         }
 
         canvas.onclick = function(){
-            //context.clearRect(0, 0, canvas.width, canvas.height)
+            context.clearRect(0, 0, canvas.width, canvas.height);
             createYZM();
         }
       }
 
-  
-      window.onload = function() {  
+
+      window.onload = function() {
           createYZM();
-      }  
+      }
     </script>
 </body>
 </html>
