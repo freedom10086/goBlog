@@ -4,17 +4,20 @@
 $.fn.getCursorPosition = function () {
     if (this.lengh == 0) return -1;
     return $(this).getSelectionStart();
-}
+};
+
 $.fn.setCursorPosition = function (position) {
     if (this.lengh == 0) return this;
     return $(this).setSelection(position, position);
-}
+};
+
 $.fn.getSelection = function () {
     if (this.lengh == 0) return -1;
     var s = $(this).getSelectionStart();
     var e = $(this).getSelectionEnd();
     return this[0].value.substring(s, e);
-}
+};
+
 $.fn.getSelectionStart = function () {
     if (this.lengh == 0) return -1;
     input = this[0];
@@ -31,7 +34,8 @@ $.fn.getSelectionStart = function () {
         pos = input.selectionStart;
 
     return pos;
-}
+};
+
 $.fn.getSelectionEnd = function () {
     if (this.lengh == 0) return -1;
     input = this[0];
@@ -48,7 +52,8 @@ $.fn.getSelectionEnd = function () {
         pos = input.selectionEnd;
 
     return pos;
-}
+};
+
 $.fn.setSelection = function (selectionStart, selectionEnd) {
     if (this.lengh == 0) return this;
     input = this[0];
@@ -65,7 +70,8 @@ $.fn.setSelection = function (selectionStart, selectionEnd) {
     }
 
     return this;
-}
+};
+
 $.fn.insertAtCousor = function (myValue) {
     var $t = $(this)[0];
     if (document.selection) {
@@ -89,7 +95,7 @@ $.fn.insertAtCousor = function (myValue) {
 
     //刷新preview
     markedinputstr();
-}
+};
 
 $.fn.isLineStart = function () {
     input = this[0];
@@ -103,7 +109,8 @@ $.fn.isLineStart = function () {
     } else {
         return false;
     }
-}
+};
+
 
 $.fn.lineStartPos = function () {
     input = this[0];
@@ -122,7 +129,7 @@ $.fn.lineStartPos = function () {
         }
     }
     return i;
-}
+};
 
 $.fn.lineEndPos = function () {
     if (this.lengh == 0) return -1;
@@ -473,10 +480,11 @@ var toolbarHandlers = {
                 '<table border="0" cellspacing="0" cellpadding="0"><tr>';
             for (var i = 1; i <= 33; i++) {
                 labFace = 'tb' + i;
-                strFace += '<td><img src="smiley/tieba/tb' + i + '.png" onclick="insertSmiley(\'' + labFace + '\');"/></td>';
+                strFace += '<td><img src="smiley/tb/tb' + i + '.png" onclick="insertSmiley(\'' + labFace + '\');"/></td>';
                 if (i % 9 == 0) strFace += '</tr><tr>';
             }
-            strFace += '</tr></table></div>';
+            strFace += '</tr>' +
+                '</table></div>';
             editor.append(strFace);
             smileybox = document.getElementById("smiley_container");
         }
@@ -782,7 +790,7 @@ function showhidepreview() {
 function insertSmiley(name) {
     var currurl = window.location.href;
     currurl = currurl.substring(0, currurl.lastIndexOf("/"));
-    var imgurl = currurl + "/smiley/tieba/" + name + ".png";
+    var imgurl = currurl + "/smiley/tb/" + name + ".png";
     var str = "![表情](" + imgurl + ")";
     var nextline = "";
     if (!inputaera.isLineStart()) {

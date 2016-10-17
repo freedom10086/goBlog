@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html manifest="cache.appcache">
 <head>
   <meta charset="utf-8"/>
   <title>Markdown 在线编辑器</title>
@@ -58,12 +58,12 @@
 			
 			inputaera.oninput = function(){
 				markedinputstr();
-			}
+			};
 
 			inputaera.onscroll = function(){
 				scrollbar_l();
 			}
-		}
+		};
 
 		//窗口大小改变
 		window.onresize = function(){

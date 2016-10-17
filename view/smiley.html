@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="styles/my.css">
+    <link rel="stylesheet" href="styles/font-awesome.css">
+    <style type="text/css">
+        .smiley {
+            background: #fff;
+            border: 1px solid #e2e2e2;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            /*display:none;*/
+            z-index: 999;
+            width: 350px;
+        }
+
+        .smiley ul {
+            background-color: #f4f5f7;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .smiley li.on {
+            background-color: #fff;
+        }
+
+        .smiley img {
+            cursor: pointer;
+            border: 1px transparent solid;
+            width: 38px;
+            height: 38px;
+            margin: 3px 4px;
+            vertical-align: middle;
+        }
+
+        .smiley img:hover {
+            border: 1px #0066cc solid;
+        }
+
+        .smiley li img {
+            border: none;
+            width: 30px;
+            height: 30px;
+            padding: 5px;
+        }
+
+        .smiley li img:hover {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<button id="smileybtn">表情</button>
+<!--<div id="smiley" class="smiley">-->
+<!--<ul>-->
+<!--<li class="on">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--</li>-->
+<!--<li>-->
+<!--<img src="smiley/xds/xds1.webp">-->
+<!--</li>-->
+<!--</ul>-->
+<!--<div class="row" style="padding: 5px;">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--<img src="smiley/tb/tb1.png">-->
+<!--</div>-->
+<!--</div>-->
+<script>
+    var SmileyBox = {
+        smileys : ["tb", 33, ".png", "xds", 15, ".webp", "bz", 15, ".webp", "qy", 20, ".webp"],
+        titles:{
+            "tb": ['贴吧', '惊哭', '呼~', '喷', '生气', '不高兴', '惊讶', '酷', '疑问', '吐舌', '泪', '哈哈', '怒', '鄙视', '勉强', '花心',
+                '啊', '乖', '钱', '委屈', '黑线', '睡觉', '呵呵', '太开心', '真棒', '咦', '汗', '阴险', '狂汗', '滑稽', '开心', '笑眼', '吐', '冷'],
+            "xds": ['小电视', '笑', '发愁', '赞', '差评', '嘟嘴', '汗', '害羞', '吃惊', '哭泣', '太喜欢', '好怒啊', '困惑', '我好兴奋', '思索', '无语'],
+            "bz": ['2233娘', '大笑', '吃惊', '大哭', '耶', '卖萌', '疑问', '汗', '困惑', '怒', '委屈', '郁闷', '第一', '喝茶', '吐魂', '无言'],
+            "qy": ['蛆音娘', '卖萌', '吃瓜群众', '吃惊', '害怕', '扶额', '滑稽', '哼', '机智', '哭泣', '睡觉觉', '生气', '偷看', '吐血', '无语', '摇头', '疑问', 'die', 'OK', '肥皂', '大笑']
+        },
+        createSmiley:function () {
+            var div = document.createElement("div");
+            div.id = "smiley";
+            div.className = "smiley";
+
+            var htmlstr = '<ul>';
+            for (var i = 0; i < this.smileys.length / 3; i++) {
+                htmlstr += '<li><img src="smiley/' + this.smileys[i * 3] + '/' + (this.smileys[i * 3] + '1' + this.smileys[i * 3 + 2]) + '"></li>';
+            }
+            htmlstr += '<li class="horizon-stretch"><i class="fa fa-close" style="float: right;"></i></li></ul><div class="row">';
+            htmlstr += '</div>';
+
+            div.innerHTML = htmlstr;
+            document.body.appendChild(div);
+            var lis = div.querySelectorAll("ul li");
+            lis.forEach(function (v, k) {
+                if (k != lis.length - 1) {
+                    v.addEventListener("click", function () {
+                        SmileyBox.switchSmiley(k);
+                    })
+                }
+            });
+
+            this.switchSmiley(0);
+
+            var closebtn = div.querySelector(".fa-close");
+            closebtn.addEventListener('click', function () {
+                div.style.display = "none";
+            })
+        },
+        switchSmiley: function(index) {
+            var smiley = document.querySelector("#smiley");
+            var lis = smiley.querySelectorAll("ul li");
+            var cuur = smiley.querySelector("ul li.on");
+
+            var curindex = -1;
+            if(cuur){
+                lis.forEach(function (v, k) {
+                    if (v == cuur) {
+                        curindex = k;
+                    }
+                });
+
+                if (curindex == index&&curindex!=-1) {
+                    return;
+                }
+            }
+
+            if(curindex==-1){
+                curindex =0;
+            }
+            console.log("switch" + index);
+            lis[curindex].className = "";
+            lis[index].className = "on";
+
+            var imgcontainer = smiley.querySelector(".row");
+            var str = "";
+            var mytitles = this.titles[this.smileys[index * 3]];
+            for (var i = 1; i <= this.smileys[index * 3 + 1]; i++) {
+                str += '<img src="smiley/' + this.smileys[index * 3] + '/' + (this.smileys[index * 3] + i + this.smileys[index * 3 + 2]) + '" title="' + mytitles[i] + '">';
+            }
+            imgcontainer.innerHTML = str;
+
+            var imgs = smiley.querySelectorAll(".row img");
+            imgs.forEach(function (v, k) {
+                if (k != lis.length - 1) {
+                    v.onclick = function () {
+                        console.log(k);
+                        return false;
+                    };
+                }
+            });
+        },
+        switchState:function (callback) {
+            var state = 0;
+            var smileybox = document.getElementById("smiley");
+            if (smileybox.style.display === "none") {
+                var tops = this.btn.offsetTop + this.btn.height;
+                var lefts = this.btn.offsetLeft - smileybox.width / 2;
+                smileybox.style.left = (lefts + 10) + 'px';
+                smileybox.style.top = (tops + 10) + 'px';
+                smileybox.style.display = "block";
+                state = 1;
+                //拖拽
+                smileybox.onmousedown = function (ev) {
+                    var oEvent = ev || event;
+                    var mx = oEvent.clientX;
+                    var my = oEvent.clientY;
+                    var disX = mx - smileybox.offsetLeft;
+                    var disY = my - smileybox.offsetTop;
+                    document.onmousemove = function (ev) {
+                        var oEvent = ev || event;
+                        var mx = oEvent.clientX;
+                        var my = oEvent.clientY;
+                        var x = mx - disX;
+                        var y = my - disY;
+                        if (x < 0) {
+                            x = 0;
+                        } else if (x > document.documentElement.clientWidth - smileybox.offsetWidth) {
+                            x = document.documentElement.clientWidth - smileybox.offsetWidth;
+                        }
+                        if (y < 0) {
+                            y = 0;
+                        } else if (y > document.documentElement.clientHeight - smileybox.offsetHeight) {
+                            y = document.documentElement.clientHeight - smileybox.offsetHeight;
+                        }
+                        smileybox.style.left = x + 'px';
+                        smileybox.style.top = y + 'px';
+                    };
+                    document.onmouseup = function () {
+                        document.onmousemove = null;
+                        document.onmouseup = null;
+                    };
+                    return false;
+                };
+            } else {
+                smileybox.style.display = "none";
+                smileybox.onmousedown = null;
+                state = 0;
+            }
+            //this.initDrag(state);
+            if(callback){
+                callback(state);
+            }
+        },
+        initsmiley:function(btn) {
+            console.log("init");
+            var btn = document.getElementById(btn);
+            this.btn = btn;
+
+            btn.addEventListener('click', function () {
+                var smileybox = document.getElementById("smiley");
+                if(!smileybox){
+                    SmileyBox.createSmiley();
+                }else{
+                    SmileyBox.switchState();
+                }
+            });
+        }
+    };
+
+    SmileyBox.initsmiley('smileybtn');
+</script>
+
+</body>
+</html>
