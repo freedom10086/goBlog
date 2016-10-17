@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*
  * Editor.md
  *
@@ -9,8 +10,6 @@
  * {@link       https://github.com/pandao/editor.md}
  * @updateTime  2015-06-09
  */
-
-@charset "UTF-8";
 
 html,body *{
   font-family: "Meiryo UI", "Microsoft YaHei", "Malgun Gothic", "Segoe UI", "Trebuchet MS", Helvetica, "Monaco", monospace,  "Droid Sans", "wenquanyi micro hei", FreeSans, Arimo, Arial, sans-serif;
@@ -36,8 +35,6 @@ html,body *{
 .myeditor textarea{
   outline: 0;
   font-size: 15px;
-  font-weight: 1.4;
-
 }
 
 .myeditor ::-webkit-scrollbar {
@@ -148,9 +145,6 @@ html,body *{
   color: #fff;
   padding: 4px 6px;
   font-size: 18px;
-  -webkit-border-radius: 500px;
-  -moz-border-radius: 500px;
-  -o-border-radius: 500px;
   border-radius: 500px;
   display: none;
   background-color: #ccc;
@@ -158,12 +152,7 @@ html,body *{
   top: 35px;
   left: 35px;
   z-index: 19;
-  -webkit-transition: background-color 300ms ease-out;
-  /* Safari, Chrome */
-  -moz-transition: background-color 300ms ease-out;
-  /* Firefox 4.0~16.0 */
   transition: background-color 300ms ease-out;
-  /* IE >9, FF >15, Opera >12.0 */
 }
 
 .editormd-close-btn:hover {
