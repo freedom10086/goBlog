@@ -144,7 +144,7 @@ $.fn.lineEndPos = function () {
         }
     }
     return i;
-}
+};
 
 
 var toobarIcons = ["undo", "redo", "|", "bold", "del", "italic", "quote", "|",
@@ -391,8 +391,8 @@ var toolbarHandlers = {
     link: function () {
         var selection = inputaera.getSelection();
 
-        var title = "这儿是链接文字"
-        var link = "http://链接地址"
+        var title = "这儿是链接文字";
+        var link = "http://链接地址";
 
         if (selection != "" && selection.indexOf("http://") != -1) {
             link = selection;
@@ -616,7 +616,7 @@ function mouseOrTouch(mouseEventType, touchEventType) {
     }
 
     return eventType;
-};
+}
 
 
 function setViewSizes() {

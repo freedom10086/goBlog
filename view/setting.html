@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="styles/my.css">
+</head>
+<body>
+<header>
+    <span class="title">这是网站logo</span>
+    <nav>
+        <a href="#" class="active">Help</a>
+        <a href="#">Privacy</a>
+        <a href="#">Help</a>
+        <a href="#">Help</a>
+        <a href="#">Help</a>
+    </nav>
+    <input type="text" placeholder="搜索你感兴趣的内容..." style="width: 320px;height: 32px;">
+</header>
+
+<main>
+    <div id="content">
+        <div class="box" style="border-bottom: 0;">
+            <div class="rowb" style="font-size: 14px;"><a href="/">V2EX</a><span class="chevron">&nbsp;&nbsp;›&nbsp;&nbsp;</span>Go
+            </div>
+            <div class="row bigger">
+                设置头像
+            </div>
+            <div class="row" style="padding: 5px 10px;align-items: flex-end">
+                <canvas id="canvas" width="200" height="200" style="border: 1px solid #e2e2e2;"></canvas>
+                <canvas id="canvas2" width="112" height="112" style="border: 1px solid #e2e2e2;margin: 0 10px;"></canvas>
+                <canvas id="canvas3" width="48" height="48" style="border: 1px solid #e2e2e2;"></canvas>
+            </div>
+            <div class="rowb" style="padding: 5px 10px 10px 10px">
+                <button class="button">保存</button>
+                <button id="preview" style="margin-left: 10px;display: none" class="button">预览</button>
+                <input style="margin-left: 20px;" id="imginput" type="file" accept="image/jpeg,image/png,image/gif">
+            </div>
+        </div>
+    </div>
+
+
+</main>
+
+<footer>
+    <div>Title</div>
+</footer>
+<script>
+
+    var canvas = document.getElementById("canvas");
+    var imginput = document.getElementById("imginput");
+    var canvas2 = document.getElementById("canvas2");
+    var canvas3 = document.getElementById("canvas3");
+    var btnpreview = document.getElementById("preview");
+
+
+    var context;
+    var img, imgX = 0, imgY = 0, imgScale = 1;
+
+    var len = canvas.offsetWidth;
+    context = canvas.getContext('2d');
+    var imgWidth, imgHeight;
+
+    imginput.onchange = function (e) {
+        var file = e.target.files[0];
+        var size = file.size;
+        var kbsize  = Math.round(size * 100 / 1024) / 100;
+
+        if(kbsize>2048){
+            alert("图片太大,大小为"+kbsize+"kb！请选择小于2M的图片");
+            return false;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function () {
+            var res = reader.result;
+            img = new Image();
+            img.src = res;
+            img.onload = function () {
+                btnpreview.style.display = 'block';
+                btnpreview.onclick = function () {
+                    var newimg = new Image();
+                    newimg.src = canvas.toDataURL();
+
+                    var context2 = canvas2.getContext('2d');
+                    context2.clearRect(0,0,112,112);
+                    context2.drawImage(newimg,0,0,112, 112);
+
+                    var context3 = canvas3.getContext('2d');
+                    context3.clearRect(0,0,48,48);
+                    context3.drawImage(newimg,0,0,48, 48);
+                };
+                imgX = imgY = 0;
+                if (img.width < img.height) {//w小
+                    imgWidth = len;
+                    imgHeight = img.height * len / img.width;
+                } else {//h 小
+                    imgHeight = len;
+                    imgWidth = img.width * len / img.height;
+                }
+                //图片的坐标
+                var px = (len - imgWidth) / 2;
+                var py = (len - imgHeight) / 2;
+                context.clearRect(0, 0, len, len);
+                //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+                context.drawImage(img, px, py, imgWidth, imgHeight);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+
+    function drawImage() {
+        context.clearRect(0, 0, len, len);
+        context.drawImage(img,imgX, imgY, imgWidth * imgScale, imgHeight * imgScale);
+    }
+
+    canvas.onmousedown = function (event) {
+        var pos = windowToCanvas(canvas, event.clientX, event.clientY);
+        canvas.onmousemove = function (event) {
+            canvas.style.cursor = "move";
+            var pos1 = windowToCanvas(canvas, event.clientX, event.clientY);
+            var x = pos1.x - pos.x;
+            var y = pos1.y - pos.y;
+            pos = pos1;
+            imgX += x;
+            imgY += y;
+
+            if(imgX<len-imgWidth * imgScale){
+                imgX = len-imgWidth * imgScale;
+            }
+            if(imgX>0){
+                imgX = 0;
+            }
+            if(imgY<len-imgHeight * imgScale){
+                imgY = len-imgHeight * imgScale;
+            }
+            if(imgY>0){
+                imgY = 0;
+            }
+            drawImage();
+        };
+
+        document.onmouseup = function () {
+            canvas.onmousemove = null;
+            document.onmouseup = null;
+            canvas.style.cursor = "default";
+        };
+
+        return false;
+    };
+
+    canvas.onmousewheel = function (event) {
+        var pos = windowToCanvas(canvas, event.clientX, event.clientY);
+        console.log("pos:",pos.x);
+        if (event.wheelDelta > 0) {
+            imgScale *= 2;
+            if (imgScale > 5) {
+                imgScale /= 2;
+                return;
+            }
+            imgX = imgX * 2 - pos.x;
+            imgY = imgY * 2 - pos.y;
+            drawImage();
+        }else {
+            imgScale /= 2;
+            if (imgScale < 1 || imgWidth * imgScale < len || imgHeight * imgScale < len) {
+                imgScale *= 2;
+                return;
+            }
+            imgX = imgX / 2 + pos.x / 2;
+            imgY = imgY / 2 + pos.y / 2;
+            drawImage();
+        }
+
+    };
+
+    function windowToCanvas(canvas, x, y) {
+        var bbox = canvas.getBoundingClientRect();
+        return {
+            x: x - bbox.left - (bbox.width - canvas.width) / 2,
+            y: y - bbox.top - (bbox.height - canvas.height) / 2
+        };
+    }
+
+</script>
+</body>
+</html>
