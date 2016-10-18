@@ -21,68 +21,53 @@
 
     <div style="display: flex;flex-direction: row;align-items: center;margin-left: 48px;">
         <button class="button">发表新帖</button>
-        <a href="#"><img style="width: 25px;height: 25px;margin-left: 20px;" src="//cdn.v2ex.co/gravatar/34c12be6d846ee074786d1cad76bf79f?s=48&d=retro" class="avatar"/></a>
+        <a href="#"><img style="width: 25px;height: 25px;margin-left: 20px;"
+                         src="//cdn.v2ex.co/gravatar/34c12be6d846ee074786d1cad76bf79f?s=48&d=retro" class="avatar"/></a>
         <a href="#" style="font-size: 14px;" class="nav">这是用户名</a>
     </div>
 </header>
 
 <main>
     <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-    <!--<dialog id="regdialog" class="dialog">-->
-        <!--<div class="rowb bigger">-->
-            <!--加入我的博客<br>-->
-            <!--与世界分享你的知识、经验和见解-->
-        <!--</div>-->
-        <!--<form>-->
-            <!--<div class="row" style="padding:5px 10px;">-->
-                <!--<label for="username">用户名</label>-->
-                <!--<input type="text" class="sl" name="username" required id="username" placeholder="用户名" maxlength="12" autocomplete="name">-->
-            <!--</div>-->
-            <!--<div class="row" style="padding:5px 10px;">-->
-                <!--<label for="password">密码</label>-->
-                <!--<input type="password" class="sl" name="password" required id="password" placeholder="密码" minlength="6">-->
-            <!--</div>-->
-            <!--<div class="row" style="padding:5px 10px;">-->
-                <!--<label for="email">邮箱</label>-->
-                <!--<input type="email" class="sl" name="email" required id="email" placeholder="邮箱" autocomplete="email">-->
-            <!--</div>-->
-            <!--<div class="row" style="padding:5px 10px;">-->
-                <!--<label for="valid" style="width: 100%">验证码</label>-->
-                <!--<input style="width: 60%" type="text" class="sl" name="valid" required id="valid" placeholder="验证码" pattern="[a-zA-Z\d]{4}">-->
-                <!--<canvas id="validcanvas" width="100" height="28" style="margin-left:10px;border: 1px solid #e2e2e2;"></canvas>-->
-            <!--</div>-->
-            <!--<div class="row" style="justify-content:center;padding:10px;">-->
-                <!--<button type="submit" class="button" autofocus>注册</button>-->
-                <!--<button id="colse" class="button" style="margin-left: 20px">取消</button>-->
-                <!--<a href="#" class="dark" style="margin-left: 20px">已有账号登陆</a>-->
-            <!--</div>-->
-        <!--</form>-->
-    <!--</dialog>-->
-    <dialog id="logindialog" class="dialog">
+    <dialog id="reglogindialog" class="dialog">
         <div class="rowb bigger">
-            登陆
+            加入我的博客<br>
+            与世界分享你的知识、经验和见解
         </div>
-        <form id="loginform">
-            <div class="row" style="padding:5px 10px;">
+        <form id="reglogindialog-form">
+            <div class="row" style="padding:5px 10px;justify-content: space-between;">
                 <label for="username">用户名</label>
-                <input type="text" class="sl" name="username" required id="username" placeholder="用户名/邮箱" maxlength="15" autocomplete="name">
+                <span id="usernameinfo" class="errorcolor"></span>
+                <input type="text" class="sl" name="username" required id="username" placeholder="用户名" maxlength="25"
+                       autocomplete="name">
             </div>
-            <div class="row" style="padding:5px 10px;">
+            <div class="row" style="padding:5px 10px;justify-content: space-between;">
                 <label for="password">密码</label>
-                <input type="password" class="sl" name="password" required id="password" placeholder="密码" minlength="6">
+                <span id="passwordinfo" class="errorcolor"></span>
+                <input type="password" class="sl" name="password" required id="password" placeholder="密码(大于6位)"
+                       minlength="6" maxlength="20">
             </div>
-            <div class="row" style="padding:5px 10px;">
-                <label for="valid" style="width: 100%">验证码</label>
-                <input style="width: 60%" type="text" class="sl" name="valid" required id="valid" placeholder="验证码" pattern="[a-zA-Z\d]{4}">
-                <canvas id="validcanvas" width="100" height="28" style="margin-left:10px;border: 1px solid #e2e2e2;"></canvas>
+            <div class="row" style="padding:5px 10px;justify-content: space-between;">
+                <label for="email">邮箱</label>
+                <span id="emailinfo" class="errorcolor"></span>
+                <input type="email" class="sl" name="email" required id="email" placeholder="邮箱" autocomplete="email"
+                       maxlength="25">
+            </div>
+            <div class="row" style="padding:5px 10px;justify-content: space-between;">
+                <label for="valid" style="width: 150px">验证码</label>
+                <span id="validinfo" class="errorcolor" style=""></span>
+                <input style="width:190px" type="text" class="sl" name="valid" required id="valid" placeholder="验证码"
+                       pattern="[a-zA-Z\d]{4}" maxlength="4">
+                <canvas id="validcanvas" width="100" height="28" style="border: 1px solid #e2e2e2;"></canvas>
             </div>
         </form>
         <div class="row" style="justify-content:center;padding:10px;">
-            <button type="submit" class="button" form="loginform" autofocus>登陆</button>
-            <button id="colse" class="button" style="margin-left: 20px">取消</button>
-            <a href="#" class="dark" style="margin-left: 20px">还没有账号去注册</a>
+            <button type="submit" class="button" autofocus form="reglogindialog-form">注册</button>
+            <button class="button" style="margin-left: 20px">取消</button>
+            <a id="infotext" href="#" class="dark" style="margin-left: 20px">已有账号登陆</a>
         </div>
     </dialog>
+
     <button id="button" class="button" autofocus>注册</button>
     <button id="button2" class="button" autofocus>登陆</button>
 </main>
@@ -91,28 +76,239 @@
     <div>Title</div>
 </footer>
 <script type="text/javascript">
-    /*
+
+    //0--reg 1--login
+    Mydialog = function (dialogid) {
+
+        var _this = this;
+        this.state = -1;
+
+        this.dialog = document.getElementById(dialogid);
+        this.dialogtitle = this.dialog.querySelector(".bigger");
+        var submitbtn = this.dialog.querySelectorAll("button")[0];
+        var closebtn = this.dialog.querySelectorAll("button")[1];
+        this.infotext = this.dialog.querySelector("a");
+        this.emailbox = _this.dialog.querySelector("#email");
+
+
+        closebtn.onclick = function () {
+            _this.dialog.close();
+            _this.state = -1;
+            return false;
+        };
+
+        submitbtn.onclick = function () {
+            var checkstate = ( _this.checkUser() && _this.checkPass && _this.checkValid());
+            if (_this.state == 0) {
+                //reg
+                checkstate = checkstate && _this.checkEmail();
+            }
+            if (checkstate) {
+                console.log("ok");
+            } else {
+                console.log("not ok");
+                return false;
+            }
+        };
+
+        this.showDialog = function (type) {
+            var usernamebox = _this.dialog.querySelector("#username");
+            if (type == 1) {
+                _this.state = 1;
+                _this.dialogtitle.innerHTML = "登陆";
+                usernamebox.placeholder = "用户名/邮箱";
+                _this.emailbox.parentNode.style.display = "none";
+                _this.emailbox.removeAttribute("name");
+                _this.emailbox.removeAttribute("required");
+            } else {
+                _this.state = 0;
+                usernamebox.placeholder = "用户名";
+                _this.dialogtitle.innerHTML = '加入我们<br>与世界分享你的知识、经验和见解';
+                _this.emailbox.parentNode.style.display = "flex";
+
+                _this.emailbox.name = "email";
+                _this.emailbox.setAttribute("required","required");
+            }
+
+            _this.dialog.showModal();
+        };
+
+        this.createYZM = function () {
+            var canvas = _this.dialog.querySelector("canvas");
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            var random = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+            var colors = ["red", "green", "brown", "blue", "orange", "purple", "black"];
+            var code = [];
+            for (var i = 0; i < 4; i++) {
+                var index = Math.floor(Math.random() * 36);
+                code.push(random[index]);
+            }
+
+            context.beginPath();
+            // Sprinkle in some random dots
+            for (var i = 0; i < 10; i++) {
+                var px = Math.floor(Math.random() * canvas.width);
+                var py = Math.floor(Math.random() * canvas.height);
+                context.moveTo(px, py);
+                context.lineTo(px + 1, py + 1);
+                context.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+                context.lineWidth = Math.floor(Math.random() * 2);
+                context.stroke();
+            }
+
+            for (var j = 0; j < 2; j++) {
+                //随机线条
+                context.moveTo(0, Math.floor(Math.random() * canvas.height));//随机线的起点x坐标是画布x坐标0位置，y坐标是画布高度的随机数
+                context.lineTo(canvas.width, Math.floor(Math.random() * canvas.height));//随机线的终点x坐标是画布宽度，y坐标是画布高度的随机数
+                context.lineWidth = 0.3;//随机线宽
+                context.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+                context.stroke();//描边，即起点描到终点
+            }
+
+            var deg, cos, sin, dg;
+            context.font = "20px Arial";
+            var cx = (canvas.width - 30) / 3;
+            for (var j = 0; j < 4; j++) {
+                context.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                //产生一个正负30度以内的角度值以及一个用于变形的dg值
+                dg = Math.random() * 4.5 / 10;
+                deg = Math.floor(Math.random() * 60);
+                deg = deg > 30 ? (30 - deg) : deg;
+                cos = Math.cos(deg * Math.PI / 180);
+                sin = Math.sin(deg * Math.PI / 180);
+
+                context.save();
+                context.setTransform(cos, sin + dg, -sin + dg, cos, cx * (j + 1) - 12, 18);
+                context.fillText(code[j], 0, 0);
+                context.restore();
+            }
+
+            canvas.onclick = function () {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                _this.createYZM();
+            }
+        };
+
+        this.checkPass = function () {
+            console.log("check pass"+_this.state);
+            var message = _this.dialog.querySelector("#passwordinfo");
+            var input = _this.dialog.querySelector("#password");
+            var val =  input.value;
+            var lv = -1;
+            if(_this.state==0){//注册
+                if (val.match(/[a-z]/g)) {
+                    lv++;
+                }
+                if (val.match(/[0-9]/g)) {
+                    lv++;
+                }
+                if (val.match(/[A-Z]/g)) {
+                    lv++;
+                }
+                if (val.match(/(.[^A-Za-z0-9])/g)) {
+                    lv++;
+                }
+
+                if(lv>2){
+                    lv = 2;
+                }
+                if(val.length>20){
+                    lv = 3;
+                }else if(val.length<1){
+                    lv = 4;
+                }else if(val.length<6){
+                    lv = 5;
+                }
+                console.log("check pass"+lv);
+                var aLvTxt = ['密码强度:低', '密码强度:中', '密码强度:高','密码太长','密码不能为空','密码不足6位'];
+                var classs = ['errorcolor', 'worningcolor', 'successcolor','errorcolor','errorcolor','errorcolor'];
+                message.innerHTML = aLvTxt[lv];
+                message.className = classs[lv];
+            }else{
+                message.className = "errorcolor";
+                if(val.length<1){
+                    message.innerHTML = "密码不能为空";
+                }
+            }
+            return val.length>0&&val.length<=20;
+        };
+
+        this.checkUser = function () {
+            var message = _this.dialog.querySelector("#usernameinfo");
+            var input = _this.dialog.querySelector("#username");
+            var val =  input.value;
+            if(val.length<1){
+                message.innerHTML = "用户名不能为空";
+            }else if(val.length>25){
+                message.innerHTML = "用户超过长度";
+            }else{
+                message.innerHTML = "";
+            }
+            return input.value.length>0&&input.value.length<=25;
+        };
+
+        this.checkEmail = function () {
+            var message = _this.dialog.querySelector("#emailinfo");
+            var input = _this.dialog.querySelector("#email");
+            var val =  input.value;
+            if(val.length<1){
+                message.innerHTML = "邮箱不能位空";
+            }else if(val.length>25){
+                message.innerHTML = "邮箱长度不能超过25";
+            }else{
+                message.innerHTML = "";
+            }
+            return val.length>0&&val.length<=25;
+        };
+
+        this.checkValid = function () {
+            var input = _this.dialog.querySelector("#valid");
+            var message = _this.dialog.querySelector("#validinfo");
+            var val = input.value;
+            if(val.length!=4){
+                message.innerHTML = "验证码长度为4";
+            }else{
+                message.innerHTML = "";
+            }
+            return val.length==4;
+        };
+
+        this.initkeyup = function () {
+            _this.dialog.querySelector("#password").onkeyup = function () {
+                _this.checkPass();
+            };
+
+            _this.dialog.querySelector("#username").onkeyup = function () {
+                _this.checkUser();
+            };
+
+            _this.dialog.querySelector("#email").onkeyup = function () {
+                _this.checkEmail();
+            };
+
+            _this.dialog.querySelector("#valid").onkeyup = function () {
+                _this.checkValid();
+            };
+        };
+
+        this.initkeyup();
+        this.createYZM();
+    };
+
+
+    var dialog = new Mydialog("reglogindialog");
     var button = document.getElementById("button");
-    var dialog = document.getElementById('regdialog');
-    button.addEventListener('click', function() {
-        dialog.showModal();
-        console.log("click");
-        createYZM("validcanvas");
+    button.addEventListener('click', function () {
+        dialog.showDialog(0);
     });
-    */
 
 
     var button2 = document.getElementById("button2");
-    var dialog2 = document.getElementById('logindialog');
     button2.addEventListener('click', function() {
-        dialog2.showModal();
-        console.log("click");
-        createYZM("validcanvas");
-    });
-
-    var btnclose = document.getElementById("colse");
-    btnclose.addEventListener("click",function () {
-        dialog2.close();
+        dialog.showDialog(1);
     });
 </script>
 </body>

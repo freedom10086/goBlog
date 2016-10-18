@@ -16,12 +16,19 @@
     color: #e2e2e2;
 }
 
-.greencolor {
-    color: #393;
-}
-
 .bluecolor {
     color: #485CC7;
+}
+
+.successcolor{
+    color: #5cb85c;
+}
+.worningcolor{
+    color:#f0ad4e;
+}
+
+.errorcolor{
+    color: #d9534f;
 }
 
 html {
