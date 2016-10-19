@@ -23,19 +23,90 @@
         <div class="box" style="border-bottom: 0;">
             <div class="rowb" style="font-size: 14px;"><a href="/">V2EX</a><span class="chevron">&nbsp;&nbsp;›&nbsp;&nbsp;</span>Go
             </div>
-            <div class="row bigger">
+            <div class="rowb">
                 设置头像
             </div>
-            <div class="row" style="padding: 5px 10px;align-items: flex-end">
+            <div class="row" style="align-items: flex-end;justify-content: center">
                 <canvas id="canvas" width="200" height="200" style="border: 1px solid #e2e2e2;"></canvas>
                 <canvas id="canvas2" width="112" height="112" style="border: 1px solid #e2e2e2;margin: 0 10px;"></canvas>
                 <canvas id="canvas3" width="48" height="48" style="border: 1px solid #e2e2e2;"></canvas>
             </div>
-            <div class="rowb" style="padding: 5px 10px 10px 10px">
+            <div class="rowb" style="padding: 5px 10px 10px 10px;justify-content: center">
                 <button class="button">保存</button>
                 <button id="preview" style="margin-left: 10px;display: none" class="button">预览</button>
                 <input style="margin-left: 20px;" id="imginput" type="file" accept="image/jpeg,image/png,image/gif">
             </div>
+            <div class="row">
+                关于头像的规则
+                <ul style="width: 100%">
+                    <li>V2EX 禁止使用任何低俗或者敏感图片作为头像</li>
+                    <li>如果你是男的，请不要用女人的照片作为头像，这样可能会对其他会员产生误导</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="vgap20"></div>
+        <div class="box">
+            <div class="rowb">
+                个人信息设置
+            </div>
+
+            <div class="row" style="align-items: flex-start;justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px;" for="description">个人简介:</label>
+                <textarea id="description" style="height: 4em;width: 320px" class="textarea" placeholder="个人简介"></textarea>
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px">性别:</label>
+                <div style="width: 320px">
+                    <label><input name="sex" type="radio" value="" />保密 </label>
+                    <label><input name="sex" type="radio" value="" />男 </label>
+                    <label><input name="sex" type="radio" value="" />女 </label>
+                </div>
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px" for="birthday">出生日期:</label>
+                <input id="birthday" style="width: 320px" type="date" class="sl">
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px" for="site">个人主页:</label>
+                <input id="site" style="width: 320px" type="url" class="sl" placeholder="个人主页" minlength="3">
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px" for="phone">手机:</label>
+                <input id="phone" style="width: 320px" type="tel" class="sl" minlength="11" maxlength="11" placeholder="手机" pattern="^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$">
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px" for="email">邮箱:</label>
+                <input id="email" style="width: 320px" type="tel" class="sl"  placeholder="邮箱" value="2351386755@qq.com" readonly>
+            </div>
+            <button class="button" style="margin-left: 275px;margin-bottom: 10px;margin-top: 5px;">保存设置</button>
+
+        </div>
+        <div class="vgap20"></div>
+        <div class="box">
+            <div class="rowb">
+                密码设置
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px;" for="passpre">当前密码:</label>
+                <input id="passpre" style="width: 320px" type="password" class="sl">
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px" for="passnew">新密码:</label>
+                <input id="passnew" style="width: 320px" type="password" class="sl" minlength="6" maxlength="20">
+            </div>
+            <div class="row" style="justify-content: center">
+                <label style="width: 60px;text-align: right;margin-right: 10px" for="passnewr">确认密码:</label>
+                <input id="passnewr" style="width: 320px" type="password" class="sl" minlength="6" maxlength="20">
+            </div>
+            <button class="button" style="margin-left: 275px;margin-bottom: 10px;margin-top: 5px;">修改密码</button>
         </div>
     </div>
 

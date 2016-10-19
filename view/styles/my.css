@@ -574,7 +574,7 @@ input.sl:focus {
 }
 
 /* reply box */
-.reply-text {
+.textarea {
     border-radius: 3px;
     padding: 5px;
     font-size: 14px;
@@ -587,7 +587,7 @@ input.sl:focus {
     font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
 }
 
-.reply-text:focus {
+.textarea:focus {
     border: 1px solid rgba(128, 128, 160, 0.6);
     outline: none;
 }
