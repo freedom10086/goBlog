@@ -1,0 +1,7 @@
+笔记记录
+文章内容id content
+标题title
+文章信息info-list
+评论列表comments
+导航栏nav
+评论框comment-box
