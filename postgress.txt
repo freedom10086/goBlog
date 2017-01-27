@@ -90,3 +90,7 @@ tsvector	 	text search document
 txid_snapshot	 	user-level transaction ID snapshot
 uuid	 	universally unique identifier
 xml	 	XML data
+
+ELEMENT REFERENCES drivers
+
+Select * from test1 order by b desc nulls first;

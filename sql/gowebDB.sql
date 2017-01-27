@@ -10,6 +10,7 @@ todo
 ----------------------------------------------------------------------------------
 -------------------------------数据表定义------------------------------------------
 ----------------------------------------------------------------------------------
+DROP TABLE IF EXISTS "user";
 CREATE TABLE "user" (
 	"uid" serial NOT NULL,
 	"username" varchar(15) NOT NULL,
@@ -17,14 +18,14 @@ CREATE TABLE "user" (
 	"email" varchar(30) NOT NULL,
 	"sex" int2 NOT NULL DEFAULT 0, --'性别0-未知，1-男，2-女'
 	"description" varchar(200) NOT NULL DEFAULT '',
-	"exp" int NOT NULL DEFAULT 0 ,--'经验值'
 	"sites" varchar(30) NOT NULL DEFAULT '',--'个人主页'
-	"birthday" date NOT NULL DEFAULT '2000-01-01',
-	"messages" int NOT NULL DEFAULT 0 ,--'新消息数目'
+	"birthday" date,
+	"messages" int[] NOT NULL DEFAULT '{0,0,0}',--消息数目[1]评论消息[2]@消息[3]聊天消息
+	"exp" int NOT NULL DEFAULT 0 ,--'经验值'
 	"posts" int NOT NULL DEFAULT 0,--'发帖数'
 	"replys" int NOT NULL DEFAULT 0 ,-- '回复数'
 	"phone" varchar(20) NOT NULL DEFAULT '',
-	"status" int2 NOT NULL DEFAULT 0 ,--'0-正常 1-禁止访问'
+	"status" int2 NOT NULL DEFAULT 0,--'0-正常 1-禁止访问'
 	"regtime" timestamp NOT NULL DEFAULT current_timestamp,
 	PRIMARY KEY ("uid"),
 	CONSTRAINT "user_username" UNIQUE("username"),
@@ -34,27 +35,31 @@ CREATE TABLE "user" (
 
 
 CREATE TABLE "type" (
-	"tid" serial NOT NULL  -- '版块表id',
-	"type" varchar(25) NOT NULL -- '版块名字',
-	"description" varchar(150) NOT NULL DEFAULT '' -- '描述',
-	"posts" int NOT NULL DEFAULT 0 -- '版块帖子计数',
-	"todayposts" int NOT NULL DEFAULT 0 -- '今日新帖数目',
-	"lastpost" timestamp NOT NULL DEFAULT '2000-01-01 00:00:00' -- '最后发表时间'
+	"tid" serial NOT NULL,  -- '版块表id',
+	"typename" varchar(25) NOT NULL, -- '版块名字',
+	"description" varchar(150) NOT NULL DEFAULT '', -- '描述',
+	"sticks" int[] ELEMENT REFERENCES "post"."pid",--置顶表
+	"posts" int NOT NULL DEFAULT 0, -- '版块帖子计数'
+	"replys" int NOT NULL DEFAULT 0, -- 评论计数
+	"newposts" int NOT NULL DEFAULT 0, -- '今日新发帖数目',
+	"newreplys" int NOT NULL DEFAULT 0, -- '今日新回复数目',
 	PRIMARY KEY ("cid") ,
 	CONSTRAINT "cat_name" UNIQUE("type")
 );
 
 
 CREATE TABLE "post" (
-	"pid" serial NOT NULL  -- '文章表id',
-	"tid" int NOT NULL  -- '版块id',
-	"uid" int NOT NULL  -- '用户id',
-	"title" varchar(50) NOT NULL DEFAULT '' -- '标题',
-	"content" varchar(8000) NOT NULL DEFAULT '' -- '内容',
-	"type" int2 NOT NULL DEFAULT 0 -- '类型0-一般，1-管理员加精华',
+	"pid" serial NOT NULL,  -- '文章表id',
+	"tid" int NOT NULL,  -- '版块id',
+	"uid" int NOT NULL,  -- '用户id',
+	"author" varchar(15) NOT NULL,
+	"title" varchar(50) NOT NULL DEFAULT '', -- '标题',
+	"content" text NOT NULL DEFAULT '', -- '内容',
+	"type" int2 NOT NULL DEFAULT 0,-- '类型0-一般，1-管理员加精华',
+	"tags" varchar(10)[],
 	"status" int2 NOT NULL DEFAULT 0 -- '0-正常，1-不可回复2不可查看',
 	"views" int NOT NULL DEFAULT 0 -- '查看数',
-	"replys" int NOT NULL DEFAULT 0 -- '回复数',
+	"replys" int[] NOT NULL DEFAULT '{0,0}' -- '回复数[1]总回复数[2]未读回复数',
 	"created" timestamp NOT NULL DEFAULT current_timestamp -- '发表时间',
 	"updated" timestamp -- '编辑时间',
 	"lastreply" timestamp  -- '最后回复时间',
@@ -67,17 +72,17 @@ CREATE TABLE "post" (
 
 DROP TABLE IF EXISTS "comment";
 CREATE TABLE "comment" (
-	"cid" serial NOT NULL  -- '评论表id',
-	"pid" int NOT NULL -- '帖子id',
-	"ppid" int NOT NULL DEFAULT 0 -- '父评论id 0-一般回复0+回复某个回复（楼中楼）',
-	"uid" int NOT NULL -- '用户id',
-	"tuid" int NOT NULL -- '回复对象uid',
-	"content" varchar(5000) NOT NULL DEFAULT '' -- '内容',
-	"created" timestamp NOT NULL DEFAULT current_timestamp -- '发表时间',
-	"updated" timestamp -- '编辑时间',
-	"isread" bool NOT NULL DEFAULT true -- '是否已读0未读1已读',
-	"replys" int NOT NULL DEFAULT 0 -- '回复计数大于0表示有楼中楼回复',
-	PRIMARY KEY ("id") ,
+	"cid" serial NOT NULL,  -- '评论表id',
+	"pid" int NOT NULL, -- '帖子id',
+	"ppid" int NOT NULL DEFAULT 0, -- '父评论id 0-一般回复0+回复某个回复（楼中楼）',
+	"uid" int NOT NULL, -- '用户id',
+	"author" varchar(15) NOT NULL,
+	"tuid" int NOT NULL, -- '回复对象uid',
+	"content" text NOT NULL DEFAULT '', -- '内容',
+	"created" timestamp NOT NULL DEFAULT current_timestamp, -- '发表时间',
+	"updated" timestamp, -- '编辑时间',
+	"replys" int[] NOT NULL DEFAULT 0, -- '回复计数大于0表示有楼中楼回复',
+	PRIMARY KEY ("id"),
 	INDEX "comment_tid" ("tid"),
 	INDEX "comment_who" ("uid"),
 	INDEX "comment_pid" ("pid"),
@@ -86,25 +91,12 @@ CREATE TABLE "comment" (
 	FOREIGN KEY ("tuid") REFERENCES "user" ("uid") ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS "star";
-CREATE TABLE "star" (
-	"sid" serial NOT NULL  -- '收藏表id',
-	"uid" int NOT NULL -- '用户id',
-	"pid" int NOT NULL -- '帖子id',
-	"created" timestamp NOT NULL DEFAULT current_timestamp -- '收藏时间',
-	PRIMARY KEY ("sid"),
-	UNIQUE INDEX "star_unique" ("uid", "tid"),
-	FOREIGN KEY ("uid") REFERENCES "user" ("uid") ON DELETE CASCADE
-);
-
-DROP TABLE IF EXISTS "atmessage";
-CREATE TABLE "atmessage" (
-	"aid" serial NOT NULL  -- '回复和@表 id',
-	"uid" int NOT NULL -- '我的uid',
-	"fuid" int NOT NULL -- '来自用户uid',
-	"pid" int NOT NULL -- '来自文章id'
+DROP TABLE IF EXISTS "at";
+CREATE TABLE "at" (
+	"aid" serial NOT NULL,  -- '回复和@表 id',
+	"uid" int NOT NULL, -- '我的uid',
+	"tuid" int NOT NULL -- '对方uid',
 	"cid" int NOT NULL -- '来自文章评论id'
-	"isread" bool NOT NULL DEFAULT false -- '是否已读0未读1已读',
 	"created" timestamp NOT NULL DEFAULT current_timestamp -- '时间',
 	PRIMARY KEY ("id") ,
 	INDEX "msg_uid" ("uid"),
@@ -113,12 +105,25 @@ CREATE TABLE "atmessage" (
 	FOREIGN KEY ("fuid") REFERENCES "user" ("uid") ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS "star";
+CREATE TABLE "star" (
+	"sid" serial NOT NULL,  -- '收藏表id',
+	"uid" int NOT NULL, -- '用户id',
+	"pid" int NOT NULL, -- '帖子id',
+	"created" timestamp NOT NULL DEFAULT current_timestamp, -- '收藏时间',
+	PRIMARY KEY ("sid"),
+	UNIQUE INDEX "star_unique" ("uid", "tid"),
+	FOREIGN KEY ("uid") REFERENCES "user" ("uid") ON DELETE CASCADE
+);
+
+
+DROP TABLE IF EXISTS "star";
 CREATE TABLE "follow" (
 	"fid" serial NOT NULL,
-	"uid" int NOT NULL -- '我的uid',
-	"tuid" int NOT NULL -- '对方uid',
-	"note" varchar(15) NOT NULL DEFAULT '' -- '备注名',
-	"created" timestamp NOT NULL DEFAULT current_timestamp -- '时间',
+	"uid" int NOT NULL, -- '我的uid',
+	"tuid" int NOT NULL, -- '对方uid',
+	"note" varchar(15) NOT NULL DEFAULT '', -- '备注名',
+	"created" timestamp NOT NULL DEFAULT current_timestamp,
 	PRIMARY KEY ("fid") ,
 	UNIQUE INDEX "follow_me_t" ("uid","tuid"),
 	INDEX "friend_rev" ("tuid"),
@@ -126,11 +131,12 @@ CREATE TABLE "follow" (
 	FOREIGN KEY ("tuid") REFERENCES "user" ("uid") ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS "chat";
 CREATE TABLE "chat" (
 	"id" serial NOT NULL -- '聊天表id',
 	"uid" int NOT NULL -- '我的uid',
 	"tuid" int NOT NULL -- '对方uid',
-	"content" varchar(500) NOT NULL DEFAULT '' -- '内容',
+	"content" text NOT NULL DEFAULT '' -- '内容',
 	"created" timestamp NOT NULL DEFAULT current_timestamp -- '时间',
 	"isread" bool NOT NULL DEFAULT false -- '是否已读0-未读，1-已读，只有recieve读取才置为已读',
 	PRIMARY KEY ("id") ,
