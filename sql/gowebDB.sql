@@ -20,12 +20,11 @@ CREATE TABLE "user" (
 	"description" varchar(200) NOT NULL DEFAULT '',
 	"sites" varchar(30) NOT NULL DEFAULT '',--'个人主页'
 	"birthday" date,
-	"messages" int[] NOT NULL DEFAULT '{0,0,0}',--消息数目[1]评论消息[2]@消息[3]聊天消息
+	"messages" int[] NOT NULL DEFAULT '{0,0,0}',--[1]评论消息数目[2]@消息[3]聊天消息
 	"exp" int NOT NULL DEFAULT 0 ,--'经验值'
 	"posts" int NOT NULL DEFAULT 0,--'发帖数'
 	"replys" int NOT NULL DEFAULT 0 ,-- '回复数'
 	"phone" varchar(20) NOT NULL DEFAULT '',
-	"status" int2 NOT NULL DEFAULT 0,--'0-正常 1-禁止访问'
 	"regtime" timestamp NOT NULL DEFAULT current_timestamp,
 	PRIMARY KEY ("uid"),
 	CONSTRAINT "user_username" UNIQUE("username"),
@@ -52,18 +51,20 @@ CREATE TABLE "post" (
 	"pid" serial NOT NULL,  -- '文章表id',
 	"tid" int NOT NULL,  -- '版块id',
 	"uid" int NOT NULL,  -- '用户id',
-	"author" varchar(15) NOT NULL,
-	"title" varchar(50) NOT NULL DEFAULT '', -- '标题',
-	"content" text NOT NULL DEFAULT '', -- '内容',
-	"type" int2 NOT NULL DEFAULT 0,-- '类型0-一般，1-管理员加精华',
-	"tags" varchar(10)[],
-	"status" int2 NOT NULL DEFAULT 0 -- '0-正常，1-不可回复2不可查看',
-	"views" int NOT NULL DEFAULT 0 -- '查看数',
-	"replys" int[] NOT NULL DEFAULT '{0,0}' -- '回复数[1]总回复数[2]未读回复数',
-	"created" timestamp NOT NULL DEFAULT current_timestamp -- '发表时间',
-	"updated" timestamp -- '编辑时间',
-	"lastreply" timestamp  -- '最后回复时间',
-	PRIMARY KEY ("tid") ,
+	"author" varchar(15) NOT NULL,--当用户名更改后要修改此
+	"title" varchar(50) NOT NULL DEFAULT '', -- '标题'
+	"content" text NOT NULL DEFAULT '', -- '内容'
+	"tags" varchar(10)[],--标签
+	"views" int NOT NULL DEFAULT 0, -- '查看数'
+	"replys" int[] NOT NULL DEFAULT '{0,0}' -- '回复数[1]总回复数[2]未读回复数'
+	"agrees" int[],--点赞uid列表
+	"disagree" int[],--不赞uid同列表
+	"status" int2 NOT NULL DEFAULT 0, -- '0-正常，1-不可回复2不可查看'
+	"type" int2 NOT NULL DEFAULT 0,-- '类型0-一般，1-管理员加精华'
+	"created" timestamp NOT NULL DEFAULT current_timestamp, -- '发表时间'
+	"updated" timestamp -- '编辑时间'
+	"lastreply" timestamp NOT NULL DEFAULT current_timestamp, -- '最后回复时间'
+	PRIMARY KEY ("tid"),
 	INDEX "post_new" ("cid","lastreply"),
 	INDEX "post_who" ("uid"),
 	FOREIGN KEY ("cid") REFERENCES "category" ("cid") ON DELETE CASCADE,
@@ -72,16 +73,18 @@ CREATE TABLE "post" (
 
 DROP TABLE IF EXISTS "comment";
 CREATE TABLE "comment" (
-	"cid" serial NOT NULL,  -- '评论表id',
-	"pid" int NOT NULL, -- '帖子id',
-	"ppid" int NOT NULL DEFAULT 0, -- '父评论id 0-一般回复0+回复某个回复（楼中楼）',
-	"uid" int NOT NULL, -- '用户id',
+	"cid" serial NOT NULL,  -- '评论表id'
+	"pid" int NOT NULL, -- '帖子id'
+	"ppid" int NOT NULL DEFAULT 0, -- '父评论id 0-一般回复0+回复某个回复（楼中楼）'
+	"uid" int NOT NULL, -- '用户id'
 	"author" varchar(15) NOT NULL,
-	"tuid" int NOT NULL, -- '回复对象uid',
-	"content" text NOT NULL DEFAULT '', -- '内容',
-	"created" timestamp NOT NULL DEFAULT current_timestamp, -- '发表时间',
-	"updated" timestamp, -- '编辑时间',
-	"replys" int[] NOT NULL DEFAULT 0, -- '回复计数大于0表示有楼中楼回复',
+	"tuid" int NOT NULL, -- '回复对象uid'
+	"content" text NOT NULL DEFAULT '', -- '内容'
+	"agree" int[],--点赞uid列表
+	"disagree" int[],--不赞同uid列表
+	"created" timestamp NOT NULL DEFAULT current_timestamp, -- '发表时间'
+	"updated" timestamp, -- '编辑时间'
+	"replys" int[] NOT NULL DEFAULT 0, -- '回复计数大于0表示有楼中楼回复'
 	PRIMARY KEY ("id"),
 	INDEX "comment_tid" ("tid"),
 	INDEX "comment_who" ("uid"),
@@ -107,9 +110,9 @@ CREATE TABLE "at" (
 
 DROP TABLE IF EXISTS "star";
 CREATE TABLE "star" (
-	"sid" serial NOT NULL,  -- '收藏表id',
-	"uid" int NOT NULL, -- '用户id',
-	"pid" int NOT NULL, -- '帖子id',
+	"sid" serial NOT NULL,  -- '收藏表id'
+	"uid" int NOT NULL, -- '用户id'
+	"pid" int NOT NULL, -- '帖子id'
 	"created" timestamp NOT NULL DEFAULT current_timestamp, -- '收藏时间',
 	PRIMARY KEY ("sid"),
 	UNIQUE INDEX "star_unique" ("uid", "tid"),
@@ -117,7 +120,7 @@ CREATE TABLE "star" (
 );
 
 
-DROP TABLE IF EXISTS "star";
+DROP TABLE IF EXISTS "follow";
 CREATE TABLE "follow" (
 	"fid" serial NOT NULL,
 	"uid" int NOT NULL, -- '我的uid',
@@ -144,6 +147,16 @@ CREATE TABLE "chat" (
 	INDEX "chat_my_r" ("recieve"),
 	FOREIGN KEY ("send") REFERENCES "user" ("uid") ON DELETE CASCADE,
 	FOREIGN KEY ("recieve") REFERENCES "user" ("uid") ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS "ban";
+CREATE TABLE "ban" (
+	"bid" serial NOT NULL, -- '禁止表id'
+	"uid" int NOT NULL,
+	"reason" varchar(200) NOT NULL DEFAULT '', -- 理由
+	"start" timestamp NOT NULL DEFAULT current_timestamp, -- '时间',
+	"end" timestamp NOT NULL DEFAULT current_timestamp,
+	PRIMARY KEY ("bid")
 );
 
 #------------------------------------------------------------------------------------

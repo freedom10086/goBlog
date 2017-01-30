@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"database/sql"
+	"goweb/handlers"
 	"log"
 	_ "github.com/lib/pq"
 )
@@ -16,11 +17,6 @@ type myHandler struct {
 func (*myHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	url := "https://127.0.0.1:10443" + req.RequestURI
 	http.Redirect(w, req, url, http.StatusMovedPermanently)
-}
-
-func handler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("This is an example server.\n"))
 }
 
 func init() {
@@ -41,7 +37,7 @@ func main() {
 		http.ListenAndServe(":8080", &myHandler{})
 	}()
 
-	http.HandleFunc("/", handler)
+	http.Handle("/", handlers.NewStaticServer())
 	log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
 	err := http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil)
 	log.Fatal(err)

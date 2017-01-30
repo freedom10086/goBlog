@@ -1,19 +1,6 @@
 /*https://github.com/sindresorhus/github-markdown-css*/
-
-@font-face {
-  font-family: octicons-link;
-  src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
-}
-
-.markdown {
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  line-height: 1.5;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 16px;
-  line-height: 1.5;
-  word-wrap: break-word;
+.markdown{
+  padding: 10px 0;
 }
 
 .markdown .pl-c {
@@ -139,11 +126,6 @@
   font-weight: bolder;
 }
 
-.markdown h1 {
-  font-size: 2em;
-  margin: 0.67em 0;
-}
-
 .markdown img {
   border-style: none;
 }
@@ -155,15 +137,11 @@
 .markdown code,
 .markdown kbd,
 .markdown pre {
-  font-family: monospace, monospace;
-  font-size: 1em;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 0.9em;
 }
 
-.markdown hr {
-  box-sizing: content-box;
-  height: 0;
-  overflow: visible;
-}
+
 
 .markdown input {
   font: inherit;
@@ -177,10 +155,6 @@
 .markdown [type="checkbox"] {
   box-sizing: border-box;
   padding: 0;
-}
-
-.markdown * {
-  box-sizing: border-box;
 }
 
 .markdown input {
@@ -204,12 +178,11 @@
 }
 
 .markdown hr {
-  height: 0;
-  margin: 15px 0;
   overflow: hidden;
-  background: transparent;
   border: 0;
-  border-bottom: 1px solid #ddd;
+  background-color: #e7e7e7;
+  height: 2px;
+  margin: 1em 0;
 }
 
 .markdown hr::before {
@@ -231,51 +204,6 @@
 .markdown td,
 .markdown th {
   padding: 0;
-}
-
-.markdown h1,
-.markdown h2,
-.markdown h3,
-.markdown h4,
-.markdown h5,
-.markdown h6 {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.markdown h1 {
-  font-size: 32px;
-  font-weight: 600;
-}
-
-.markdown h2 {
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.markdown h3 {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.markdown h4 {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.markdown h5 {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.markdown h6 {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.markdown p {
-  margin-top: 0;
-  margin-bottom: 10px;
 }
 
 .markdown blockquote {
@@ -303,11 +231,6 @@
 
 .markdown dd {
   margin-left: 0;
-}
-
-.markdown code {
-  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  font-size: 12px;
 }
 
 .markdown pre {
@@ -368,15 +291,7 @@
 .markdown table,
 .markdown pre {
   margin-top: 0;
-  margin-bottom: 16px;
-}
-
-.markdown hr {
-  height: 0.25em;
-  padding: 0;
-  margin: 24px 0;
-  background-color: #e7e7e7;
-  border: 0;
+  margin-bottom: .8rem;
 }
 
 .markdown blockquote {
@@ -394,6 +309,7 @@
 }
 
 .markdown kbd {
+  font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
   display: inline-block;
   padding: 3px 5px;
   font-size: 11px;
@@ -407,74 +323,12 @@
   box-shadow: inset 0 -1px 0 #bbb;
 }
 
-.markdown h1,
-.markdown h2,
-.markdown h3,
-.markdown h4,
-.markdown h5,
-.markdown h6 {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.markdown h1 .octicon-link,
-.markdown h2 .octicon-link,
-.markdown h3 .octicon-link,
-.markdown h4 .octicon-link,
-.markdown h5 .octicon-link,
-.markdown h6 .octicon-link {
-  color: #000;
-  vertical-align: middle;
-  visibility: hidden;
-}
-
-.markdown h1:hover .anchor,
-.markdown h2:hover .anchor,
-.markdown h3:hover .anchor,
-.markdown h4:hover .anchor,
-.markdown h5:hover .anchor,
-.markdown h6:hover .anchor {
-  text-decoration: none;
-}
-
-.markdown h1:hover .anchor .octicon-link,
-.markdown h2:hover .anchor .octicon-link,
-.markdown h3:hover .anchor .octicon-link,
-.markdown h4:hover .anchor .octicon-link,
-.markdown h5:hover .anchor .octicon-link,
-.markdown h6:hover .anchor .octicon-link {
-  visibility: visible;
-}
-
 .markdown h1 {
-  padding-bottom: 0.3em;
-  font-size: 2em;
-  border-bottom: 1px solid #eee;
+  font-size: 1.15em;
 }
 
-.markdown h2 {
-  padding-bottom: 0.3em;
-  font-size: 1.5em;
-  border-bottom: 1px solid #eee;
-}
-
-.markdown h3 {
-  font-size: 1.25em;
-}
-
-.markdown h4 {
-  font-size: 1em;
-}
-
-.markdown h5 {
-  font-size: 0.875em;
-}
-
-.markdown h6 {
-  font-size: 0.85em;
-  color: #777;
+.markdown h2,h3,h4,h5,h6{
+  font-size: 1.1em;
 }
 
 .markdown ul,
@@ -587,9 +441,9 @@
 
 .markdown .highlight pre,
 .markdown pre {
-  padding: 16px;
+  padding: .8rem;
   overflow: auto;
-  font-size: 85%;
+  font-size: 86%;
   line-height: 1.45;
   background-color: #f7f7f7;
   border-radius: 3px;
@@ -645,20 +499,6 @@
   border: 1px solid #4078c0;
 }
 
-.markdown kbd {
-  display: inline-block;
-  padding: 3px 5px;
-  font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  line-height: 10px;
-  color: #555;
-  vertical-align: middle;
-  background-color: #fcfcfc;
-  border: solid 1px #ccc;
-  border-bottom-color: #bbb;
-  border-radius: 3px;
-  box-shadow: inset 0 -1px 0 #bbb;
-}
-
 .markdown :checked+.radio-label {
   position: relative;
   z-index: 1;
@@ -678,17 +518,12 @@
   vertical-align: middle;
 }
 
-.markdown hr {
-  border-bottom-color: #eee;
-}
-
-
 
 /*
 Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 */
 
-.hljs {
+.markdown .hljs{
   display: block;
   overflow-x: auto;
   padding: 0.5em;
@@ -698,86 +533,86 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 
 /* Base color: saturation 0; */
 
-.hljs,
-.hljs-subst {
+.markdown .hljs
+.markdown .hljs-subst{
   color: #444;
 }
 
-.hljs-comment {
+.markdown .hljs-comment {
   color: #888888;
 }
 
-.hljs-keyword,
-.hljs-attribute,
-.hljs-selector-tag,
-.hljs-meta-keyword,
-.hljs-doctag,
-.hljs-name {
+.markdown .hljs-keyword,
+.markdown .hljs-attribute,
+.markdown .hljs-selector-tag,
+.markdown .hljs-meta-keyword,
+.markdown .hljs-doctag,
+.markdown .hljs-name {
   font-weight: bold;
 }
 
 
 /* User color: hue: 0 */
 
-.hljs-type,
-.hljs-string,
-.hljs-number,
-.hljs-selector-id,
-.hljs-selector-class,
-.hljs-quote,
-.hljs-template-tag,
-.hljs-deletion {
+.markdown .hljs-type,
+.markdown .hljs-string,
+.markdown .hljs-number,
+.markdown .hljs-selector-id,
+.markdown .hljs-selector-class,
+.markdown .hljs-quote,
+.markdown .hljs-template-tag,
+.markdown .hljs-deletion {
   color: #880000;
 }
 
-.hljs-title,
-.hljs-section {
+.markdown .hljs-title,
+.markdown .hljs-section {
   color: #880000;
   font-weight: bold;
 }
 
-.hljs-regexp,
-.hljs-symbol,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-link,
-.hljs-selector-attr,
-.hljs-selector-pseudo {
+.markdown .hljs-regexp,
+.markdown .hljs-symbol,
+.markdown .hljs-variable,
+.markdown .hljs-template-variable,
+.markdown .hljs-link,
+.markdown .hljs-selector-attr,
+.markdown .hljs-selector-pseudo {
   color: #BC6060;
 }
 
 
 /* Language color: hue: 90; */
 
-.hljs-literal {
+.markdown .hljs-literal {
   color: #78A960;
 }
 
-.hljs-built_in,
-.hljs-bullet,
-.hljs-code,
-.hljs-addition {
+.markdown .hljs-built_in,
+.markdown .hljs-bullet,
+.markdown .hljs-code,
+.markdown .hljs-addition {
   color: #397300;
 }
 
 
 /* Meta color: hue: 200 */
 
-.hljs-meta {
+.markdown .hljs-meta {
   color: #1f7199;
 }
 
-.hljs-meta-string {
+.markdown .hljs-meta-string {
   color: #4d99bf;
 }
 
 
 /* Misc effects */
 
-.hljs-emphasis {
+.markdown .hljs-emphasis {
   font-style: italic;
 }
 
-.hljs-strong {
+.markdown .hljs-strong {
   font-weight: bold;
 }
