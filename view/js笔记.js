@@ -59,7 +59,17 @@ window.onload = function(){
 		return false;
 	}
 
-	
 
+
+    document.ready和onload的区别——JavaScript文档加载完成事件
+    页面加载完成有两种事件：
+
+一是ready，表示文档结构已经加载完成（不包含图片等非文字媒体文件）；
+
+二是onload，指示页面包含图片等文件在内的所有元素都加载完成。
+
+
+	js判断函数参数是否传入
+    typeof(variableName) == "undefined"
 	
 }

@@ -23,7 +23,7 @@ type Post struct {
 
 //带回复
 type Article struct {
-	Post     Post //id
+	Post     *Post //id
 	Comments []*Comment
 }
 
@@ -38,11 +38,10 @@ func AddPost(cid, uid int, title, content string) error {
 
 	rowCnt, err := res.RowsAffected()
 	if err != nil && rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
-
 
 //删除主题
 func DelPost(id int) error {
@@ -56,15 +55,15 @@ func DelPost(id int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
 
 //编辑文章
-func EditPost(tid int,title, content string){
+func EditPost(tid int, title, content string) error {
 	res, err := db.Exec("call post_edit(?,?,?)",
-		tid, title,content)
+		tid, title, content)
 	if err != nil {
 		return err
 	}
@@ -73,14 +72,14 @@ func EditPost(tid int,title, content string){
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 
 }
 
 //禁止回复文章
-func PostCloseComment(tid int){
+func PostCloseComment(tid int) error {
 	res, err := db.Exec("call post_close_c(?)",
 		tid)
 	if err != nil {
@@ -91,13 +90,13 @@ func PostCloseComment(tid int){
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
 
 //允许回复文章
-func PostOpenComment(tid int){
+func PostOpenComment(tid int) error {
 	res, err := db.Exec("call post_open_c(?)",
 		tid)
 	if err != nil {
@@ -108,7 +107,7 @@ func PostOpenComment(tid int){
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
@@ -127,53 +126,53 @@ func PostCanReply(tid int) bool {
 }
 
 //获得文章带回复
-func GetArticle(tid int)(*Article,error){
+func GetArticle(tid int) (*Article, error) {
 	row := db.QueryRow(
 		"SELECT `cid`,`uid`,`author`,`title`, `content`,"+
 			"`type`,`status`,`created`, `updated`,"+
 			"`views`, `replys`,`lastreply`"+
-			" FROM `post` WHERE `tid` = ?",tid)
+			" FROM `post` WHERE `tid` = ?", tid)
 
 	post := &Post{Tid: tid}
 	err := row.Scan(
-		&post.Cid, &post.User.Uid,&post.User.Username, &post.Title,&post.Content,
-		&post.Type,&post.Status,&post.Created,&post.Updated,
-		&post.Views,&post.Replys,&post.Lastreply)
+		&post.Cid, &post.User.Uid, &post.User.Username, &post.Title, &post.Content,
+		&post.Type, &post.Status, &post.Created, &post.Updated,
+		&post.Views, &post.Replys, &post.Lastreply)
 
 	//sql.ErrNoRows
 	if err != nil {
 		return nil, err
 	}
 
-	comments,err := GetComments(tid)
+	comments, err := GetComments(tid)
 	if err != nil {
 		log.Fatal(err)
 		comments = nil
 	}
 
-	artcle :=&Article{Post:post,Comments:comments}
-	return artcle,nil
+	artcle := &Article{Post: post, Comments: comments}
+	return artcle, nil
 }
 
 //按照创建顺序倒叙
-func GetPostNewCreate(cid,limit,offset int) ([]*Post, error){
-	return GetPosts(cid, limit, offset,"create")
+func GetPostNewCreate(cid, limit, offset int) ([]*Post, error) {
+	return GetPosts(cid, limit, offset, "create")
 }
 
 //按照最后回复顺序倒叙
-func GetPostNewReply(cid,limit,offset int) ([]*Post, error){
-	return GetPosts(cid, limit, offset,"new")
+func GetPostNewReply(cid, limit, offset int) ([]*Post, error) {
+	return GetPosts(cid, limit, offset, "new")
 }
 
 //按照最近7天热帖排序
-func GetPostHot(cid,limit,offset int) ([]*Post, error){
-	return GetPosts(cid, limit, offset,"hot")
+func GetPostHot(cid, limit, offset int) ([]*Post, error) {
+	return GetPosts(cid, limit, offset, "hot")
 }
 
 //获得某一cid的文章列表 按照发布时间倒叙
-func GetPosts(cid, limit, offset int,order string) ([]*Post, error) {
+func GetPosts(cid, limit, offset int, order string) ([]*Post, error) {
 	//查询数据
-	where  := "ORDER BY `tid` DESC"
+	where := "ORDER BY `tid` DESC"
 	switch order {
 	case "create":
 		where = "ORDER BY `tid` DESC"
@@ -187,12 +186,12 @@ func GetPosts(cid, limit, offset int,order string) ([]*Post, error) {
 		//新帖
 		where = "ORDER BY `lastreply` DESC"
 	}
-	
+
 	rows, err := db.Query(
 		"SELECT `tid`,`uid`,`author`,`title`, `content`,"+
 			"`type`,`status`,`created`, `updated`,"+
 			"`views`, `replys`,`lastreply`"+
-			" FROM `post` WHERE `cid` = ? "+where +" LIMIT ? OFFSET ?",
+			" FROM `post` WHERE `cid` = ? "+where+" LIMIT ? OFFSET ?",
 		cid, limit, offset)
 
 	if err != nil {
@@ -202,11 +201,11 @@ func GetPosts(cid, limit, offset int,order string) ([]*Post, error) {
 	posts := make([]*Post, limit)
 
 	for rows.Next() {
-		post := &Post{Cid:cid}
+		post := &Post{Cid: cid}
 		err = rows.Scan(
-			&post.Tid, &post.User.Uid,&post.User.Username, &post.Title,&post.Content,
-			&post.Type,&post.Status,&post.Created,&post.Updated,
-			&post.Views,&post.Replys,&post.Lastreply)
+			&post.Tid, &post.User.Uid, &post.User.Username, &post.Title, &post.Content,
+			&post.Type, &post.Status, &post.Created, &post.Updated,
+			&post.Views, &post.Replys, &post.Lastreply)
 
 		if err != nil {
 			log.Fatal(err)
@@ -221,9 +220,3 @@ func GetPosts(cid, limit, offset int,order string) ([]*Post, error) {
 	}
 	return posts, err
 }
-
-
-
-
-
-

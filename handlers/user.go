@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"goweb/conf"
 	"io"
 	"math/rand"
 	"net/http"
@@ -14,6 +13,7 @@ import (
 	"strings"
 	"time"
 )
+
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "hello this is user!!")
@@ -26,7 +26,7 @@ type TokenData struct {
 }
 
 //生成TOKEN base64(data+hmac(data,SecretKey))
-func GenToken(username string, timeout int) string {
+func GenToken(username, secretKey string, timeout int) string {
 
 	data := &TokenData{
 		Username: username,
@@ -34,7 +34,7 @@ func GenToken(username string, timeout int) string {
 		Expires:  time.Now().Add(time.Minute * time.Duration(timeout)),
 	}
 
-	mac := hmac.New(sha256.New, []byte(conf.SecretKey))
+	mac := hmac.New(sha256.New, []byte(secretKey))
 	bytedata, _ := json.Marshal(data)
 	mac.Write(bytedata)
 	signature := mac.Sum(nil)
@@ -55,7 +55,7 @@ func Krand(size int) string {
 }
 
 //valid token
-func ValidToken(token string) (bool, string) {
+func ValidToken(token, secretKey string) (bool, string) {
 
 	fmt.Println(len(token))
 	decode_token, err := base64.URLEncoding.DecodeString(token)
@@ -65,10 +65,10 @@ func ValidToken(token string) (bool, string) {
 	}
 
 	totallen := len(decode_token)
-	payload := decode_token[:totallen-32]
-	signature := decode_token[totallen-32:]
+	payload := decode_token[:totallen - 32]
+	signature := decode_token[totallen - 32:]
 
-	mac := hmac.New(sha256.New, []byte(conf.SecretKey))
+	mac := hmac.New(sha256.New, []byte(secretKey))
 	mac.Write([]byte(payload))
 	my_signature := mac.Sum(nil)
 
@@ -112,11 +112,13 @@ func SendToMail(to, subject, content string) error {
 
 //发送验证邮箱
 func SendValidMail(to, username string) error {
-	sub := "valid your email"
-	timeout := 20
-	token := GenToken(username, timeout)
-	content := "welcome regiest " + conf.SiteName + "!!" +
-		"\r\n click " + conf.SiteAddr + conf.SitePort + "/email?token=" + token + " to valid your email<" + to + ">" +
-		"\r\n\r\n attention: please valided in " + string(timeout) + " minutes."
-	return SendToMail(to, sub, content)
+	//sub := "valid your email"
+	//timeout := 20
+	//token := GenToken(username, timeout)
+	//content := "welcome regiest " + configure.SiteName + "!!" +
+	//	"\r\n click " + configure.SiteAddr + configure.SitePort + "/email?token=" + token + " to valid your email<" + to + ">" +
+	//	"\r\n\r\n attention: please valided in " + string(timeout) + " minutes."
+	//return SendToMail(to, sub, content)
+
+	return nil
 }

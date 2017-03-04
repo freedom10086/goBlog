@@ -16,43 +16,26 @@ type Category struct {
 }
 
 //新增category
-func AddCate(name, description string) error {
-	res, err := db.Exec(
-		"call cate_add(?,?);",
-		name,
-		description)
+func AddCate(name, description string) (int64, error) {
+	stmt, err := db.Prepare("INSERT `category` SET title=?,description=?")
 	if err != nil {
-		return err
+		return -1, err
 	}
-	rowCnt, err := res.RowsAffected()
-	if rowCnt < 1 {
-		return ErrNoAff
-	}
-	return err
+	return add(stmt, name, description)
 }
 
 //删除category 里面的帖子怎么办？
 //所以最好不要删除category
-func DelCate(cid int) error {
-	res, err := db.Exec(
-		"call cate_del(?);",
-		cid)
+func DelCate(cid int) (err error) {
+	stmt, err := db.Prepare("DELETE FROM `category` WHERE `cid` = ?")
 	if err != nil {
 		return err
 	}
-	rowCnt, err := res.RowsAffected()
-	log.Println("aff", rowCnt)
-	if err != nil {
-		return err
-	} else if rowCnt < 1 {
-		return ErrNoAff
-	}
-	return err
+	return delete(stmt, cid)
 }
 
 //获得category
 func GetCate(cid int) (*Category, error) {
-
 	cate := &Category{Cid: cid}
 	err := db.QueryRow(
 		"SELECT  `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category` WHERE `cid` = ?",
@@ -66,7 +49,7 @@ func GetCate(cid int) (*Category, error) {
 //获得所有category
 func GetCates() ([]*Category, error) {
 	//查询数据
-	rows, err := db.Query("SELECT `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category`")
+	rows, err := db.Query("SELECT `cid`, `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category`")
 	if err != nil {
 		return nil, err
 	}
@@ -75,30 +58,25 @@ func GetCates() ([]*Category, error) {
 
 	for rows.Next() {
 		cate := &Category{}
-		err = rows.Scan(&cate.Title, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.LastPost, &cate.Created)
+		err = rows.Scan(&cate.Cid, &cate.Title, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.LastPost, &cate.Created)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			continue
 		}
 		cates = append(cates, cate)
 	}
+
 	if err = rows.Err(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return cates, err
 }
 
 //修改category
 func ModifyCate(cid int, name, description string) error {
-	res, err := db.Exec(
-		"call cate_edit(?,?,?)",
-		cid, name, description)
+	stmt, err := db.Prepare("UPDATE `category` SET `title` = ?,`description` = ? WHERE `cid` = ?")
 	if err != nil {
 		return err
 	}
-	rowCnt, err := res.RowsAffected()
-	if rowCnt < 1 {
-		return ErrNoAff
-	}
-	return err
+	return update(stmt, name, description, cid)
 }

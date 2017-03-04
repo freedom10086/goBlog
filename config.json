@@ -1,0 +1,10 @@
+{
+  "SiteName": "goweb",
+  "SiteAddr": "http://127.0.0.1",
+  "SitePort": ":8080",
+  "SitePortSSL": ":10443",
+  "SecretKey": "jA8/}~-)n?'z#!`+",
+  "DbUsername": "root",
+  "DbPassword": "justice",
+  "DbName": "goblog"
+}

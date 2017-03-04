@@ -30,7 +30,7 @@ func AddCommentLz(tid, uid int, content string) error {
 
 		rowCnt, err := res.RowsAffected()
 		if err != nil && rowCnt < 1 {
-			return ErrNoAff
+			return ErrNoInsert
 		}
 		return err
 	} else {
@@ -49,7 +49,7 @@ func AddCommentCz(tid, pid, uid int, content string) error {
 
 		rowCnt, err := res.RowsAffected()
 		if err != nil && rowCnt < 1 {
-			return ErrNoAff
+			return ErrNoInsert
 		}
 		return err
 	} else {
@@ -135,7 +135,7 @@ func DelComment(id int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
@@ -153,7 +153,7 @@ func ModifyComment(id int, content string) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
@@ -170,7 +170,7 @@ func SetReadComment_s(id int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
@@ -187,7 +187,7 @@ func SetReadComment_t(uid, tid int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }
@@ -204,7 +204,7 @@ func SetReadComment_a(uid int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoAff
+		return ErrNoInsert
 	}
 	return err
 }

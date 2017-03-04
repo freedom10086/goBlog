@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>餐位预订系统</title>
+    <style type="text/css">
+        h1 {
+            margin: 15px 0;
+        }
+
+        h3 {
+            margin: 6px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align: center">餐位预订系统</h1>
+
+<div style="display: flex;flex-direction: row;justify-content: center;">
+    <div style="border: 1px solid #e2e2e2;padding: 15px">
+        <h3>预定</h3>
+        <span style="color: #F40;" id="order-err"></span><br/>
+        <label for="date">就餐日期</label>
+        <input id="date" type="date" name="date"><br/>
+        <div id="order-container" style="display: none">
+            <label for="username">用户名</label>
+            <input id="username" type="text" name="username"><br/>
+            <label for="phone">手机号</label>
+            <input id="phone" type="tel" name="phone"><br/>
+            <button id="btn_reserve">预定</button>
+        </div>
+    </div>
+    <div style="margin-left: 20px;border: 1px solid #e2e2e2;padding: 15px">
+        <h3>取消预定</h3>
+        <span style="color: #F40;" id="cancel-err"></span><br/>
+        <label for="qx-username">用户名</label>
+        <input id="qx-username" type="text" name="username"><br/>
+        <label for="qx-phone">手机号</label>
+        <input id="qx-phone" type="tel" name="phone"><br/>
+        <button id="btn_cancel">取消预定</button>
+    </div>
+</div>
+
+<h6 style="text-align: center">
+    by 罗杨 1603121433
+</h6>
+</body>
+<script type="application/javascript">
+    var orderErr = document.getElementById("order-err");
+    var cancelErr = document.getElementById("cancel-err");
+    var btnReserve = document.getElementById("btn_reserve");
+    var btnCancel = document.getElementById("btn_cancel");
+
+    var baseUrl = "http://localhost:8080/axis2/services/ReservationSystem/";
+
+    var xhr = xmlRequest = new XMLHttpRequest();
+    function sendAjaxRequest(url, callBackMethod) {
+        xhr.onreadystatechange = function () {
+            if (xmlRequest.readyState == 4) {
+                if (xmlRequest.status == 200) {
+                    callBackMethod(xmlRequest.responseXML);
+                }
+            } else {
+                alert("请求webservice失败!");
+            }
+        };
+        xhr.open("post", url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+        xhr.send(url);
+        return true;
+    }
+
+    //验证日期
+    function validDate(dateStr) {
+        var url = baseUrl + "validDate?date=" + dateStr;
+        sendAjaxRequest(url, function (data) {
+            var result = data.getElementsByTagName("ns:return")[0].nodeValue;
+            if (result == 'ok') {
+                document.getElementById("order-container").style.display = 'block';
+            } else {
+                document.getElementById("order-container").style.display = 'none';
+                orderErr.innerHTML = result;
+            }
+            console.log(result);
+        });
+    }
+
+    //增加预定
+    function addReservation(name, phone, date) {
+        var url = baseUrl + "addResavation?name=" + name + "&phone=" + phone + "&date=" + date;
+        sendAjaxRequest(url, function (data) {
+            var result = data.getElementsByTagName("ns:return")[0].nodeValue;
+            orderErr.innerHTML = result;
+        });
+    }
+
+    //取消预定
+    //增加预定
+    function cancelReservation(name, phone) {
+        var url = baseUrl + "deleteReservation?name=" + name + "&phone=" + phone;
+        sendAjaxRequest(url, function (data) {
+            var result = data.getElementsByTagName("ns:return")[0].nodeValue;
+            if (result) {
+                cancelErr.innerHTML = "取消预定成功";
+            } else {
+                cancelErr.innerHTML = "没有查询到预定记录";
+            }
+        });
+    }
+
+
+    var orderDate = document.getElementById("date");
+    orderDate.addEventListener('change', function () {
+        console.log(this.value);
+        var dateStr = this.value.replace(/-/g, "/");
+        var date = new Date(dateStr);
+        orderErr.innerHTML = "";
+        validDate(date);
+    });
+
+    btnReserve.addEventListener('click', function () {
+        orderErr.innerHTML = "";
+        var name = document.getElementById("username").value;
+        var phone = document.getElementById("phone").value;
+
+        if (name.length < 1) {
+            orderErr.innerHTML = "用户名不能为空";
+            return
+        }
+
+        if (phone.length < 1) {
+            orderErr.innerHTML = "手机号码不能为空";
+            return
+        }
+
+        if (phone.length != 11) {
+            orderErr.innerHTML = "手机号码不合法";
+            return
+        }
+
+        var date = document.getElementById("date").value;
+        addReservation(name, phone, date)
+
+    });
+
+
+    btnCancel.addEventListener('click', function () {
+        cancelErr.innerHTML = "";
+        var name = document.getElementById("qx-username").value;
+        var phone = document.getElementById("qx-phone").value;
+
+        if (name.length < 1) {
+            cancelErr.innerHTML = "用户名不能为空";
+            return
+        }
+        if (phone.length < 1) {
+            cancelErr.innerHTML = "手机号码不能为空";
+            return
+        }
+
+        if (phone.length != 11) {
+            cancelErr.innerHTML = "手机号码不合法";
+            return
+        }
+
+        cancelReservation(name, phone);
+
+    });
+</script>
+</html>
