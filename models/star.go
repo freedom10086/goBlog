@@ -3,6 +3,7 @@ package models
 import (
 	"log"
 	"time"
+	"goBlog/code"
 )
 
 /*
@@ -27,7 +28,7 @@ func AddStar(uid, tid int) error {
 
 	rowCnt, err := res.RowsAffected()
 	if err != nil && rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 }
@@ -43,7 +44,7 @@ func DelStarById(id int) error {
 
 	rowCnt, err := res.RowsAffected()
 	if err != nil && rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 }
@@ -59,7 +60,7 @@ func DelStarByTid(uid, id int) error {
 
 	rowCnt, err := res.RowsAffected()
 	if err != nil && rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 }

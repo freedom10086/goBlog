@@ -3,15 +3,18 @@ package models
 import (
 	"log"
 	"time"
+	"goBlog/code"
 )
 
 //单一post
 type Post struct {
 	Tid       int //id
 	Cid       int
-	User      User
+	Uid       int
+	Username  string
 	Title     string
 	Content   string
+	Tags      string
 	Type      int
 	Status    int
 	Views     int
@@ -28,19 +31,20 @@ type Article struct {
 }
 
 //发布主题
-func AddPost(cid, uid int, title, content string) error {
+func AddPost(cid, uid int, title, content string) (int64, error) {
 	res, err := db.Exec(
 		"call post_add(?,?,?,?)", cid, uid, title, content)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	rowCnt, err := res.RowsAffected()
 	if err != nil && rowCnt < 1 {
-		return ErrNoInsert
+		return 0, code.ErrNoInsert
 	}
-	return err
+
+	return rowCnt, err
 }
 
 //删除主题
@@ -55,7 +59,7 @@ func DelPost(id int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 }
@@ -72,7 +76,7 @@ func EditPost(tid int, title, content string) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 
@@ -90,7 +94,7 @@ func PostCloseComment(tid int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 }
@@ -107,7 +111,7 @@ func PostOpenComment(tid int) error {
 	if err != nil {
 		return err
 	} else if rowCnt < 1 {
-		return ErrNoInsert
+		return code.ErrNoInsert
 	}
 	return err
 }
@@ -128,14 +132,14 @@ func PostCanReply(tid int) bool {
 //获得文章带回复
 func GetArticle(tid int) (*Article, error) {
 	row := db.QueryRow(
-		"SELECT `cid`,`uid`,`author`,`title`, `content`,"+
-			"`type`,`status`,`created`, `updated`,"+
-			"`views`, `replys`,`lastreply`"+
+		"SELECT `cid`,`uid`,`author`,`title`, `content`," +
+			"`type`,`status`,`created`, `updated`," +
+			"`views`, `replys`,`lastreply`" +
 			" FROM `post` WHERE `tid` = ?", tid)
 
 	post := &Post{Tid: tid}
 	err := row.Scan(
-		&post.Cid, &post.User.Uid, &post.User.Username, &post.Title, &post.Content,
+		&post.Cid, &post.Uid, &post.Username, &post.Title, &post.Content,
 		&post.Type, &post.Status, &post.Created, &post.Updated,
 		&post.Views, &post.Replys, &post.Lastreply)
 
@@ -188,10 +192,10 @@ func GetPosts(cid, limit, offset int, order string) ([]*Post, error) {
 	}
 
 	rows, err := db.Query(
-		"SELECT `tid`,`uid`,`author`,`title`, `content`,"+
-			"`type`,`status`,`created`, `updated`,"+
-			"`views`, `replys`,`lastreply`"+
-			" FROM `post` WHERE `cid` = ? "+where+" LIMIT ? OFFSET ?",
+		"SELECT `tid`,`uid`,`author`,`title`, `content`," +
+			"`type`,`status`,`created`, `updated`," +
+			"`views`, `replys`,`lastreply`" +
+			" FROM `post` WHERE `cid` = ? " + where + " LIMIT ? OFFSET ?",
 		cid, limit, offset)
 
 	if err != nil {
@@ -203,7 +207,7 @@ func GetPosts(cid, limit, offset int, order string) ([]*Post, error) {
 	for rows.Next() {
 		post := &Post{Cid: cid}
 		err = rows.Scan(
-			&post.Tid, &post.User.Uid, &post.User.Username, &post.Title, &post.Content,
+			&post.Tid, &post.Uid, &post.Username, &post.Title, &post.Content,
 			&post.Type, &post.Status, &post.Created, &post.Updated,
 			&post.Views, &post.Replys, &post.Lastreply)
 

@@ -2,23 +2,16 @@ package models
 
 import (
 	"database/sql"
-	"errors"
-	"log"
-
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"goBlog/code"
 )
 
 var (
-	db          *sql.DB
-	ErrNoInsert error = errors.New("操作失败!")
-	ErrNoDelete error = errors.New("删除失败!")
-	ErrNoUpdate error = errors.New("没有更改!")
-	ErrReply    error = errors.New("此文章无法回复!")
-	ErrLogin          = errors.New("账号异常,你没有权限登陆!")
+	db             *sql.DB
 )
 
-func InitDB(dbuser, dbpass, dbname string) {
+func InitDB(dbname, dbuser, dbpass string) {
 	var err error
 	db, err = sql.Open("mysql", dbuser+":"+dbpass+"@/"+dbname+"?charset=utf8mb4&parseTime=true")
 	if err != nil {
@@ -48,22 +41,19 @@ func add(stmt *sql.Stmt, args ...interface{}) (id int64, err error) {
 	return
 }
 
-func delete(stmt *sql.Stmt, args ...interface{}) error {
+func delete(stmt *sql.Stmt, args ...interface{}) (deletes int64, err error) {
+	deletes = -1
 	res, err := stmt.Exec(args...)
 	if err != nil {
-		return err
+		return
 	}
 
-	affect, err := res.RowsAffected()
+	deletes, err = res.RowsAffected()
 	if err != nil {
-		return err
+		return
 	}
-	fmt.Println(affect)
 
-	if affect <= 0 {
-		return ErrNoDelete
-	}
-	return nil
+	return
 }
 
 func update(stmt *sql.Stmt, args ...interface{}) error {
@@ -76,10 +66,10 @@ func update(stmt *sql.Stmt, args ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(affect)
+	log.Println(affect)
 
 	if affect <= 0 {
-		return ErrNoUpdate
+		return code.ErrNoUpdate
 	}
 	return nil
 }

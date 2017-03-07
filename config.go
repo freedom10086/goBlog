@@ -25,7 +25,9 @@ func init() {
 }
 
 func readConfig() *Config {
-
+	if config != nil {
+		return config
+	}
 	inputFile := "./config.json"
 	buf, err := ioutil.ReadFile(inputFile)
 	if err != nil {

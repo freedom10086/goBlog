@@ -17,20 +17,20 @@
 #用户
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `uid`         INT         NOT NULL AUTO_INCREMENT,
-  `username`    VARCHAR(25) NOT NULL,
-  `password`    VARCHAR(64) NOT NULL,
-  `email`       VARCHAR(25) NOT NULL,
-  `status`      TINYINT     NOT NULL DEFAULT 0, #0-ok 1-block
-  `sex`         TINYINT     NOT NULL DEFAULT 0, #0-unknown 1-man 2-woman
-  `exp`         INT         NOT NULL DEFAULT 0, #经验值
-  `birthday`    DATE        NOT NULL DEFAULT '1000-01-01',
-  `phone`       VARCHAR(15), #手机号码
-  `description` VARCHAR(255),
-  `site`        VARCHAR(50), #个人网站
-  `posts`       INT         NOT NULL DEFAULT 0, #发帖数
-  `replys`      INT         NOT NULL DEFAULT 0, #回复数
-  `regtime`     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `uid`         INT          NOT NULL AUTO_INCREMENT,
+  `username`    VARCHAR(25)  NOT NULL,
+  `password`    VARCHAR(64)  NOT NULL,
+  `email`       VARCHAR(25)  NOT NULL,
+  `status`      TINYINT      NOT NULL DEFAULT 0, #0-ok 1-block
+  `sex`         TINYINT      NOT NULL DEFAULT 0, #0-unknown 1-man 2-woman
+  `exp`         INT          NOT NULL DEFAULT 0, #经验值
+  `birthday`    DATE         NOT NULL DEFAULT 0,
+  `phone`       VARCHAR(15)  NOT NULL DEFAULT '', #手机号码
+  `description` VARCHAR(255) NOT NULL DEFAULT '',
+  `site`        VARCHAR(50)  NOT NULL DEFAULT '', #个人网站
+  `posts`       INT          NOT NULL DEFAULT 0, #发帖数
+  `replys`      INT          NOT NULL DEFAULT 0, #回复数
+  `regtime`     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`),
   UNIQUE INDEX `user_username` (`username`),
   UNIQUE INDEX `user_email` (`email`)
@@ -65,7 +65,7 @@ CREATE TABLE `post` (
   `views`     INT            NOT NULL DEFAULT 0,
   `replys`    INT            NOT NULL DEFAULT 0,
   `created`   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated`   TIMESTAMP      NOT NULL DEFAULT '1970-01-01 00:00:01',
+  `updated`   TIMESTAMP      NOT NULL DEFAULT 0,
   `lastreply` TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP, #最后回复时间
   PRIMARY KEY (`tid`),
   INDEX `post_last` (`cid`, `lastreply`),

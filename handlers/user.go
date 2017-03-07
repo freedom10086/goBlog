@@ -1,124 +1,116 @@
 package handlers
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
+	"goBlog/models"
 	"io"
-	"math/rand"
+	"log"
 	"net/http"
-	"net/smtp"
-	"strings"
-	"time"
+	"strconv"
+	"goBlog/code"
 )
 
-
-func UserHandler(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "hello this is user!!")
+type UserHandler struct {
+	BaseHandler
 }
 
-type TokenData struct {
-	Username string
-	Salt     string
-	Expires  time.Time
+
+
+func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	HandleMethod(h, w, r)
 }
 
-//生成TOKEN base64(data+hmac(data,SecretKey))
-func GenToken(username, secretKey string, timeout int) string {
+func (*UserHandler) ServeGET(w http.ResponseWriter, r *http.Request) {
+	//order := r.FormValue("order")
+	page := r.FormValue("page")
+	size := r.FormValue("size")
 
-	data := &TokenData{
-		Username: username,
-		Salt:     Krand(10),
-		Expires:  time.Now().Add(time.Minute * time.Duration(timeout)),
+	if page == "" {
+		page = "1"
 	}
 
-	mac := hmac.New(sha256.New, []byte(secretKey))
-	bytedata, _ := json.Marshal(data)
-	mac.Write(bytedata)
-	signature := mac.Sum(nil)
-
-	return base64.URLEncoding.EncodeToString(append(bytedata, signature...))
-}
-
-// 随机字符串
-func Krand(size int) string {
-	kinds, result := [][]int{[]int{10, 48}, []int{26, 97}, []int{26, 65}}, make([]byte, size)
-	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < size; i++ {
-		ikind := rand.Intn(3)
-		scope, base := kinds[ikind][0], kinds[ikind][1]
-		result[i] = uint8(base + rand.Intn(scope))
+	if size == "" {
+		size = "30"
 	}
-	return string(result)
-}
 
-//valid token
-func ValidToken(token, secretKey string) (bool, string) {
+	var sizeInt, pageInt int
+	var err error
 
-	fmt.Println(len(token))
-	decode_token, err := base64.URLEncoding.DecodeString(token)
+	if pageInt, err = strconv.Atoi(page); err != nil || pageInt <= 0 {
+		HandleError(code.ERR_PARAMETER, w, r)
+		return
+	}
+
+	if sizeInt, err = strconv.Atoi(size); err != nil || sizeInt <= 0 {
+		HandleError(code.ERR_PARAMETER, w, r)
+		return
+	}
+
+	offset := sizeInt * (pageInt - 1)
+
+	log.Printf("offset:%d limit:%d", offset, sizeInt)
+
+	users, err := models.GetUsers(true, offset, sizeInt)
 
 	if err != nil {
-		return false, "decode error"
+		HandleError(err, w, r)
+		return
 	}
 
-	totallen := len(decode_token)
-	payload := decode_token[:totallen - 32]
-	signature := decode_token[totallen - 32:]
+	d, err := json.Marshal(users)
+	if err != nil {
+		HandleError(err, w, r)
+		return
+	}
 
-	mac := hmac.New(sha256.New, []byte(secretKey))
-	mac.Write([]byte(payload))
-	my_signature := mac.Sum(nil)
+	w.Write(d)
+}
 
-	if hmac.Equal(signature, my_signature) {
+func (*UserHandler) ServePOST(w http.ResponseWriter, r *http.Request) {
+	username := r.PostFormValue("username")
+	password := r.PostFormValue("password")
+	email := r.PostFormValue("email")
+	sex := r.PostFormValue("sex")
 
-		data := &TokenData{}
-		err := json.Unmarshal([]byte(payload), &data)
+	var sexInt int
 
-		if err != nil {
-			return false, "Unmarshal faild"
-		}
-		if data.Expires.Before(time.Now()) {
-			return false, "time is expires"
-		}
-
-		return true, data.Username
-
+	if sex == "0" {
+		sexInt = 0
+	} else if sex == "1" {
+		sexInt = 1
+	} else if sex == "2" {
+		sexInt = 2
 	} else {
-		return false, "signature not equal"
+		sexInt = -1
 	}
+
+	if username == "" || password == "" || email == "" || sexInt < 0 {
+		HandleError(code.ERR_PARAMETER, w, r)
+		return
+	}
+
+	id, err := models.AddUser(username, password, email, sexInt)
+	if err != nil {
+		HandleError(err, w, r)
+		return
+	}
+
+	log.Printf("insert user %d ok", id)
+	io.WriteString(w, string(id))
 }
 
-//发送邮箱
-func SendToMail(to, subject, content string) error {
-	user := "2351386755@qq.com"
-	password := "StrikeFreedom"
-	host := "smtp.qq.com:587"
+func (*UserHandler) ServeDELETE(w http.ResponseWriter, r *http.Request) {
+	uid := r.PostFormValue("uid")
+	if uidInt, err := strconv.Atoi(uid); err != nil {
+		HandleError(code.ERR_PARAMETER, w, r)
+		return
+	} else {
+		i, err := models.DelUser(uidInt)
+		if err != nil {
+			HandleError(err, w, r)
+			return
+		}
 
-	hp := strings.Split(host, ":")
-	auth := smtp.PlainAuth("", user, password, hp[0])
-
-	msg := []byte("To:" + to +
-		"\r\n" +
-		"Subject: " + subject +
-		"\r\n\r\n" +
-		content)
-
-	err := smtp.SendMail(host, auth, user, strings.Split(to, ";"), msg)
-	return err
-}
-
-//发送验证邮箱
-func SendValidMail(to, username string) error {
-	//sub := "valid your email"
-	//timeout := 20
-	//token := GenToken(username, timeout)
-	//content := "welcome regiest " + configure.SiteName + "!!" +
-	//	"\r\n click " + configure.SiteAddr + configure.SitePort + "/email?token=" + token + " to valid your email<" + to + ">" +
-	//	"\r\n\r\n attention: please valided in " + string(timeout) + " minutes."
-	//return SendToMail(to, sub, content)
-
-	return nil
+		log.Printf("delete user %d ok,delete count %d", uidInt, i)
+	}
 }

@@ -1,19 +1,17 @@
 package main
 
 import (
+	"goBlog/handlers"
 	"net/http"
 )
 
-type Route struct {
-	Path string
-	Func func(w http.ResponseWriter, r *http.Request)
-}
+var routers map[string]http.Handler
 
-/*
-// 路由规则
-var Routes = []Route{
-	{"/", controls.HomeHandler},
-	{"/user", controls.UserHandler},
-	{"/post", controls.PostHandler},
+func init() {
+	readConfig()
+	routers = make(map[string]http.Handler)
+	routers["/"] = &handlers.StaticFileHandler{}
+	routers["/cate"] = &handlers.CateHandler{}
+	routers["/user"] = &handlers.UserHandler{}
+	routers["/login"] = &handlers.LoginHandler{SecretKey: config.SecretKey}
 }
-*/

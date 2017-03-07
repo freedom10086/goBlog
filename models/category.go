@@ -7,17 +7,16 @@ import (
 
 type Category struct {
 	Cid         int
-	Title       string
+	Name        string
 	Description string
 	Posts       int
 	ToadyPosts  int
-	LastPost    time.Time
 	Created     time.Time
 }
 
 //新增category
 func AddCate(name, description string) (int64, error) {
-	stmt, err := db.Prepare("INSERT `category` SET title=?,description=?")
+	stmt, err := db.Prepare("INSERT INTO `cate` SET name=?,description=?")
 	if err != nil {
 		return -1, err
 	}
@@ -26,10 +25,10 @@ func AddCate(name, description string) (int64, error) {
 
 //删除category 里面的帖子怎么办？
 //所以最好不要删除category
-func DelCate(cid int) (err error) {
-	stmt, err := db.Prepare("DELETE FROM `category` WHERE `cid` = ?")
+func DelCate(cid int) (count int64, err error) {
+	stmt, err := db.Prepare("DELETE FROM `cate` WHERE `cid` = ?")
 	if err != nil {
-		return err
+		return -1, err
 	}
 	return delete(stmt, cid)
 }
@@ -39,7 +38,7 @@ func GetCate(cid int) (*Category, error) {
 	cate := &Category{Cid: cid}
 	err := db.QueryRow(
 		"SELECT  `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category` WHERE `cid` = ?",
-		cid).Scan(&cate.Title, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.LastPost, &cate.Created)
+		cid).Scan(&cate.Name, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.Created)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +48,7 @@ func GetCate(cid int) (*Category, error) {
 //获得所有category
 func GetCates() ([]*Category, error) {
 	//查询数据
-	rows, err := db.Query("SELECT `cid`, `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category`")
+	rows, err := db.Query("SELECT `cid`, `name`, `description`,`posts`,`todayposts`,`created` FROM `cate`")
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +57,7 @@ func GetCates() ([]*Category, error) {
 
 	for rows.Next() {
 		cate := &Category{}
-		err = rows.Scan(&cate.Cid, &cate.Title, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.LastPost, &cate.Created)
+		err = rows.Scan(&cate.Cid, &cate.Name, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.Created)
 		if err != nil {
 			log.Println(err)
 			continue

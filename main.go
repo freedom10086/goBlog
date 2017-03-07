@@ -1,31 +1,32 @@
 package main
 
 import (
-	"net/http"
 	"goBlog/handlers"
+	"goBlog/models"
 	"log"
+	"net/http"
 )
 
-type myHandler struct {
-}
-
-func (*myHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	url := "https://127.0.0.1" + config.SitePortSSL + req.RequestURI
-	http.Redirect(w, req, url, http.StatusMovedPermanently)
-}
-
 func init() {
-	log.Print("==main init==")
+	models.InitDB(config.DbName, config.DbUsername, config.DbPassword)
+	log.Printf("==%s started==", config.SiteName)
 }
 
 func main() {
 	go func() {
-		log.Println("listen on " + config.SitePort + ". Go to http://127.0.0.1:8080/")
-		http.ListenAndServe(config.SitePort, &myHandler{})
+		log.Printf("http listen on %s%s", config.SiteAddr, config.SitePort)
+		http.ListenAndServe(config.SitePort, &handlers.RedirectHandler{
+			Url:  config.SiteAddr,
+			Port: config.SitePortSSL,
+		})
 	}()
 
-	http.Handle("/", handlers.NewStaticServer())
-	log.Println("listen on " + config.SitePortSSL + ". Go to https://127.0.0.1:10443/")
-	err := http.ListenAndServeTLS(config.SitePortSSL, "cert.pem", "key.pem", nil)
+	mux := http.NewServeMux()
+	for k, v := range routers {
+		mux.Handle(k, v)
+	}
+
+	log.Printf("https listen on %s%s", "https://127.0.0.1", config.SitePortSSL)
+	err := http.ListenAndServeTLS(config.SitePortSSL, "cert.pem", "key.pem", mux)
 	log.Fatal(err)
 }

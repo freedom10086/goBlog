@@ -1,32 +1,46 @@
 package models
 
 import (
+	"crypto/hmac"
 	"crypto/md5"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"goBlog/code"
 	"log"
+	"math/rand"
+	"net/smtp"
+	"strings"
 	"time"
 )
 
 type User struct {
-	Uid         int
+	Uid         int64
 	Username    string
-	Password    string
+	Password    string `json:"-"`
 	Email       string
+	Status      int
 	Sex         int
-	Description string
 	Exp         int
-	Sites       string
-	Messages    int
+	Birthday    time.Time
+	Phone       string
+	Description string `json:",omitempty"`
+	Site        string
 	Posts       int
 	Replys      int
-	Phone       string
 	Regtime     time.Time
-	Birthday    time.Time
+}
+
+type TokenData struct {
+	Uid     int64
+	Salt    string
+	Expires time.Time
 }
 
 //添加用户
 func AddUser(username, password, email string, sex int) (int64, error) {
-	md5pass := Md5_password(password)
+	md5pass := Md5_encode(password)
 	stmt, err := db.Prepare("INSERT INTO `user`(`username`,`password`,`email`,`sex`) VALUES (?,?,?,?)")
 	if err != nil {
 		return -1, err
@@ -35,10 +49,10 @@ func AddUser(username, password, email string, sex int) (int64, error) {
 }
 
 //删除用户
-func DelUser(uid int) error {
+func DelUser(uid int) (int64, error) {
 	stmt, err := db.Prepare("delete from `user` where `uid` = ?")
 	if err != nil {
-		return err
+		return -1, err
 	}
 	return delete(stmt, uid)
 }
@@ -52,60 +66,107 @@ func UpdateUser(uid int, sites, description, phone string, sex int, birthday tim
 	return update(stmt, sex, description, sites, birthday, phone, uid)
 }
 
-//根据uid查询用户
-func GetUserById(uid int) (*User, error) {
-	auser := &User{Uid: uid}
-	err := db.QueryRow("SELECT `username`,`email`,`sex`,`exp`,`messages`,`posts`,`replys`,`description`, `sites`,`phone`,`regtime` "+
-		"FROM `user` WHERE `uid` = ?", uid).Scan(
-		&auser.Username, &auser.Email, &auser.Sex, &auser.Exp, &auser.Messages, &auser.Posts, &auser.Replys,
-		&auser.Description, &auser.Sites, &auser.Phone, &auser.Regtime)
+//获得所有用户
+func GetUsers(order bool, offset, limit int) ([]*User, error) {
+	//orderstr := "ASC"
+	if !order {
+		//orderstr = "DESC"
+	}
+	rows, err := db.Query(
+		"SELECT `uid`,`username`,`email`, `status`," +
+			" `sex`, `exp`, `birthday`, `phone`," +
+			" `description`,`site`,`posts`,`replys`,`regtime` " +
+			"FROM `user` ORDER BY uid LIMIT ? OFFSET ? ",
+		limit, offset)
 
 	if err != nil {
 		return nil, err
 	}
-	//user.Regtime, err = time.ParseInLocation(time.RFC822, timestr, loc)
-	return auser, nil
+	defer rows.Close()
+	users := make([]*User, 0)
+
+	for rows.Next() {
+		user := &User{}
+		err = rows.Scan(
+			&user.Uid, &user.Username, &user.Email, &user.Status,
+			&user.Sex, &user.Exp, &user.Birthday, &user.Phone,
+			&user.Description, &user.Site, &user.Posts, &user.Replys, &user.Regtime)
+
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		users = append(users, user)
+	}
+
+	err = rows.Err()
+	return users, err
+}
+
+//根据uid查询用户
+func GetUserById(uid int64) (u *User, err error) {
+	u = &User{Uid: uid}
+	err = db.QueryRow("SELECT `username`,`password`,`email`,`status`,`sex`," +
+		"`exp`,`birthday`,`phone`,`description`, " +
+		"`site`,`posts`,`replys`,`regtime` " +
+		"FROM `user` WHERE `uid` = ?", uid).Scan(
+		&u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
+		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
+		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+	return
 }
 
 //根据用户名查询用户
-func GetUserByName(username string) (*User, error) {
-
-	auser := &User{Username: username}
-	err := db.QueryRow("SELECT `uid`,`email`,`sex`,`exp`,`messages`,`posts`,`replys`,`description`, `sites`,`phone`,`regtime` "+
+func GetUserByName(username string) (u *User, err error) {
+	u = &User{Username: username}
+	err = db.QueryRow("SELECT `uid`,`password`,`email`,`status`,`sex`," +
+		"`exp`,`birthday`,`phone`,`description`, " +
+		"`site`,`posts`,`replys`,`regtime` " +
 		"FROM `user` WHERE `username` = ?", username).Scan(
-		&auser.Uid, &auser.Email, &auser.Sex, &auser.Exp, &auser.Messages, &auser.Posts, &auser.Replys,
-		&auser.Description, &auser.Sites, &auser.Phone, &auser.Regtime)
+		&u.Uid, &u.Password, &u.Email, &u.Status, &u.Sex,
+		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
+		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+	return
+}
 
-	if err != nil {
-		return nil, err
-	}
-	return auser, nil
+//根据email查询用户
+func GetUserByEmail(email string) (u *User, err error) {
+	u = &User{Email: email}
+	err = db.QueryRow("SELECT `uid`,`password`,`username`,`status`,`sex`," +
+		"`exp`,`birthday`,`phone`,`description`, " +
+		"`site`,`posts`,`replys`,`regtime` " +
+		"FROM `user` WHERE `email` = ?", email).Scan(
+		&u.Uid, &u.Password, &u.Username, &u.Status, &u.Sex,
+		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
+		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+	return
 }
 
 //登陆 //Status //0-正常 1-禁止访问
-func UserLogin(username, password string) (*User, error) {
-	md5pass := Md5_password(password)
-	user := &User{}
-	status := 0
-	err := db.QueryRow("SELECT `uid`,`username`,`email`,`sex`,`exp`,`messages`,`posts`,`replys`,`description`, `status` FROM `user`"+
-		" WHERE (`username`=?  AND `password` = ?) OR (`email` = ? AND `password` = ?)", username, md5pass, username, md5pass).Scan(
-		&user.Uid, &user.Username, &user.Email, &user.Sex, &user.Exp, &user.Messages, &user.Posts, &user.Replys, &user.Description, &status)
+func UserLogin(username, email, password string) (u *User, err error) {
+	if username != "" {
+		u, err = GetUserByName(username)
+		if err == nil && u != nil && u.Username == username {
+			if u.Password == Md5_encode(password) {
+				return
+			}
+		}
+	} else if email != "" {
+		u, err = GetUserByEmail(email)
+		if err == nil && u != nil && u.Email == email {
+			if u.Password == Md5_encode(password) {
+				return
+			}
 
-	switch {
-	case err != nil:
-		return nil, err
-	case status == 0:
-		user, err = GetUserById(user.Uid)
-		return user, err
-	default:
-		return nil, ErrLogin
+		}
 	}
-}
 
-//存入数据库 md5(password)
-func Md5_password(password string) string {
-	md5pass := fmt.Sprintf("%x", md5.Sum([]byte(password)))
-	return md5pass
+	if err == nil {
+		err = code.ERR_LOGIN
+	}
+
+	return nil, err
 }
 
 //禁止用户
@@ -140,54 +201,16 @@ func ChangePass(uid int, oldpass, newpass string) error {
 		}
 		return update(stmt, newpass, uid)
 	default:
-		return ErrLogin
+		return code.ErrLogin
 	}
-}
-
-//获得所有用户
-func GetUsers(order bool, limit, offset int) ([]*User, error) {
-	orderstr := "ASC"
-	if !order {
-		orderstr = "DESC"
-	}
-	rows, err := db.Query(
-		"SELECT `uid`,`username`,`email`, `regtime`,"+
-			" `sites`, `sex`, `description`, `exp`,"+
-			" `birthday`,`phone`,`posts`,`replys` FROM `user`"+
-			" ORDER BY `uid` ? LIMIT ? OFFSET ? ",
-		orderstr, limit, offset)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	users := make([]*User, 0)
-
-	for rows.Next() {
-		user := &User{}
-		err = rows.Scan(
-			&user.Uid, &user.Username, &user.Email, &user.Regtime,
-			&user.Sites, &user.Sex, &user.Description, &user.Exp,
-			&user.Birthday, &user.Phone, &user.Posts, &user.Replys)
-
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		users = append(users, user)
-	}
-
-	err = rows.Err()
-	return users, err
 }
 
 //获得所有被禁止的user
 func GetBlockUsers(limit, offset int) ([]*User, error) {
 	rows, err := db.Query(
-		"SELECT `uid`,`username`,`email`, `regtime`,"+
-			" `sites`, `sex`, `description`, `exp`,"+
-			" `posts`,`replys` FROM `user`"+
+		"SELECT `uid`,`username`,`email`, `regtime`," +
+			" `sites`, `sex`, `description`, `exp`," +
+			" `posts`,`replys` FROM `user`" +
 			" WHERE `status` <> 0  LIMIT ? OFFSET ? ",
 		limit, offset)
 
@@ -201,7 +224,7 @@ func GetBlockUsers(limit, offset int) ([]*User, error) {
 		user := &User{}
 		err = rows.Scan(
 			&user.Uid, &user.Username, &user.Email, &user.Regtime,
-			&user.Sites, &user.Sex, &user.Description, &user.Exp,
+			&user.Site, &user.Sex, &user.Description, &user.Exp,
 			&user.Posts, &user.Replys)
 
 		if err != nil {
@@ -214,4 +237,108 @@ func GetBlockUsers(limit, offset int) ([]*User, error) {
 
 	err = rows.Err()
 	return users, err
+}
+
+//生成TOKEN base64(data+hmac(data,SecretKey))
+func GenToken(uid int64, secretKey string, duration time.Duration) string {
+	data := &TokenData{
+		Uid:     uid,
+		Salt:    Krand(10),
+		Expires: time.Now().Add(duration),
+	}
+
+	mac := hmac.New(sha256.New, []byte(secretKey))
+	bytedata, _ := json.Marshal(data)
+	mac.Write(bytedata)
+	signature := mac.Sum(nil)
+
+	return base64.URLEncoding.EncodeToString(append(bytedata, signature...))
+}
+
+//valid token 返回uid
+func ValidToken(token, secretKey string) (uid int64, err error) {
+	uid = -1
+	decode_token, err := base64.URLEncoding.DecodeString(token)
+	if err != nil {
+		return
+	}
+
+	totallen := len(decode_token)
+	payload := decode_token[:totallen - 32]
+	signature := decode_token[totallen - 32:]
+
+	mac := hmac.New(sha256.New, []byte(secretKey))
+	mac.Write([]byte(payload))
+	my_signature := mac.Sum(nil)
+
+	if hmac.Equal(signature, my_signature) {
+		data := &TokenData{}
+		if err = json.Unmarshal([]byte(payload), &data); err != nil {
+			return
+		}
+
+		if data.Expires.Before(time.Now()) {
+			return -1, code.ERR_TOKEN_TIMEOUT
+		}
+
+		var d TokenData
+		if err = json.Unmarshal(payload, &d); err != nil {
+			return
+		}
+
+		return d.Uid, nil
+	} else {
+		err = code.ERR_TOKEN_INVALID
+		return;
+	}
+}
+
+// 随机字符串
+func Krand(size int) string {
+	kinds, result := [][]int{[]int{10, 48}, []int{26, 97}, []int{26, 65}}, make([]byte, size)
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < size; i++ {
+		ikind := rand.Intn(3)
+		scope, base := kinds[ikind][0], kinds[ikind][1]
+		result[i] = uint8(base + rand.Intn(scope))
+	}
+	return string(result)
+}
+
+//发送邮箱
+func SendToMail(to, subject, content string) error {
+	user := "2351386755@qq.com"
+	password := "StrikeFreedom"
+	host := "smtp.qq.com:587"
+
+	hp := strings.Split(host, ":")
+	auth := smtp.PlainAuth("", user, password, hp[0])
+
+	msg := []byte("To:" + to +
+		"\r\n" +
+		"Subject: " + subject +
+		"\r\n\r\n" +
+		content)
+
+	err := smtp.SendMail(host, auth, user, strings.Split(to, ";"), msg)
+	return err
+}
+
+//发送验证邮箱
+func SendValidMail(to, username string) error {
+	//sub := "valid your email"
+	//timeout := 20
+	//token := GenToken(username, timeout)
+	//content := "welcome regiest " + configure.SiteName + "!!" +
+	//	"\r\n click " + configure.SiteAddr + configure.SitePort + "/email?token=" + token + " to valid your email<" + to + ">" +
+	//	"\r\n\r\n attention: please valided in " + string(timeout) + " minutes."
+	//return SendToMail(to, sub, content)
+
+	return nil
+}
+
+//存入数据库 md5(password)
+func Md5_encode(password string) string {
+	md5pass := fmt.Sprintf("%x", md5.Sum([]byte(password)))
+	return md5pass
 }

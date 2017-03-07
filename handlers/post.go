@@ -1,30 +1,22 @@
 package handlers
 
 import (
-	//"encoding/json"
-	//"goweb/models"
-	//"io"
 	"net/http"
 )
 
+// /post
 func PostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		handleGet(w, r)
+	} else if (r.Method == "POST") {
+		handlePost(w, r)
+	}
+}
 
-	/*
-		post, err := models.GetPosts(10, 100, 0)
-		if err != nil {
-			io.WriteString(w, err.Error())
+func handleGet(w http.ResponseWriter, r *http.Request) {
 
-			return
-		} else {
-			jsonbyte, err := json.Marshal(&post)
-			if err != nil {
-				io.WriteString(w, err.Error())
-				return
-			} else {
-				io.WriteString(w, string(jsonbyte))
-			}
+}
 
-		}
-	*/
+func handlePost(w http.ResponseWriter, r *http.Request){
 
 }
