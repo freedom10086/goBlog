@@ -2,19 +2,18 @@ package handlers
 
 import (
 	"encoding/json"
+	"goBlog/code"
 	"goBlog/models"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
-	"goBlog/code"
 )
 
 type UserHandler struct {
 	BaseHandler
+	SecretKey string
 }
-
-
 
 func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	HandleMethod(h, w, r)
@@ -66,37 +65,28 @@ func (*UserHandler) ServeGET(w http.ResponseWriter, r *http.Request) {
 	w.Write(d)
 }
 
-func (*UserHandler) ServePOST(w http.ResponseWriter, r *http.Request) {
-	username := r.PostFormValue("username")
-	password := r.PostFormValue("password")
-	email := r.PostFormValue("email")
-	sex := r.PostFormValue("sex")
-
-	var sexInt int
-
-	if sex == "0" {
-		sexInt = 0
-	} else if sex == "1" {
-		sexInt = 1
-	} else if sex == "2" {
-		sexInt = 2
-	} else {
-		sexInt = -1
-	}
-
-	if username == "" || password == "" || email == "" || sexInt < 0 {
-		HandleError(code.ERR_PARAMETER, w, r)
+//要验证regtoken
+func (h *UserHandler) ServePOST(w http.ResponseWriter, r *http.Request) {
+	if token := r.PostFormValue("token"); token == "" {
+		HandleParaError(w, r)
 		return
+	} else if t, ok := models.ValidRegToken(token, h.SecretKey); ok {
+		if t.Username == "" || t.Password == "" || t.Email == "" || t.Sex < 0 {
+			HandleParaError(w, r)
+			return
+		}
+
+		id, err := models.AddUser(t.Username, t.Password, t.Email, t.Sex)
+		if err != nil {
+			HandleError(err, w, r)
+			return
+		}
+
+		log.Printf("insert user %d ok", id)
+		io.WriteString(w, string(id))
 	}
 
-	id, err := models.AddUser(username, password, email, sexInt)
-	if err != nil {
-		HandleError(err, w, r)
-		return
-	}
-
-	log.Printf("insert user %d ok", id)
-	io.WriteString(w, string(id))
+	HandleError(code.ERR_TOKEN_INVALID, w, r)
 }
 
 func (*UserHandler) ServeDELETE(w http.ResponseWriter, r *http.Request) {

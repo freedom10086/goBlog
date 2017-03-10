@@ -1,11 +1,8 @@
 package handlers
 
 import (
-	"encoding/json"
-	"goBlog/code"
 	"goBlog/models"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -13,6 +10,11 @@ import (
 type LoginHandler struct {
 	BaseHandler
 	SecretKey string
+}
+
+type LoginResult struct {
+	User  *models.User
+	Token string
 }
 
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -28,26 +30,14 @@ func (*LoginHandler) ServeGET(w http.ResponseWriter, r *http.Request) {
 // 2.通过用户名密码登陆 同时产生新的token
 func (h *LoginHandler) ServePOST(w http.ResponseWriter, r *http.Request) {
 	if token := r.PostFormValue("token"); token != "" {
-		if len(token) <= 32 {
-			HandleError(code.ERR_TOKEN_INVALID, w, r)
-			return
-		}
-		if uid, err := models.ValidToken(token, h.SecretKey); err == nil {
-			if u, err := models.GetUserById(uid); err != nil {
-				HandleError(err, w, r)
-				return
-			} else {
-				if ub, err := json.Marshal(u); ub != nil {
-					w.Write(ub)
-					return
-				} else if err != nil {
-					HandleError(err, w, r)
-					return
-				}
-
-			}
-		} else {
+		if uid, err := models.ValidLoginToken(token, h.SecretKey); err != nil {
 			HandleError(err, w, r)
+			return
+		} else if u, err := models.GetUserById(uid); err != nil {
+			HandleError(err, w, r)
+			return
+		} else {
+			HandleResult(u, w, r)
 			return
 		}
 	}
@@ -57,31 +47,16 @@ func (h *LoginHandler) ServePOST(w http.ResponseWriter, r *http.Request) {
 	password := r.PostFormValue("password")
 	email := r.PostFormValue("email")
 
-	log.Println("login")
-
 	if (username == "" && email == "") || password == "" {
-		HandleError(code.ERR_PARAMETER, w, r)
+		HandleParaError(w, r)
 		return
-	}
-
-	log.Println("login")
-
-	u, err := models.UserLogin(username, email, password)
-	if err != nil {
+	} else if u, err := models.UserLogin(username, email, password); err != nil {
 		HandleError(err, w, r)
 		return
-	}
-
-	if u == nil {
-		HandleError(code.ERR_LOGIN, w, r)
+	} else {
+		t := models.GenLoginToken(u.Uid, h.SecretKey, time.Hour*24*30)
+		res := &LoginResult{User: u, Token: t}
+		HandleResult(res, w, r)
 		return
 	}
-
-	t := models.GenToken(u.Uid, h.SecretKey, time.Hour*24*30)
-	log.Printf("token is :%s", t)
-
-	ub, _ := json.Marshal(u)
-
-	io.WriteString(w, t)
-	w.Write(ub)
 }

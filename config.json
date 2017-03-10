@@ -1,5 +1,5 @@
 {
-  "SiteName": "goweb",
+  "SiteName": "goBlog",
   "SiteAddr": "http://127.0.0.1",
   "SitePort": ":8080",
   "SitePortSSL": ":10443",

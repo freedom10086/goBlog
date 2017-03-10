@@ -14,4 +14,5 @@ func init() {
 	routers["/cate"] = &handlers.CateHandler{}
 	routers["/user"] = &handlers.UserHandler{}
 	routers["/login"] = &handlers.LoginHandler{SecretKey: config.SecretKey}
+	routers["/regiest"] = &handlers.RegisterHandler{SecretKey: config.SecretKey}
 }

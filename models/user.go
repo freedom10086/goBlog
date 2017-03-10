@@ -32,10 +32,19 @@ type User struct {
 	Regtime     time.Time
 }
 
-type TokenData struct {
+type LoginToken struct {
 	Uid     int64
 	Salt    string
 	Expires time.Time
+}
+
+type RegToken struct {
+	Username string
+	Password string //真正要插入时才有此
+	Email    string
+	Sex      int //同上
+	Salt     string
+	Expires  time.Time
 }
 
 //添加用户
@@ -73,9 +82,9 @@ func GetUsers(order bool, offset, limit int) ([]*User, error) {
 		//orderstr = "DESC"
 	}
 	rows, err := db.Query(
-		"SELECT `uid`,`username`,`email`, `status`," +
-			" `sex`, `exp`, `birthday`, `phone`," +
-			" `description`,`site`,`posts`,`replys`,`regtime` " +
+		"SELECT `uid`,`username`,`email`, `status`,"+
+			" `sex`, `exp`, `birthday`, `phone`,"+
+			" `description`,`site`,`posts`,`replys`,`regtime` "+
 			"FROM `user` ORDER BY uid LIMIT ? OFFSET ? ",
 		limit, offset)
 
@@ -107,9 +116,9 @@ func GetUsers(order bool, offset, limit int) ([]*User, error) {
 //根据uid查询用户
 func GetUserById(uid int64) (u *User, err error) {
 	u = &User{Uid: uid}
-	err = db.QueryRow("SELECT `username`,`password`,`email`,`status`,`sex`," +
-		"`exp`,`birthday`,`phone`,`description`, " +
-		"`site`,`posts`,`replys`,`regtime` " +
+	err = db.QueryRow("SELECT `username`,`password`,`email`,`status`,`sex`,"+
+		"`exp`,`birthday`,`phone`,`description`, "+
+		"`site`,`posts`,`replys`,`regtime` "+
 		"FROM `user` WHERE `uid` = ?", uid).Scan(
 		&u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
@@ -120,9 +129,9 @@ func GetUserById(uid int64) (u *User, err error) {
 //根据用户名查询用户
 func GetUserByName(username string) (u *User, err error) {
 	u = &User{Username: username}
-	err = db.QueryRow("SELECT `uid`,`password`,`email`,`status`,`sex`," +
-		"`exp`,`birthday`,`phone`,`description`, " +
-		"`site`,`posts`,`replys`,`regtime` " +
+	err = db.QueryRow("SELECT `uid`,`password`,`email`,`status`,`sex`,"+
+		"`exp`,`birthday`,`phone`,`description`, "+
+		"`site`,`posts`,`replys`,`regtime` "+
 		"FROM `user` WHERE `username` = ?", username).Scan(
 		&u.Uid, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
@@ -133,9 +142,9 @@ func GetUserByName(username string) (u *User, err error) {
 //根据email查询用户
 func GetUserByEmail(email string) (u *User, err error) {
 	u = &User{Email: email}
-	err = db.QueryRow("SELECT `uid`,`password`,`username`,`status`,`sex`," +
-		"`exp`,`birthday`,`phone`,`description`, " +
-		"`site`,`posts`,`replys`,`regtime` " +
+	err = db.QueryRow("SELECT `uid`,`password`,`username`,`status`,`sex`,"+
+		"`exp`,`birthday`,`phone`,`description`, "+
+		"`site`,`posts`,`replys`,`regtime` "+
 		"FROM `user` WHERE `email` = ?", email).Scan(
 		&u.Uid, &u.Password, &u.Username, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
@@ -208,9 +217,9 @@ func ChangePass(uid int, oldpass, newpass string) error {
 //获得所有被禁止的user
 func GetBlockUsers(limit, offset int) ([]*User, error) {
 	rows, err := db.Query(
-		"SELECT `uid`,`username`,`email`, `regtime`," +
-			" `sites`, `sex`, `description`, `exp`," +
-			" `posts`,`replys` FROM `user`" +
+		"SELECT `uid`,`username`,`email`, `regtime`,"+
+			" `sites`, `sex`, `description`, `exp`,"+
+			" `posts`,`replys` FROM `user`"+
 			" WHERE `status` <> 0  LIMIT ? OFFSET ? ",
 		limit, offset)
 
@@ -239,58 +248,90 @@ func GetBlockUsers(limit, offset int) ([]*User, error) {
 	return users, err
 }
 
-//生成TOKEN base64(data+hmac(data,SecretKey))
-func GenToken(uid int64, secretKey string, duration time.Duration) string {
-	data := &TokenData{
-		Uid:     uid,
-		Salt:    Krand(10),
-		Expires: time.Now().Add(duration),
-	}
-
+//生成token
+func EncodeToken(data interface{}, secretKey string) string {
 	mac := hmac.New(sha256.New, []byte(secretKey))
 	bytedata, _ := json.Marshal(data)
 	mac.Write(bytedata)
 	signature := mac.Sum(nil)
-
 	return base64.URLEncoding.EncodeToString(append(bytedata, signature...))
 }
 
-//valid token 返回uid
-func ValidToken(token, secretKey string) (uid int64, err error) {
-	uid = -1
-	decode_token, err := base64.URLEncoding.DecodeString(token)
-	if err != nil {
-		return
-	}
-
-	totallen := len(decode_token)
-	payload := decode_token[:totallen - 32]
-	signature := decode_token[totallen - 32:]
-
-	mac := hmac.New(sha256.New, []byte(secretKey))
-	mac.Write([]byte(payload))
-	my_signature := mac.Sum(nil)
-
-	if hmac.Equal(signature, my_signature) {
-		data := &TokenData{}
-		if err = json.Unmarshal([]byte(payload), &data); err != nil {
-			return
-		}
-
-		if data.Expires.Before(time.Now()) {
-			return -1, code.ERR_TOKEN_TIMEOUT
-		}
-
-		var d TokenData
-		if err = json.Unmarshal(payload, &d); err != nil {
-			return
-		}
-
-		return d.Uid, nil
+//验证token 签名是否一致
+func DecodeToken(token, secretKey string) ([]byte, error) {
+	if decode_token, err := base64.URLEncoding.DecodeString(token); err != nil {
+		return nil, err
 	} else {
-		err = code.ERR_TOKEN_INVALID
-		return;
+		totallen := len(decode_token)
+		payload := decode_token[:totallen-32]
+		signature := decode_token[totallen-32:]
+
+		mac := hmac.New(sha256.New, []byte(secretKey))
+		mac.Write([]byte(payload))
+		my_signature := mac.Sum(nil)
+
+		if !hmac.Equal(signature, my_signature) {
+			return nil, code.ERR_TOKEN_INVALID
+		} else {
+			return payload, nil
+		}
 	}
+}
+
+//生成TOKEN base64(data+hmac(data,SecretKey))
+func GenLoginToken(uid int64, secretKey string, duration time.Duration) string {
+	data := &LoginToken{
+		Uid:     uid,
+		Salt:    Krand(10),
+		Expires: time.Now().Add(duration),
+	}
+	return EncodeToken(data, secretKey)
+}
+
+//valid token 返回uid
+func ValidLoginToken(token, secretKey string) (int64, error) {
+	if s, err := DecodeToken(token, secretKey); err != nil {
+		return -1, nil
+	} else {
+		data := &LoginToken{}
+		if err = json.Unmarshal(s, &data); err != nil {
+			return -1, err
+		} else if data.Expires.Before(time.Now()) {
+			return -1, code.ERR_TOKEN_TIMEOUT
+		} else {
+			return data.Uid, nil
+		}
+	}
+}
+
+//产生注册token
+//包含 username,email,过期时间,产生token发送到邮箱
+//当用户点击连接时验证token和时间等，成功则设置密码等完成注册写入数据库
+func GenRegToken(username, email string, secretKey string, duration time.Duration) string {
+	data := &RegToken{
+		Username: username,
+		Email:    email,
+		Salt:     Krand(10),
+		Expires:  time.Now().Add(duration),
+	}
+	return EncodeToken(data, secretKey)
+}
+
+//返回用户名和邮箱以便于检查可用性
+func ValidRegToken(token, secretKey string) (*RegToken, bool) {
+	if s, err := DecodeToken(token, secretKey); err != nil {
+		log.Println(err)
+		return nil, false
+	} else {
+		data := &RegToken{}
+		if err = json.Unmarshal(s, &data); err != nil {
+			return nil, false
+		} else if data.Expires.After(time.Now()) {
+			return data, true
+		}
+	}
+
+	return nil, false
 }
 
 // 随机字符串

@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"goBlog/code"
 	"io"
 	"net/http"
 )
@@ -26,6 +28,12 @@ type MethodHandler interface {
 	ServePUT(http.ResponseWriter, *http.Request)
 	ServePATCH(http.ResponseWriter, *http.Request)
 	ServeHEAD(http.ResponseWriter, *http.Request)
+}
+
+type Result struct {
+	Data    interface{}
+	Code    int
+	Message string
 }
 
 func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +70,6 @@ func (*BaseHandler) ServeHEAD(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, s)
 }
 
-
 func HandleMethod(target MethodHandler, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -80,7 +87,24 @@ func HandleMethod(target MethodHandler, w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func HandleError(err error,w http.ResponseWriter, r *http.Request)  {
-	w.Write([]byte(err.Error()))
+func HandleResult(data interface{},w http.ResponseWriter, r *http.Request) {
+	res := &Result{Data: data, Code: code.CODE_OK, Message: ""}
+	if b, err := json.Marshal(res); err != nil {
+		w.Write([]byte(err.Error()))
+	} else {
+		w.Write(b)
+	}
 }
 
+func HandleParaError(w http.ResponseWriter, r *http.Request) {
+	HandleError(code.ERR_PARAMETER, w, r)
+}
+
+func HandleError(err error, w http.ResponseWriter, r *http.Request) {
+	res := &Result{Data: nil, Code: code.CODE_ERROR, Message: err.Error()}
+	if b, err := json.Marshal(res); err != nil {
+		w.Write([]byte(err.Error()))
+	} else {
+		w.Write(b)
+	}
+}
