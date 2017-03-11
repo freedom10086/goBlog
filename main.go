@@ -5,6 +5,8 @@ import (
 	"goBlog/models"
 	"log"
 	"net/http"
+	"time"
+	"goBlog/router"
 )
 
 func init() {
@@ -21,12 +23,15 @@ func main() {
 		})
 	}()
 
-	mux := http.NewServeMux()
-	for k, v := range routers {
-		mux.Handle(k, v)
+	r := router.NewRouter();
+	server := &http.Server{
+		Addr: config.SitePortSSL,
+		Handler: r,
+		WriteTimeout: 8 * time.Second,
+		ReadTimeout:  8 * time.Second,
 	}
 
 	log.Printf("https listen on %s%s", "https://127.0.0.1", config.SitePortSSL)
-	err := http.ListenAndServeTLS(config.SitePortSSL, "cert.pem", "key.pem", mux)
+	err := server.ListenAndServeTLS("cert.pem", "key.pem")
 	log.Fatal(err)
 }

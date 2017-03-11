@@ -1,7 +1,6 @@
-package handlers
+package router
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -36,6 +35,7 @@ var mineTypes = map[string]string{
 }
 
 type StaticFileHandler struct {
+	BaseHandler
 }
 
 func GetMineType(name string) string {
@@ -72,7 +72,7 @@ func GetMineType(name string) string {
 
 }
 
-func (*StaticFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (*StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	fname := viewPath + r.URL.Path
 
 	if strings.HasSuffix(fname, "/") {
@@ -83,20 +83,20 @@ func (*StaticFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	f, err := os.Open(fname)
 	if err != nil {
-		HandleError(err, w, r)
+		NotFound(w, r)
 		return
 	}
 	defer f.Close()
 
 	fi, err := f.Stat()
 	if err != nil {
-		HandleError(err, w, r)
+		InternalError(w, r, err)
 		return
 	}
 
 	const modeType = os.ModeDir | os.ModeSymlink | os.ModeNamedPipe | os.ModeSocket | os.ModeDevice
 	if fi.Mode()&modeType != 0 {
-		HandleError(errors.New("not a regular file"), w, r)
+		InternalError(w, r, err)
 		return
 	}
 
