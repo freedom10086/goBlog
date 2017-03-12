@@ -1,4 +1,4 @@
-package main
+package conf
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-var config *Config
+var Conf *Config
 
 type Config struct {
 	SiteName    string `json:"SiteName"`
@@ -20,13 +20,13 @@ type Config struct {
 }
 
 func init() {
-	config = readConfig()
+	Conf = readConfig()
 	log.Println("success read config")
 }
 
 func readConfig() *Config {
-	if config != nil {
-		return config
+	if Conf != nil {
+		return Conf
 	}
 	inputFile := "./config.json"
 	buf, err := ioutil.ReadFile(inputFile)

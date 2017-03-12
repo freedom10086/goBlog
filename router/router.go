@@ -1,11 +1,11 @@
 package router
 
 import (
-	"sync"
+	"log"
 	"net/http"
 	"path"
 	"strings"
-	"log"
+	"sync"
 )
 
 var htmlReplacer = strings.NewReplacer(
@@ -23,8 +23,8 @@ func init() {
 	routers["/"] = &StaticFileHandler{}
 	routers["/categorys"] = &CateHandler{}
 	routers["/users"] = &UserHandler{}
-	//routers["/login"] = &handlers.LoginHandler{SecretKey: config.SecretKey}
-	//routers["/regiest"] = &handlers.RegisterHandler{SecretKey: config.SecretKey}
+	routers["/auth"] = &OauthHandler{}
+	routers["/regiest"] = RegisterHandler{}
 }
 
 type MyRouter struct {
@@ -40,15 +40,17 @@ type muxEntry struct {
 //子类要实现此接口中的方法如果不实现
 //由父类代替
 type MyHandler interface {
+	DoAuth(http.ResponseWriter, *http.Request) bool
 	DoGet(http.ResponseWriter, *http.Request)
 	DoPost(http.ResponseWriter, *http.Request)
 	DoDelete(http.ResponseWriter, *http.Request)
-	DoUpdate(http.ResponseWriter, *http.Request)//put patch
+	DoUpdate(http.ResponseWriter, *http.Request) //put patch
 	DoOther(http.ResponseWriter, *http.Request)
 }
 
 type Filter interface {
-
+	//todo 身份验证统一放到这儿
+	//由子类提供验证方法，父类验证成功后再转发消息
 }
 
 func NewRouter() *MyRouter {
@@ -73,22 +75,28 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h, _ := mux.getHandler(r); h != nil {
-		switch r.Method {
-		case "GET":
-			h.DoGet(w, r)
-		case "POST":
-			h.DoPost(w, r)
-		case "DELETE":
-			h.DoDelete(w, r)
-		case "PUT":
-		case "PATCH":
-			h.DoUpdate(w, r)
-		default:
-			h.DoOther(w, r)
+		if h.DoAuth(w, r) {
+			switch r.Method {
+			case "GET":
+				h.DoGet(w, r)
+			case "POST":
+				h.DoPost(w, r)
+			case "DELETE":
+				h.DoDelete(w, r)
+			case "PUT":
+			case "PATCH":
+				h.DoUpdate(w, r)
+			default:
+				h.DoOther(w, r)
+			}
+			return
 		}
-	} else {
-		NotFound(w, r)
+
+		Unauthorized(w, r)
+		return
+
 	}
+	NotFound(w, r)
 }
 
 func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
@@ -101,8 +109,8 @@ func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
 	}
 
 	// /tree/-> /tree
-	if n > 1&&pattern[n - 1] == '/' {
-		pattern = pattern[:n - 1]
+	if n > 1 && pattern[n-1] == '/' {
+		pattern = pattern[:n-1]
 	}
 
 	if mux.m == nil {
@@ -119,7 +127,7 @@ func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
 func (mux *MyRouter) getHandler(r *http.Request) (h MyHandler, pattern string) {
 	if r.Method != "CONNECT" {
 		if p := cleanPath(r.URL.Path); p != r.URL.Path {
-			r.URL.Path = p;
+			r.URL.Path = p
 		}
 	}
 
@@ -147,7 +155,7 @@ func pathMatch(pattern, path string) bool {
 		return false
 	}
 	n := len(pattern)
-	if pattern[n - 1] != '/' {
+	if pattern[n-1] != '/' {
 		return pattern == path
 	}
 	return len(path) >= n && path[0:n] == pattern
@@ -161,7 +169,7 @@ func cleanPath(p string) string {
 		p = "/" + p
 	}
 	np := path.Clean(p)
-	if p[len(p) - 1] == '/' && np != "/" {
+	if p[len(p)-1] == '/' && np != "/" {
 		np += "/"
 	}
 	return np

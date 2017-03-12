@@ -1,32 +1,36 @@
 package main
 
 import (
-	"goBlog/handlers"
-	"goBlog/models"
+	"goBlog/conf"
+	"goBlog/model"
+	"goBlog/router"
 	"log"
 	"net/http"
 	"time"
-	"goBlog/router"
 )
 
+var config conf.Config
+
 func init() {
-	models.InitDB(config.DbName, config.DbUsername, config.DbPassword)
+	config = conf.Conf
+	model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
 	log.Printf("==%s started==", config.SiteName)
 }
 
 func main() {
+	defer model.CloseDB()
 	go func() {
 		log.Printf("http listen on %s%s", config.SiteAddr, config.SitePort)
-		http.ListenAndServe(config.SitePort, &handlers.RedirectHandler{
+		http.ListenAndServe(config.SitePort, &router.RedirectHandler{
 			Url:  config.SiteAddr,
 			Port: config.SitePortSSL,
 		})
 	}()
 
-	r := router.NewRouter();
+	r := router.NewRouter()
 	server := &http.Server{
-		Addr: config.SitePortSSL,
-		Handler: r,
+		Addr:         config.SitePortSSL,
+		Handler:      r,
 		WriteTimeout: 8 * time.Second,
 		ReadTimeout:  8 * time.Second,
 	}

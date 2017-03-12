@@ -1,7 +1,7 @@
 package router
 
 import (
-	"goBlog/models"
+	"goBlog/model"
 	"log"
 	"net/http"
 	"strconv"
@@ -32,7 +32,7 @@ func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 
 	offset := sizeInt * (pageInt - 1)
 	log.Printf("offset:%d limit:%d", offset, sizeInt)
-	if users, err := models.GetUsers(true, offset, sizeInt); err != nil {
+	if users, err := model.GetUsers(true, offset, sizeInt); err != nil {
 		InternalError(w, r, err)
 		return
 	} else {
@@ -45,13 +45,13 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	if token := r.PostFormValue("token"); token == "" {
 		BadParament(w, r)
 		return
-	} else if t, ok := models.ValidRegToken(token, h.SecretKey); ok {
+	} else if t, ok := model.ValidRegToken(token, h.SecretKey); ok {
 		if t.Username == "" || t.Password == "" || t.Email == "" || t.Sex < 0 {
 			BadParament(w, r)
 			return
 		}
 
-		id, err := models.AddUser(t.Username, t.Password, t.Email, t.Sex)
+		id, err := model.AddUser(t.Username, t.Password, t.Email, t.Sex)
 		if err != nil {
 			InternalError(w, r, err)
 		}
@@ -70,7 +70,7 @@ func (*UserHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 		BadParament(w, r)
 		return
 	} else {
-		if i, err := models.DelUser(uidInt); err != nil {
+		if i, err := model.DelUser(uidInt); err != nil {
 			InternalError(w, r, err)
 			return
 		} else {

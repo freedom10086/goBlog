@@ -351,7 +351,6 @@ WHERE 1;
 #---------------------------------------------------
 #---------------------存储过程定义-------------------
 #---------------------------------------------------
-
 #发表主题
 DROP PROCEDURE IF EXISTS post_add;
 CREATE PROCEDURE post_add(
@@ -375,49 +374,6 @@ CREATE PROCEDURE post_add(
     END IF;
   END;
 
-#编辑文章
-DROP PROCEDURE IF EXISTS post_edit;
-CREATE PROCEDURE post_edit(
-  IN in_tid     INT,
-  IN in_title   VARCHAR(50),
-  IN in_content VARCHAR(10000))
-  BEGIN
-    SET @timenow = now();
-    UPDATE `post`
-    SET `title` = in_title, `content` = in_content, `updated` = @timenow, `lastreply` = @timenow
-    WHERE `tid` = in_tid;
-    SELECT in_tid;
-  END;
-
-#删除文章
-DROP PROCEDURE IF EXISTS post_del;
-CREATE PROCEDURE post_del(IN in_tid INT)
-  BEGIN
-    DELETE FROM `post`
-    WHERE `tid` = in_tid;
-    SELECT ROW_COUNT();
-  END;
-
-#禁止回复文章
-DROP PROCEDURE IF EXISTS post_close_comment;
-CREATE PROCEDURE post_close_comment(IN in_tid INT)
-  BEGIN
-    UPDATE `post`
-    SET `status` = '1'
-    WHERE `tid` = in_tid;
-    SELECT ROW_COUNT();
-  END;
-
-#允许回复文章
-DROP PROCEDURE IF EXISTS post_open_comment;
-CREATE PROCEDURE post_open_comment(IN in_tid INT)
-  BEGIN
-    UPDATE `post`
-    SET `status` = '0'
-    WHERE `tid` = in_tid;
-    SELECT ROW_COUNT();
-  END;
-
 #添加评论回复楼主
 DROP PROCEDURE IF EXISTS `comment_add_lz`;
 CREATE PROCEDURE comment_add_lz(
@@ -429,14 +385,10 @@ CREATE PROCEDURE comment_add_lz(
     INTO @tuid
     FROM `post`
     WHERE tid = in_tid;
-
     IF @tuid IS NOT NULL
     THEN
       INSERT INTO `comment` (`tid`, `uid`, `tuid`, `content`)
       VALUES (in_tid, in_uid, @tuid, in_content);
-      SELECT LAST_INSERT_ID();
-    ELSE
-      SELECT 0;
     END IF;
   END;
 
@@ -448,7 +400,6 @@ CREATE PROCEDURE comment_add_cz(
   IN in_uid     INT,
   IN in_content VARCHAR(10000))
   BEGIN
-
     SELECT @czuid := `uid`
     FROM `comment`
     WHERE `tid` = in_tid AND `id` = in_pid;
@@ -457,10 +408,6 @@ CREATE PROCEDURE comment_add_cz(
     THEN
       INSERT INTO `comment` (`tid`, `pid`, `uid`, `tuid`, `content`)
       VALUES (in_tid, in_pid, in_uid, @czuid, in_content);
-
-      SELECT LAST_INSERT_ID();
-    ELSE
-      SELECT 0;
     END IF;
   END;
 
@@ -475,37 +422,16 @@ CREATE PROCEDURE comment_del(IN in_id INT)
     INTO @pid, @uid, @replys
     FROM `comment`
     WHERE `id` = in_id;
-
     IF FOUND_ROWS() > 0
     THEN
       DELETE FROM `comment`
       WHERE `id` = in_id;
-
       IF @pid = 0 AND @replys > 0 #父评论且有子回复
       THEN
         DELETE FROM comment
         WHERE pid = in_id;
-
-        SELECT ROW_COUNT() + 1;
-      ELSE
-        SELECT ROW_COUNT();
       END IF;
-
-
-    ELSE
-      SELECT 0;
     END IF;
-  END;
-
-#编辑评论
-DROP PROCEDURE IF EXISTS `comment_edit`;
-CREATE PROCEDURE comment_edit(
-  IN in_id      INT,
-  IN in_content VARCHAR(10000))
-  BEGIN
-    UPDATE `comment`
-    SET `content` = in_content, `updated` = now()
-    WHERE `id` = in_id;
   END;
 
 #收藏文章

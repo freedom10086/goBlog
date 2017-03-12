@@ -7,7 +7,44 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"log"
+	"goBlog/conf"
 )
+
+var config conf.Config
+
+type BaseHandler struct {
+
+}
+
+func init() {
+	config = conf.Conf
+}
+
+func (*BaseHandler) DoAuth(w http.ResponseWriter, r *http.Request) bool {
+	log.Printf("header %v", r.Header)
+	return true
+}
+
+func (*BaseHandler)DoGet(w http.ResponseWriter, r *http.Request) {
+	NotAllowed(w, r)
+}
+
+func (*BaseHandler)DoPost(w http.ResponseWriter, r *http.Request) {
+	NotAllowed(w, r)
+}
+
+func (*BaseHandler)DoDelete(w http.ResponseWriter, r *http.Request) {
+	NotAllowed(w, r)
+}
+
+func (*BaseHandler)DoUpdate(w http.ResponseWriter, r *http.Request) {
+	NotAllowed(w, r)
+}
+
+func (*BaseHandler)DoOther(w http.ResponseWriter, r *http.Request) {
+	NotAllowed(w, r)
+}
 
 type ResultData struct {
 	Data    interface{}

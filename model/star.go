@@ -1,13 +1,9 @@
-package models
+package model
 
 import (
 	"log"
 	"time"
-	"goBlog/code"
 )
-
-/*
- */
 
 type Star struct {
 	Id      int       //id

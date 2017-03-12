@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"log"
@@ -10,32 +10,27 @@ type Category struct {
 	Name        string
 	Description string
 	Posts       int
+	Sticks      []int64
 	ToadyPosts  int
 	Created     time.Time
 }
 
 //新增category
 func AddCate(name, description string) (int64, error) {
-	stmt, err := db.Prepare("INSERT INTO `cate` SET name=?,description=?")
-	if err != nil {
-		return -1, err
-	}
-	return add(stmt, name, description)
+	s:="INSERT INTO `cate` (`name`, `description`) VALUES (?, ?)"
+	return add(s, name, description)
 }
 
 //删除category 里面的帖子怎么办？
 //所以最好不要删除category
-func DelCate(cid int) (count int64, err error) {
-	stmt, err := db.Prepare("DELETE FROM `cate` WHERE `cid` = ?")
-	if err != nil {
-		return -1, err
-	}
-	return delete(stmt, cid)
+func DelCate(cid int) (int64, error) {
+	return del("DELETE FROM `cate` WHERE `cid` = ?", cid)
 }
 
 //获得category
 func GetCate(cid int) (*Category, error) {
 	cate := &Category{Cid: cid}
+
 	err := db.QueryRow(
 		"SELECT  `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category` WHERE `cid` = ?",
 		cid).Scan(&cate.Name, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.Created)
@@ -72,10 +67,7 @@ func GetCates() ([]*Category, error) {
 }
 
 //修改category
-func ModifyCate(cid int, name, description string) error {
-	stmt, err := db.Prepare("UPDATE `category` SET `title` = ?,`description` = ? WHERE `cid` = ?")
-	if err != nil {
-		return err
-	}
-	return update(stmt, name, description, cid)
+func ModifyCate(cid int, name, description string) (int64, error) {
+	sql := "UPDATE `category` SET `title` = ?,`description` = ? WHERE `cid` = ?"
+	return update(sql, name, description, cid)
 }
