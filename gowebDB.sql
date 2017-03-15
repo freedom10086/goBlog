@@ -14,6 +14,16 @@
 #ROW_COUNT()  : update delete insert.
 #LEFT(in_content, 50) 截断字符串
 
+#mysql 判断天数间隔
+#1、利用TO_DAYS函数
+#select to_days(now()) - to_days('20140831')
+#2、利用DATEDIFF函数
+#select datediff(now(),'20140831')
+
+#函数TimeStampDiff()是MySQL本身提供的可以计算两个时间间隔的函数，语法为：
+#TIMESTAMPDIFF(unit,datetime_expr1,datetime_expr2)，
+#其中unit单位有如下几种，分别是：FRAC_SECOND (microseconds), SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER, or YEAR
+
 #用户
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
@@ -30,6 +40,9 @@ CREATE TABLE `user` (
   `site`        VARCHAR(50)  NOT NULL DEFAULT '', #个人网站
   `posts`       INT          NOT NULL DEFAULT 0, #发帖数
   `replys`      INT          NOT NULL DEFAULT 0, #回复数
+  `newreplys`   INT          NOT NULL DEFAULT 0, #新回复数
+  `newfollows`  INT          NOT NULL DEFAULT 0, #新粉丝数
+  `newchats`    INT          NOT NULL DEFAULT 0, #新私信数
   `regtime`     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`),
   UNIQUE INDEX `user_username` (`username`),
@@ -110,24 +123,6 @@ CREATE TABLE `star` (
     ON DELETE CASCADE
 );
 
-#@表 回复表可以根据评论推断出来
-DROP TABLE IF EXISTS `atmsg`;
-CREATE TABLE `atmsg` (
-  `id`      INT       NOT NULL AUTO_INCREMENT,
-  `uid`     INT       NOT NULL, #我的uid
-  `tuid`    INT       NOT NULL, #对方uid
-  `type`    TINYINT   NOT NULL, #0-reply 1-post
-  `rid`     INT       NOT NULL, #根据上面type确定id
-  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  INDEX `atmsg_uid` (`uid`),
-  INDEX `atmsg_to` (`uid`),
-  FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)
-    ON DELETE CASCADE,
-  FOREIGN KEY (`tuid`) REFERENCES `user` (`uid`)
-    ON DELETE CASCADE
-);
-
 #关注
 DROP TABLE IF EXISTS `follow`;
 CREATE TABLE `follow` (
@@ -152,6 +147,7 @@ CREATE TABLE `chat` (
   `uid`     INT           NOT NULL,
   `tuid`    INT           NOT NULL, #对方uid
   `content` VARCHAR(2000) NOT NULL DEFAULT '',
+  `isread`  TINYINT       NOT NULL DEFAULT '0',
   `created` TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `chat_my_uid` (`uid`),
@@ -160,19 +156,6 @@ CREATE TABLE `chat` (
     ON DELETE CASCADE,
   FOREIGN KEY (`tuid`) REFERENCES `user` (`uid`)
     ON DELETE CASCADE
-);
-
-#消息表
-DROP TABLE IF EXISTS `message`;
-CREATE TABLE `message` (
-  `mid`     INT       NOT NULL AUTO_INCREMENT,
-  `uid`     INT       NOT NULL,
-  `type`    TINYINT   NOT NULL, #1-reply 2-at 3-chat 4-follow
-  `rid`     INT       NOT NULL, #根据上面的type获取id
-  `isread`  TINYINT   NOT NULL DEFAULT 0, #0未读 1-已读
-  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`mid`),
-  UNIQUE INDEX `message_item` (`uid`, `type`, `rid`)
 );
 
 #---------------------------------------------------
@@ -211,9 +194,6 @@ FOR EACH ROW
     UPDATE `cate`
     SET `posts` = `posts` - 1, `todayposts` = `todayposts` - @today
     WHERE `cid` = old.cid;
-
-    DELETE FROM `atmsg`
-    WHERE type = 2 AND rid = old.tid;
   END;
 
 #增加评论之后
@@ -235,12 +215,22 @@ FOR EACH ROW
       UPDATE `comment`
       SET `replys` = `replys` + 1
       WHERE id = new.pid;
-    #todo 还要通知lz
+
+      #楼中楼 通知楼主
+      UPDATE user
+      SET newreplys = newreplys + 1
+      WHERE uid = (SELECT uid
+                   FROM post
+                   WHERE tid = new.tid)
+            AND uid <> new.tuid;
     END IF;
 
+    #通知
     IF new.uid <> new.tuid
     THEN
-      INSERT INTO message (uid, type, rid) VALUES (new.tuid, 1, new.id);
+      UPDATE user
+      SET newreplys = newreplys + 1
+      WHERE uid = new.tuid;
     END IF;
   END;
 
@@ -264,34 +254,6 @@ FOR EACH ROW
       SET `replys` = `replys` - 1
       WHERE id = new.pid AND `replys` > 0;
     END IF;
-
-    DELETE FROM `atmsg`
-    WHERE type = 1 AND rid = old.id;
-
-    DELETE FROM `message`
-    WHERE type = 1 AND rid = old.tid;
-  END;
-
-#增加@
-DROP TRIGGER IF EXISTS `t_atmsg_add`;
-CREATE TRIGGER `t_atmsg_add`
-AFTER INSERT ON `atmsg`
-FOR EACH ROW
-  BEGIN
-    IF new.uid <> new.tuid
-    THEN
-      INSERT INTO message (uid, type, rid) VALUES (new.tuid, 2, new.id);
-    END IF;
-  END;
-
-#删除@
-DROP TRIGGER IF EXISTS `t_atmsg_del`;
-CREATE TRIGGER `t_atmsg_del`
-AFTER DELETE ON `atmsg`
-FOR EACH ROW
-  BEGIN
-    DELETE FROM `message`
-    WHERE type = 2 AND rid = old.id;
   END;
 
 #增加chat
@@ -301,7 +263,9 @@ AFTER INSERT ON `chat`
 FOR EACH ROW
   IF new.uid <> new.tuid
   THEN
-    INSERT INTO message (uid, type, rid) VALUES (new.tuid, 3, new.id);
+    UPDATE user
+    SET newchats = newchats + 1
+    WHERE uid = new.tuid;
   END IF;
 
 #删除chat
@@ -310,29 +274,25 @@ CREATE TRIGGER `t_chat_del`
 AFTER DELETE ON `chat`
 FOR EACH ROW
   BEGIN
-    DELETE FROM `message`
-    WHERE type = 3 AND rid = old.id;
+    IF old.isread = 0
+    THEN
+      UPDATE user
+      SET newchats = newchats - 1
+      WHERE uid = old.tuid AND newchats > 0;
+    END IF;
   END;
 
-#增加follow
+#增加关注
 DROP TRIGGER IF EXISTS `t_follow_add`;
 CREATE TRIGGER `t_follow_add`
 AFTER INSERT ON `follow`
 FOR EACH ROW
   IF new.uid <> new.tuid
   THEN
-    INSERT INTO message (uid, type, rid) VALUES (new.tuid, 4, new.id);
+    UPDATE user
+    SET newfollows = newfollows + 1
+    WHERE uid = new.tuid;
   END IF;
-
-#删除follow
-DROP TRIGGER IF EXISTS `t_follow_del`;
-CREATE TRIGGER `t_follow_del`
-AFTER DELETE ON `follow`
-FOR EACH ROW
-  BEGIN
-    DELETE FROM `message`
-    WHERE type = 4 AND rid = old.id;
-  END;
 
 #---------------------------------------------------
 #--------------计划任务定义--------------------------
@@ -351,29 +311,6 @@ WHERE 1;
 #---------------------------------------------------
 #---------------------存储过程定义-------------------
 #---------------------------------------------------
-#发表主题
-DROP PROCEDURE IF EXISTS post_add;
-CREATE PROCEDURE post_add(
-  IN in_cid     INT,
-  IN in_uid     INT,
-  IN in_title   VARCHAR(50),
-  IN in_content VARCHAR(10000))
-  BEGIN
-    SELECT `username`
-    INTO @username
-    FROM `user`
-    WHERE `uid` = in_uid;
-
-    IF @username IS NOT NULL
-    THEN
-      INSERT INTO `post` (`cid`, `uid`, `username`, `title`, `content`)
-      VALUES (in_cid, in_uid, @username, in_title, in_content);
-      SELECT last_insert_id();
-    ELSE
-      SELECT 0;
-    END IF;
-  END;
-
 #添加评论回复楼主
 DROP PROCEDURE IF EXISTS `comment_add_lz`;
 CREATE PROCEDURE comment_add_lz(
@@ -413,15 +350,14 @@ CREATE PROCEDURE comment_add_cz(
 
 #删除评论
 DROP PROCEDURE IF EXISTS `comment_del`;
-CREATE PROCEDURE comment_del(IN in_id INT)
+CREATE PROCEDURE comment_del(IN in_uid INT, IN in_id INT)
   BEGIN
     SELECT
       `pid`,
-      `uid`,
       `replys`
-    INTO @pid, @uid, @replys
+    INTO @pid, @replys
     FROM `comment`
-    WHERE `id` = in_id;
+    WHERE `id` = in_id AND `uid` = in_uid;
     IF FOUND_ROWS() > 0
     THEN
       DELETE FROM `comment`
@@ -434,113 +370,24 @@ CREATE PROCEDURE comment_del(IN in_id INT)
     END IF;
   END;
 
-#收藏文章
-DROP PROCEDURE IF EXISTS `star_add`;
-CREATE PROCEDURE star_add(
-  IN in_uid INT,
-  IN in_tid INT)
+#删除评论
+DROP PROCEDURE IF EXISTS `comment_del_admin`;
+CREATE PROCEDURE comment_del_admin(IN in_id INT)
   BEGIN
-    INSERT INTO `star` (`uid`, `tid`) VALUES (in_uid, in_tid);
-    SELECT last_insert_id();
-  END;
-
-#取消收藏文章
-DROP PROCEDURE IF EXISTS `star_del_bytid`;
-CREATE PROCEDURE star_del_bytid(
-  IN in_uid INT,
-  IN in_tid INT)
-  BEGIN
-    DELETE FROM `star`
-    WHERE `uid` = in_uid AND `tid` = in_tid;
-
-    SELECT ROW_COUNT();
-  END;
-
-#取消收藏文章
-DROP PROCEDURE IF EXISTS `star_del_byid`;
-CREATE PROCEDURE star_del_byid(IN in_id INT)
-  BEGIN
-    DELETE FROM `star`
+    SELECT
+      `pid`,
+      `replys`
+    INTO @pid, @replys
+    FROM `comment`
     WHERE `id` = in_id;
-
-    SELECT ROW_COUNT();
-  END;
-
-#添加被@消息--post
-DROP PROCEDURE IF EXISTS `at_add_lz`;
-CREATE PROCEDURE at_add_lz(
-  IN in_myuid INT,
-  IN in_tuid  INT,
-  IN in_tid   INT)
-  BEGIN
-    IF in_myuid <> in_tuid
+    IF FOUND_ROWS() > 0
     THEN
-      INSERT INTO atmsg (`uid`, `tuid`, `type`, `rid`)
-      VALUES (in_myuid, in_tuid, 2, in_tid);
-      SELECT last_insert_id();
-    ELSE
-      SELECT 0;
-    END IF;
-  END;
-
-#添加被@消息--reply
-DROP PROCEDURE IF EXISTS `at_add_cz`;
-CREATE PROCEDURE at_add_cz(
-  IN in_myuid INT,
-  IN in_tuid  INT,
-  IN in_id    INT)
-  BEGIN
-    IF in_myuid <> in_tuid
-    THEN
-      INSERT INTO atmsg (`uid`, `tuid`, `type`, `rid`)
-      VALUES (in_myuid, in_tuid, 1, in_id);
-      SELECT last_insert_id();
-    ELSE
-      SELECT 0;
-    END IF;
-  END;
-
-#增加关注
-DROP PROCEDURE IF EXISTS `follow_add`;
-CREATE PROCEDURE follow_add(
-  IN in_uid  INT,
-  IN in_tuid INT,
-  IN in_note VARCHAR(25))
-  BEGIN
-    IF in_uid <> in_tuid
-    THEN
-      INSERT INTO `follow` (`uid`, `tuid`, `note`)
-      VALUES (in_uid, in_tuid, in_note);
-      SELECT last_insert_id();
-    ELSE
-      SELECT 0;
-    END IF;
-  END;
-
-#取消关注
-DROP PROCEDURE IF EXISTS `follow_del`;
-CREATE PROCEDURE follow_del(
-  IN in_uid  INT,
-  IN in_tuid INT)
-  BEGIN
-    DELETE FROM `follow`
-    WHERE `uid` = in_uid AND `tuid` = in_tuid;
-
-    SELECT ROW_COUNT();
-  END;
-
-#发送聊天消息
-DROP PROCEDURE IF EXISTS `chat_add`;
-CREATE PROCEDURE chat_add(
-  IN in_uid     INT,
-  IN in_tuid    INT,
-  IN in_content VARCHAR(2000))
-  BEGIN
-    IF in_uid <> in_tuid
-    THEN
-      INSERT INTO `chat` (`uid`, `tuid`, `content`) VALUES (in_uid, in_tuid, in_content);
-      SELECT last_insert_id();
-    ELSE
-      SELECT 0;
+      DELETE FROM `comment`
+      WHERE `id` = in_id;
+      IF @pid = 0 AND @replys > 0 #父评论且有子回复
+      THEN
+        DELETE FROM comment
+        WHERE pid = in_id;
+      END IF;
     END IF;
   END;

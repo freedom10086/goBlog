@@ -28,7 +28,7 @@ func readConfig() *Config {
 	if Conf != nil {
 		return Conf
 	}
-	inputFile := "./config.json"
+	inputFile := "./conf/config.json"
 	buf, err := ioutil.ReadFile(inputFile)
 	if err != nil {
 		panic(err.Error())

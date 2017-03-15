@@ -14,7 +14,7 @@ type RegisterHandler struct {
 
 //token null /regiest ->登陆页面
 //登陆页面 ->dopost -> 发邮件 -> 点击连接 -> user.doPost 插入数据库
-func (h *RegisterHandler) DoGET(w http.ResponseWriter, r *http.Request) {
+func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	if token := r.FormValue("token"); token == "" {
 		s := fmt.Sprintln("this is reg page 用户名 邮件 ->提交 doPost")
 		io.WriteString(w, s)
@@ -30,7 +30,7 @@ func (h *RegisterHandler) DoGET(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *RegisterHandler) DoPOST(w http.ResponseWriter, r *http.Request) {
+func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	username := r.PostFormValue("username")
 	email := r.PostFormValue("email")
 

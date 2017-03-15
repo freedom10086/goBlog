@@ -30,9 +30,8 @@ func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset := sizeInt * (pageInt - 1)
-	log.Printf("offset:%d limit:%d", offset, sizeInt)
-	if users, err := model.GetUsers(true, offset, sizeInt); err != nil {
+	log.Printf("page:%d size:%d", pageInt, sizeInt)
+	if users, err := model.GetUsers(pageInt, sizeInt); err != nil {
 		InternalError(w, r, err)
 		return
 	} else {

@@ -11,6 +11,11 @@ import (
 	"math/rand"
 )
 
+var (
+	ErrTokenInvalid = errors.New("token is invalid!")
+	ErrTokenExperied = errors.New("token is experied!")
+)
+
 type Token struct {
 	Uid       int64
 	Authority int //权限 0-99 普通用户 100admin
@@ -50,7 +55,7 @@ func DecodeToken(token, secretKey string) ([]byte, error) {
 		my_signature := mac.Sum(nil)
 
 		if !hmac.Equal(signature, my_signature) {
-			return nil, code.ERR_TOKEN_INVALID
+			return nil, ErrTokenInvalid
 		} else {
 			return payload, nil
 		}
@@ -82,7 +87,7 @@ func ValidToken(token, secretKey string) (*Token, error) {
 		if err = json.Unmarshal(s, &data); err != nil {
 			return nil, err
 		} else if data.Expires.Before(time.Now()) {
-			return nil, errors.New("token is expires")
+			return nil, ErrTokenExperied
 		} else {
 			return data, nil
 		}

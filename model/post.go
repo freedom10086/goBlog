@@ -31,8 +31,9 @@ type Article struct {
 
 //发布主题
 func AddPost(cid, uid int, title, content string) (int64, error) {
-	s := "call post_add(?,?,?,?)"
-	return add(s, cid, uid, title, content)
+	s := "insert into `post` (`cid`,`uid`,`username`,`title`,`content`) VALUES " +
+		"(?,?,(select username from `user` where uid = ?),?,?)"
+	return add(s, cid, uid, uid, title, content)
 }
 
 //删除主题

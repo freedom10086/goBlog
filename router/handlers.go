@@ -11,7 +11,7 @@ import (
 	"goBlog/conf"
 )
 
-var config conf.Config
+var config *conf.Config
 
 type BaseHandler struct {
 

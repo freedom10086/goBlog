@@ -19,6 +19,11 @@ type Comment struct {
 
 //发表回复回复楼主
 func AddCommentLz(tid, uid int, content string) (int64, error) {
+	if status, err := getPostStatus(tid); err != nil {
+		return -1, err
+	} else if status != 0 {
+		return -1, ErrNoAuth
+	}
 	s := "call comment_add_lz(?,?,?)"
 	return add(s, tid, uid, content)
 }
@@ -30,14 +35,20 @@ func AddCommentCz(tid, pid, uid int, content string) (int64, error) {
 	} else if status != 0 {
 		return -1, ErrNoAuth
 	}
-
 	s := "call comment_add_cz(?,?,?,?)"
 	return add(s, tid, pid, uid, content)
 }
 
 //删除回复
-func DelComment(id int) (int64, error) {
+func DelComment(uid, id int) (int64, error) {
 	s := "call comment_del(?)"
+	return del(s, id)
+}
+
+//删除回复admin
+//管理员可以不用uid删除
+func ADelComment(id int) (int64, error) {
+	s := "call comment_del_admin(?)"
 	return del(s, id)
 }
 
@@ -84,7 +95,7 @@ func GetComments(tid int, page, pagesize int) (cs []*Comment, err error) {
 func GetCommentsLzl(tid, id int) (css []*Comment, err error) {
 	var rows *sql.Rows
 	if rows, err = db.Query(
-		"SELECT  `id`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` "+
+		"SELECT  `id`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` " +
 			"FROM `comment` WHERE  `tid` = ? AND `pid` = ?", tid, id); err != nil {
 		return
 	}

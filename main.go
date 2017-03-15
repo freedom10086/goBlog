@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var config conf.Config
+var config *conf.Config
 
 func init() {
 	config = conf.Conf

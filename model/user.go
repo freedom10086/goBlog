@@ -50,14 +50,13 @@ func UpdatePass1(uid int, password string) (int64, error) {
 }
 
 //修改密码
-func UpdatePass2(uid int, oldpass, newpass string) error {
+func UpdatePass2(uid int, oldpass, newpass string) (int64, error) {
 	s := "select username from user where uid = ? and password = ?"
 	oldpass = Md5_encode(oldpass)
 	var uname string
 	if err := queryA2(s, uid, oldpass, &uname); err != nil {
-		return err
+		return -1, err
 	}
-
 	newpass = Md5_encode(newpass)
 	s = "UPDATE `user` SET `password` = ? WHERE `uid` = ?"
 	return update(s, newpass, uid)
