@@ -5,11 +5,25 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"errors"
 )
 
 type UserHandler struct {
 	BaseHandler
-	SecretKey string
+}
+
+func (h *UserHandler) DoAuth(method int, r *http.Request) error {
+	if method == MethodPost {
+		//由注册页面来的真正注册请求
+		//验证注册token
+		if token := r.PostFormValue("token"); token == "" {
+			return errors.New("reg token needed!")
+		}
+
+		return nil
+	}
+
+	return h.BaseHandler.DoAuth(method, r)
 }
 
 func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +55,8 @@ func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 
 //要验证regtoken
 func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
-	if token := r.PostFormValue("token"); token == "" {
-		BadParament(w, r)
-		return
-	} else if t, ok := model.ValidRegToken(token, h.SecretKey); ok {
+	token := r.PostFormValue("token")
+	if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
 		if t.Username == "" || t.Password == "" || t.Email == "" || t.Sex < 0 {
 			BadParament(w, r)
 			return
@@ -55,6 +67,7 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 			InternalError(w, r, err)
 		}
 
+		//todo 注册成功返回token
 		log.Printf("insert user %d ok", id)
 		Result(w, r, id)
 		return

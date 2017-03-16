@@ -72,6 +72,10 @@ func GetMineType(name string) string {
 
 }
 
+func (*StaticFileHandler) DoAuth(int, *http.Request) error {
+	return nil
+}
+
 func (*StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	fname := viewPath + r.URL.Path
 

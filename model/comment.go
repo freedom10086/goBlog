@@ -24,7 +24,7 @@ func AddCommentLz(tid, uid int, content string) (int64, error) {
 	} else if status != 0 {
 		return -1, ErrNoAuth
 	}
-	s := "call comment_add_lz(?,?,?)"
+	s := "call comment_add_lz($1,$2,$3)"
 	return add(s, tid, uid, content)
 }
 
@@ -35,33 +35,33 @@ func AddCommentCz(tid, pid, uid int, content string) (int64, error) {
 	} else if status != 0 {
 		return -1, ErrNoAuth
 	}
-	s := "call comment_add_cz(?,?,?,?)"
+	s := "call comment_add_cz($1,$2,$3,$4)"
 	return add(s, tid, pid, uid, content)
 }
 
 //删除回复
 func DelComment(uid, id int) (int64, error) {
-	s := "call comment_del(?)"
-	return del(s, id)
+	s := "delete from comment where uid = $1 AND id = $2"
+	return del(s, uid, id)
 }
 
 //删除回复admin
 //管理员可以不用uid删除
 func ADelComment(id int) (int64, error) {
-	s := "call comment_del_admin(?)"
+	s := "delete from comment where id = $1"
 	return del(s, id)
 }
 
 //修改回复
 func UpdateComment(id int, content string) (int64, error) {
-	s := "UPDATE `comment` SET `content` = ?, `updated` = now() WHERE `id` = ?"
+	s := "UPDATE `comment` SET `content` = $1, `updated` = now() WHERE `id` = $2"
 	return update(s, content, id)
 }
 
 //获得评论
 func GetComment(id int) (*Comment, error) {
 	c := &Comment{Id: id}
-	s := "SELECT  `tid`,`pid`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` FROM `comment` WHERE `id` = ?"
+	s := "SELECT  `tid`,`pid`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` FROM `comment` WHERE `id` = $1"
 	err := queryA1(s, id, &c.Tid, &c.Pid, &c.Uid, &c.Tuid, &c.Content, &c.Replys, &c.Created, &c.Updated)
 	return c, err
 }
@@ -69,7 +69,7 @@ func GetComment(id int) (*Comment, error) {
 //获得某一文章的所有评论
 func GetComments(tid int, page, pagesize int) (cs []*Comment, err error) {
 	s := "SELECT `id`,`pid`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` " +
-		"FROM `comment` WHERE `tid` = ? ORDER BY tid ASC LIMIT ? OFFSET ?"
+		"FROM `comment` WHERE `tid` = $1 ORDER BY tid ASC LIMIT $2 OFFSET $3"
 	offset := (page - 1) * pagesize
 	var rows *sql.Rows
 	if rows, err = db.Query(s, tid, pagesize, offset); err != nil {
@@ -96,7 +96,7 @@ func GetCommentsLzl(tid, id int) (css []*Comment, err error) {
 	var rows *sql.Rows
 	if rows, err = db.Query(
 		"SELECT  `id`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` " +
-			"FROM `comment` WHERE  `tid` = ? AND `pid` = ?", tid, id); err != nil {
+			"FROM `comment` WHERE  `tid` = $1 AND `pid` = $2", tid, id); err != nil {
 		return
 	}
 	defer rows.Close()

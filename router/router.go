@@ -1,7 +1,6 @@
 package router
 
 import (
-	"log"
 	"net/http"
 	"path"
 	"strings"
@@ -17,6 +16,14 @@ var htmlReplacer = strings.NewReplacer(
 )
 
 var routers map[string]MyHandler
+
+const (
+	MethodGet = iota
+	MethodPost
+	MethodDelete
+	MethodUpdate
+	MethodOther
+)
 
 func init() {
 	routers = make(map[string]MyHandler)
@@ -38,20 +45,16 @@ type muxEntry struct {
 	pattern string
 }
 
+
 //子类要实现此接口中的方法如果不实现
 //由父类代替
+//int HttpMethod
 type MyHandler interface {
-	DoAuth(http.ResponseWriter, *http.Request) bool
+	DoAuth(int, *http.Request) error
 	DoGet(http.ResponseWriter, *http.Request)
 	DoPost(http.ResponseWriter, *http.Request)
 	DoDelete(http.ResponseWriter, *http.Request)
-	DoUpdate(http.ResponseWriter, *http.Request) //put patch
-	DoOther(http.ResponseWriter, *http.Request)
-}
-
-type Filter interface {
-	//todo 身份验证统一放到这儿
-	//由子类提供验证方法，父类验证成功后再转发消息
+	DoUpdate(http.ResponseWriter, *http.Request)
 }
 
 func NewRouter() *MyRouter {
@@ -60,13 +63,10 @@ func NewRouter() *MyRouter {
 	for i, v := range routers {
 		r.Handle(i, v)
 	}
-
 	return r
 }
 
 func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("get request %s method %s", r.URL.Path, r.Method)
-
 	if r.RequestURI == "*" {
 		if r.ProtoAtLeast(1, 1) {
 			w.Header().Set("Connection", "close")
@@ -76,27 +76,48 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h, _ := mux.getHandler(r); h != nil {
-		if h.DoAuth(w, r) {
-			switch r.Method {
-			case "GET":
-				h.DoGet(w, r)
-			case "POST":
-				h.DoPost(w, r)
-			case "DELETE":
-				h.DoDelete(w, r)
-			case "PUT":
-			case "PATCH":
-				h.DoUpdate(w, r)
-			default:
-				h.DoOther(w, r)
+		var method int
+		switch r.Method {
+		case "GET":
+			method = MethodGet
+			err := h.DoAuth(method, r)
+			if err != nil {
+				Unauthorized(w, r)
+				return
 			}
-			return
+			h.DoGet(w, r)
+		case "POST":
+			method = MethodPost
+			err := h.DoAuth(method, r)
+			if err != nil {
+				Unauthorized(w, r)
+				return
+			}
+			h.DoPost(w, r)
+		case "DELETE":
+			method = MethodDelete
+			err := h.DoAuth(method, r)
+			if err != nil {
+				Unauthorized(w, r)
+				return
+			}
+			h.DoDelete(w, r)
+		case "PUT":
+		case "PATCH":
+			method = MethodUpdate
+			err := h.DoAuth(method, r)
+			if err != nil {
+				Unauthorized(w, r)
+				return
+			}
+			h.DoUpdate(w, r)
+		default:
+			method = MethodOther
+			NotAllowed(w, r)
 		}
-
-		Unauthorized(w, r)
 		return
-
 	}
+
 	NotFound(w, r)
 }
 
@@ -110,8 +131,8 @@ func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
 	}
 
 	// /tree/-> /tree
-	if n > 1 && pattern[n-1] == '/' {
-		pattern = pattern[:n-1]
+	if n > 1 && pattern[n - 1] == '/' {
+		pattern = pattern[:n - 1]
 	}
 
 	if mux.m == nil {
@@ -156,7 +177,7 @@ func pathMatch(pattern, path string) bool {
 		return false
 	}
 	n := len(pattern)
-	if pattern[n-1] != '/' {
+	if pattern[n - 1] != '/' {
 		return pattern == path
 	}
 	return len(path) >= n && path[0:n] == pattern
@@ -170,7 +191,7 @@ func cleanPath(p string) string {
 		p = "/" + p
 	}
 	np := path.Clean(p)
-	if p[len(p)-1] == '/' && np != "/" {
+	if p[len(p) - 1] == '/' && np != "/" {
 		np += "/"
 	}
 	return np

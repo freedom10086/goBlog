@@ -4,7 +4,7 @@
   "SitePort": ":8080",
   "SitePortSSL": ":10443",
   "SecretKey": "jA8/}~-)n?'z#!`+",
-  "DbUsername": "root",
+  "DbUsername": "yang",
   "DbPassword": "justice",
   "DbName": "goblog"
 }

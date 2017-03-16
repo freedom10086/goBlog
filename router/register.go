@@ -12,6 +12,14 @@ type RegisterHandler struct {
 	BaseHandler
 }
 
+func (h *RegisterHandler) DoAuth(method int, r *http.Request) error {
+	if method == MethodGet || method == MethodPost {
+		return nil
+	}
+
+	return h.BaseHandler.DoAuth(method, r)
+}
+
 //token null /regiest ->登陆页面
 //登陆页面 ->dopost -> 发邮件 -> 点击连接 -> user.doPost 插入数据库
 func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +38,8 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//填好用户名 邮箱假注册
+//真注册链接在邮件
 func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	username := r.PostFormValue("username")
 	email := r.PostFormValue("email")

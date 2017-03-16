@@ -14,7 +14,7 @@ type CateHandler struct {
 
 func (*CateHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	if cates, err := model.GetCates(); err != nil {
-		InternalError(w, r,err)
+		InternalError(w, r, err)
 	} else {
 		Result(w, r, cates)
 	}

@@ -32,19 +32,19 @@ type Article struct {
 //发布主题
 func AddPost(cid, uid int, title, content string) (int64, error) {
 	s := "insert into `post` (`cid`,`uid`,`username`,`title`,`content`) VALUES " +
-		"(?,?,(select username from `user` where uid = ?),?,?)"
-	return add(s, cid, uid, uid, title, content)
+		"($1,$2,(select username from `user` where uid = $2),$3,$4)"
+	return add(s, cid, uid, title, content)
 }
 
 //删除主题
 func DelPost(tid int) (int64, error) {
-	s := "delete from post where tid = ?"
+	s := "delete from post where tid = $1"
 	return del(s, tid)
 }
 
 //编辑文章
 func EditPost(tid int, title, content string) (int64, error) {
-	s := "UPDATE `post` SET `title` = ?, `content` = ?, `updated` = now(), `lastreply` = `updated` WHERE `tid` = ?"
+	s := "UPDATE `post` SET `title` = $1, `content` = $2, `updated` = now(), `lastreply` = `updated` WHERE `tid` = $3"
 	return update(s, title, content, tid)
 }
 
@@ -53,21 +53,21 @@ func setPostStatus(tid, status int) (int64, error) {
 	if tid <= 0 || status < 0 || status > 2 {
 		return -1, ErrParama
 	}
-	s := " UPDATE `post` SET `status` = ? WHERE `tid` = ?"
+	s := " UPDATE `post` SET `status` = $1 WHERE `tid` = $2"
 	return update(s, status, tid)
 }
 
 //查看一篇文章status
 func getPostStatus(tid int) (int, error) {
 	status := 2
-	err := queryA1("SELECT  `status` FROM `post` WHERE `tid` = ?", tid, &status)
+	err := queryA1("SELECT  `status` FROM `post` WHERE `tid` = $1", tid, &status)
 	return status, err
 }
 
 //根据tid获取单篇文章
 func GetPost(tid int) (*Post, error) {
 	s := "SELECT `cid`,`uid`,`username`,`title`,`content`,`tags`,`type`,`status`," +
-		"`views`,`replys`,`created`,`updated`,`lastreply` FROM `post` WHERE `tid` = ?"
+		"`views`,`replys`,`created`,`updated`,`lastreply` FROM `post` WHERE `tid` = $1"
 
 	p := &Post{Tid: tid}
 	err := queryA1(s, tid,
@@ -130,13 +130,13 @@ func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err err
 	if cid < 0 {
 		whereCid = "whrer 1 "
 	} else {
-		whereCid = "whrew `cid` = ? "
+		whereCid = "whrew `cid` = $1 "
 	}
 
 	s := "SELECT `tid`,`uid`,`username`,`title`, left(content,120)," +
 		"`tags`,`type`,`status`, `views`," +
 		"`replys`, `created`,`updated`,`lastreply`" +
-		" FROM `post` " + whereCid + where + " LIMIT ? OFFSET ?"
+		" FROM `post` " + whereCid + where + " LIMIT $2 OFFSET $3"
 
 	var rows *sql.Rows
 	if cid < 0 {

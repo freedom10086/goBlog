@@ -1,48 +1,47 @@
 package router
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"goBlog/conf"
+	"goBlog/model"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
-	"log"
-	"goBlog/conf"
 )
 
 var config *conf.Config
 
 type BaseHandler struct {
-
+	Token     *model.Token
 }
 
 func init() {
 	config = conf.Conf
 }
 
-func (*BaseHandler) DoAuth(w http.ResponseWriter, r *http.Request) bool {
-	log.Printf("header %v", r.Header)
-	return true
+//基础auth 子类可以重写此方法实现自定义auth
+func (h *BaseHandler) DoAuth(method int, r *http.Request) error {
+	t, err := BaseAuth(method, r)
+	if err != nil {
+		return err
+	}
+	h.Token = t
+	return nil
 }
 
-func (*BaseHandler)DoGet(w http.ResponseWriter, r *http.Request) {
+func (*BaseHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
-
-func (*BaseHandler)DoPost(w http.ResponseWriter, r *http.Request) {
+func (*BaseHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
-
-func (*BaseHandler)DoDelete(w http.ResponseWriter, r *http.Request) {
+func (*BaseHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
-
-func (*BaseHandler)DoUpdate(w http.ResponseWriter, r *http.Request) {
-	NotAllowed(w, r)
-}
-
-func (*BaseHandler)DoOther(w http.ResponseWriter, r *http.Request) {
+func (*BaseHandler) DoUpdate(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
 
@@ -50,6 +49,20 @@ type ResultData struct {
 	Data    interface{}
 	Code    int
 	Message string
+}
+
+//常用auth
+//基础用户
+func BaseAuth(method int, r *http.Request) (*model.Token, error) {
+	var auth string
+	if auth := r.Header.Get("Authorization"); auth == "" {
+		return nil, model.ErrTokenInvalid
+	}
+	if decodeToken, err := base64.URLEncoding.DecodeString(auth); err != nil {
+		return nil, model.ErrTokenInvalid
+	} else {
+		return model.ValidToken(string(decodeToken), config.SecretKey)
+	}
 }
 
 func Error(w http.ResponseWriter, error string, code int) {
@@ -66,7 +79,8 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 		Message: "",
 	}
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 	if b, err := json.Marshal(res); err != nil {
 		InternalError(w, r, err)
 		return

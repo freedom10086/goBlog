@@ -11,29 +11,26 @@ type Category struct {
 	Description string
 	Posts       int
 	Sticks      []int64
-	ToadyPosts  int
 	Created     time.Time
 }
 
 //新增category
 func AddCate(name, description string) (int64, error) {
-	s:="INSERT INTO `cate` (`name`, `description`) VALUES (?, ?)"
+	s := "INSERT INTO `cate` (`name`, `description`) VALUES ($1, $2)"
 	return add(s, name, description)
 }
 
 //删除category 里面的帖子怎么办？
 //所以最好不要删除category
 func DelCate(cid int) (int64, error) {
-	return del("DELETE FROM `cate` WHERE `cid` = ?", cid)
+	return del("DELETE FROM `cate` WHERE `cid` = $1", cid)
 }
 
 //获得category
 func GetCate(cid int) (*Category, error) {
 	cate := &Category{Cid: cid}
-
-	err := db.QueryRow(
-		"SELECT  `title`, `description`,`posts`,`todayposts`,`lastpost`,`created` FROM `category` WHERE `cid` = ?",
-		cid).Scan(&cate.Name, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.Created)
+	s := "SELECT  `title`, `description`,`posts`,`lastpost`,`created` FROM `category` WHERE `cid` = $1"
+	err := queryA1(s, cid, &cate.Name, &cate.Description, &cate.Posts, &cate.Created)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +40,7 @@ func GetCate(cid int) (*Category, error) {
 //获得所有category
 func GetCates() ([]*Category, error) {
 	//查询数据
-	rows, err := db.Query("SELECT `cid`, `name`, `description`,`posts`,`todayposts`,`created` FROM `cate`")
+	rows, err := db.Query("SELECT `cid`, `name`, `description`,`posts`,`created` FROM `cate`")
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +49,7 @@ func GetCates() ([]*Category, error) {
 
 	for rows.Next() {
 		cate := &Category{}
-		err = rows.Scan(&cate.Cid, &cate.Name, &cate.Description, &cate.Posts, &cate.ToadyPosts, &cate.Created)
+		err = rows.Scan(&cate.Cid, &cate.Name, &cate.Description, &cate.Posts, &cate.Created)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -68,6 +65,6 @@ func GetCates() ([]*Category, error) {
 
 //修改category
 func ModifyCate(cid int, name, description string) (int64, error) {
-	sql := "UPDATE `category` SET `title` = ?,`description` = ? WHERE `cid` = ?"
+	sql := "UPDATE `category` SET `title` = $1,`description` = $2 WHERE `cid` = $3"
 	return update(sql, name, description, cid)
 }

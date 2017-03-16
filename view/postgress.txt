@@ -1,16 +1,43 @@
+Windows
+初始化 initdb.exe -D C:\app\pgsql-9.6.2\data -E UTF8
+启动 pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
+
+警告:为本地连接启动了 "trust" 认证.
+你可以通过编辑 pg_hba.conf 更改或你下次
+行 initdb 时使用 -A或者--auth-local和--auth-host选项.
+
+//创建用户 超级用户要谨慎
+createuser [--superuser] yang
+
+//设置密码 用postgres超级管理员登陆
+//为刚刚创建的用户设置密码
+psql postgres
+\password yang
+\q
+
+#创建数据库 指定所有权yang
+createdb -O yang -p 5432 goblog
+
+#登陆数据库
+//-U 用户
+//-d 数据库
+//-h host
+//-p 端口
+psql -U yang -d goblog -h 127.0.0.1 -p 5432
+（简略模式 psql mydb）
+
+
+//linux
 sudo apt-get install postgresql-client
 sudo apt-get install postgresql
 su postgress //切换到postgress用户
 psql//使用psql命令登录PostgreSQL控制台，以postgress用户
 \password postgres //更改密码
 
-$ createdb mydb //这是shell命令
-psql -U postgres -d mydb -h 127.0.0.1 -p 5432 //登录数据库
-（简略模式 psql mydb）
 
 恢复psql mydb < mydb.sql
 
-控制台命令
+控制台命令 pg_ctl -D 
 \password: 更改密码
 \h：查看SQL命令的解释，比如\h select。
 \?：查看psql命令列表。

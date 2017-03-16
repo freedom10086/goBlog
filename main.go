@@ -22,7 +22,7 @@ func main() {
 	go func() {
 		log.Printf("http listen on %s%s", config.SiteAddr, config.SitePort)
 		http.ListenAndServe(config.SitePort, &router.RedirectHandler{
-			Url:  config.SiteAddr,
+			Url:  "https://127.0.0.1",
 			Port: config.SitePortSSL,
 		})
 	}()
