@@ -13,7 +13,6 @@ import (
 	"time"
 )
 
-const viewPath = "view"
 const cacheTime = time.Hour * 24
 const defaultType = "application/octet-stream"
 
@@ -51,7 +50,7 @@ func GetMineType(name string) string {
 		for i := 0; i < len(ext); i++ {
 			c := ext[i]
 			if 'A' <= c && c <= 'Z' {
-				lower = append(lower, c+('a'-'A'))
+				lower = append(lower, c + ('a' - 'A'))
 			} else {
 				lower = append(lower, c)
 			}
@@ -77,7 +76,7 @@ func (*StaticFileHandler) DoAuth(int, *http.Request) error {
 }
 
 func (*StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	fname := viewPath + r.URL.Path
+	fname := config.SiteStaticDir + r.URL.Path
 
 	if strings.HasSuffix(fname, "/") {
 		fname += "index.html"
@@ -99,12 +98,12 @@ func (*StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	const modeType = os.ModeDir | os.ModeSymlink | os.ModeNamedPipe | os.ModeSocket | os.ModeDevice
-	if fi.Mode()&modeType != 0 {
+	if fi.Mode() & modeType != 0 {
 		InternalError(w, r, err)
 		return
 	}
 
-	cacheControl := fmt.Sprintf("public, max-age=%d", cacheTime/time.Second)
+	cacheControl := fmt.Sprintf("public, max-age=%d", cacheTime / time.Second)
 	mineType := GetMineType(ext)
 
 	log.Printf("%s %s %s", r.Method, fname, mineType)

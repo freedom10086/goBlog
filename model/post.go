@@ -30,9 +30,9 @@ type Article struct {
 }
 
 //发布主题
-func AddPost(cid, uid int, title, content string) (int64, error) {
-	s := "insert into `post` (`cid`,`uid`,`username`,`title`,`content`) VALUES " +
-		"($1,$2,(select username from `user` where uid = $2),$3,$4)"
+func AddPost(cid, uid int, title, content string) (int, error) {
+	s := "insert into post (cid,uid,username,title,content) VALUES " +
+		"($1,$2,(select username from user where uid = $2),$3,$4) RETURNING tid"
 	return add(s, cid, uid, title, content)
 }
 
@@ -44,7 +44,7 @@ func DelPost(tid int) (int64, error) {
 
 //编辑文章
 func EditPost(tid int, title, content string) (int64, error) {
-	s := "UPDATE `post` SET `title` = $1, `content` = $2, `updated` = now(), `lastreply` = `updated` WHERE `tid` = $3"
+	s := "UPDATE post SET title = $1, content = $2, updated = now(), lastreply = updated WHERE tid = $3"
 	return update(s, title, content, tid)
 }
 
@@ -53,27 +53,25 @@ func setPostStatus(tid, status int) (int64, error) {
 	if tid <= 0 || status < 0 || status > 2 {
 		return -1, ErrParama
 	}
-	s := " UPDATE `post` SET `status` = $1 WHERE `tid` = $2"
+	s := " UPDATE post SET status = $1 WHERE tid = $2"
 	return update(s, status, tid)
 }
 
 //查看一篇文章status
 func getPostStatus(tid int) (int, error) {
 	status := 2
-	err := queryA1("SELECT  `status` FROM `post` WHERE `tid` = $1", tid, &status)
+	err := db.QueryRow("SELECT  status FROM post WHERE tid = $1", tid).Scan(&status)
 	return status, err
 }
 
 //根据tid获取单篇文章
 func GetPost(tid int) (*Post, error) {
-	s := "SELECT `cid`,`uid`,`username`,`title`,`content`,`tags`,`type`,`status`," +
-		"`views`,`replys`,`created`,`updated`,`lastreply` FROM `post` WHERE `tid` = $1"
+	s := "SELECT cid,uid,username,title,content,tags,type,status," +
+		"views,replys,created,updated,lastreply FROM post WHERE tid = $1"
 
 	p := &Post{Tid: tid}
-	err := queryA1(s, tid,
-		&p.Cid, &p.Uid, &p.Username, &p.Title, &p.Content, &p.Tags, &p.Type, &p.Status,
+	err := db.QueryRow(s, tid).Scan(&p.Cid, &p.Uid, &p.Username, &p.Title, &p.Content, &p.Tags, &p.Type, &p.Status,
 		&p.Views, &p.Replys, &p.Created, &p.Updated, &p.Lastreply)
-
 	return p, err
 }
 
@@ -112,16 +110,16 @@ func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err err
 	var where string
 	switch order {
 	case "created":
-		where = "ORDER BY `created` DESC"
+		where = "ORDER BY created DESC"
 	case "hot3":
 		//最近3天的热帖
-		where = "AND DATEDIFF(NOW(),`lastreply`)< 3 ORDER BY `replys` DESC,`lastreply` DESC"
+		where = "AND DATEDIFF(NOW(),lastreply)< 3 ORDER BY replys DESC,lastreply DESC"
 	case "hot7":
 		//最近7天的热帖
-		where = "AND DATEDIFF(NOW(),`lastreply`)< 7 ORDER BY `replys` DESC,`lastreply` DESC"
+		where = "AND DATEDIFF(NOW(),lastreply)< 7 ORDER BY replys DESC,lastreply DESC"
 	default:
 		//新帖
-		where = "ORDER BY `lastreply` DESC"
+		where = "ORDER BY lastreply DESC"
 	}
 
 	offset := (page - 1) * pagesize
@@ -130,13 +128,13 @@ func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err err
 	if cid < 0 {
 		whereCid = "whrer 1 "
 	} else {
-		whereCid = "whrew `cid` = $1 "
+		whereCid = "whrew cid = $1 "
 	}
 
-	s := "SELECT `tid`,`uid`,`username`,`title`, left(content,120)," +
-		"`tags`,`type`,`status`, `views`," +
-		"`replys`, `created`,`updated`,`lastreply`" +
-		" FROM `post` " + whereCid + where + " LIMIT $2 OFFSET $3"
+	s := "SELECT tid,uid,username,title, left(content,120)," +
+		"tags,type,status, views," +
+		"replys, created,updated,lastreply" +
+		" FROM post " + whereCid + where + " LIMIT $2 OFFSET $3"
 
 	var rows *sql.Rows
 	if cid < 0 {

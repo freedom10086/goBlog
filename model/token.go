@@ -25,9 +25,7 @@ type Token struct {
 
 type RegToken struct {
 	Username string
-	Password string //真正要插入时才有此
 	Email    string
-	Sex      int    //同上
 	Salt     string
 	Expires  time.Time
 }

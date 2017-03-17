@@ -9,14 +9,15 @@ import (
 var Conf *Config
 
 type Config struct {
-	SiteName    string `json:"SiteName"`
-	SiteAddr    string `json:"SiteAddr"`
-	SitePort    string `json:"SitePort"`
-	SitePortSSL string `json:"SitePortSSL"`
-	SecretKey   string `json:"SecretKey"`
-	DbUsername  string `json:"DbUsername"`
-	DbPassword  string `json:"DbPassword"`
-	DbName      string `json:"DbName"`
+	SiteName      string `json:"SiteName"`
+	SiteIpAddr      string `json:"SiteIpAddr"`
+	SitePort      string `json:"SitePort"`
+	SitePortSSL   string `json:"SitePortSSL"`
+	SiteStaticDir string `json:"SiteStaticDir"`
+	SecretKey     string `json:"SecretKey"`
+	DbUsername    string `json:"DbUsername"`
+	DbPassword    string `json:"DbPassword"`
+	DbName        string `json:"DbName"`
 }
 
 func init() {

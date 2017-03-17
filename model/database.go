@@ -12,8 +12,8 @@ var (
 	db          *sql.DB
 	ErrNoRecord error = errors.New("没有查询到记录")
 	ErrNoAffect error = errors.New("没有改变")
-	ErrNoAuth   error = errors.New("没有权限")
-	ErrParama   error = errors.New("参数错误")
+	ErrNoAuth error = errors.New("没有权限")
+	ErrParama error = errors.New("参数错误")
 )
 
 //todo 要不要缓存一些 *sql.Stmt 避免不断的创建销毁
@@ -35,11 +35,12 @@ func InitDB(dbname, dbuser, dbpass string) {
 	}
 }
 
-func add(sql string, args ...interface{}) (int64, error) {
-	if res, err := db.Exec(sql, args...); err != nil {
+func add(sql string, args ...interface{}) (int, error) {
+	var id int
+	if err := db.QueryRow(sql, args...).Scan(&id); err != nil {
 		return -1, err
 	} else {
-		return res.LastInsertId()
+		return id, nil
 	}
 }
 
@@ -67,16 +68,6 @@ func update(sql string, args ...interface{}) (int64, error) {
 	} else {
 		return res.RowsAffected()
 	}
-}
-
-//一个参数的query
-func queryA1(sql string, arg interface{}, dest ...interface{}) error {
-	return db.QueryRow(sql, arg).Scan(dest)
-}
-
-//2个参数的query
-func queryA2(sql string, arg1 interface{}, arg2 interface{}, dest ...interface{}) error {
-	return db.QueryRow(sql, arg1, arg2).Scan(dest)
 }
 
 func CloseDB() {

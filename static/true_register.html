@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>完成注册</title>
+</head>
+<body style="max-width: 960px;margin: 0 auto">
+<h1>恭喜你验证邮箱成功,完善以下信息完成注册</h1>
+<form id="form" method="post" onsubmit="return validInput()" action="{{.PostUrl}}">
+    <label for="username">用户名</label>
+    <br/>
+    <input type="text" disabled id="username" value="{{.Username}}">
+    <br/>
+    <label for="email">邮箱</label>
+    <br/>
+    <input type="text" disabled id="email" value="{{.Email}}">
+    <br/>
+    <label for="password">设置密码(数字,字母,_,*,#)</label>
+    <span id="passwordInfo" style="color:red"></span>
+    <br/>
+    <input id="password" name="password" placeholder="密码(大于6位)" required minlength="6" type="password"
+           maxlength="25" pattern="[a-zA-Z\d_#*]{6,25}">
+    <br/>
+    <label for="password2">确认密码</label>
+    <span id="password2Info" style="color:red"></span>
+    <br/>
+    <input id="password2" placeholder="确认密码" type="password" required>
+    <br/>
+    <label>设置性别</label>
+    <br/>
+    <label><input type="radio" checked name="sex" value="0">保密</label>
+    <label><input type="radio" name="sex" value="1">男</label>
+    <label><input type="radio" name="sex" value="2">女</label>
+    <input type="hidden" name="token" value="{{.Token}}" required>
+    <br/>
+    <button type="submit" style="margin-top: 12px;">完成注册</button>
+</form>
+<script type="text/javascript" src="js/base.js"></script>
+<script type="text/javascript">
+    const passwordInput = document.querySelector("#password");
+    const password2Input = document.querySelector("#password2");
+    const passwordInfo = document.querySelector("#passwordInfo");
+    const password2Info = document.querySelector("#password2Info");
+
+
+    function validInput() {
+        return checkPassword() && checkPasswordStrength();
+    }
+
+    passwordInput.addEventListener("keyup", function () {
+        passwordInfo.innerHTML = "";
+        if (!passwordInput.checkValidity()) {
+            return
+        }
+        checkPasswordStrength();
+    });
+
+    password2Input.addEventListener("keyup", function () {
+        checkPassword();
+    });
+
+
+    function checkPassword() {
+        if (passwordInput.checkValidity()) {
+            console.log(passwordInput.value);
+            console.log(password2Input.value);
+            if (passwordInput.value != password2Input.value) {
+                password2Info.innerHTML = "密码不匹配";
+                return false
+            } else {
+                password2Info.innerHTML = "";
+            }
+            return true;
+        }
+        return false;
+    }
+
+    function checkPasswordStrength() {
+        let val = passwordInput.value;
+        let lv = -1;
+
+        if (val.match(/[a-z]/g)) {
+            lv++;
+        }
+        if (val.match(/[0-9]/g)) {
+            lv++;
+        }
+        if (val.match(/[A-Z]/g)) {
+            lv++;
+        }
+        if (val.match(/(.[^A-Za-z0-9])/g)) {
+            lv++;
+        }
+
+        if (val.length >= 12) {
+            lv += 2;
+        } else if (val.length >= 10) {
+            lv += 1
+        }
+
+        if (lv < 0) {
+            lv = 0;
+        } else if (lv > 3) {
+            lv = 3;
+        }
+
+        let aLvTxt = ['密码强度:低', '密码强度:中', '密码强度:高', '密码强度:很高'];
+        let color = ['red', 'yellow', 'green', 'blue'];
+
+        passwordInfo.style.color = color[lv];
+        passwordInfo.innerHTML = aLvTxt[lv];
+        return lv > 0;
+    }
+</script>
+</body>
+</html>

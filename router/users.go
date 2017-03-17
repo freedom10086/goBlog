@@ -56,22 +56,34 @@ func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 //要验证regtoken
 func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	token := r.PostFormValue("token")
+	password := r.PostFormValue("password")
+	sex := r.PostFormValue("sex")
+	sexInt := -1;
+	if sex == "0" {
+		sexInt = 0;
+	} else if (sex == "1") {
+		sexInt = 1;
+	} else if (sex == "2") {
+		sexInt = 2;
+	}
+	if len(token) < 32 || len(password) < 6 || sexInt < 0 || sexInt > 2 {
+		BadParament(w, r)
+		return
+	}
 	if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
-		if t.Username == "" || t.Password == "" || t.Email == "" || t.Sex < 0 {
-			BadParament(w, r)
-			return
-		}
-
-		id, err := model.AddUser(t.Username, t.Password, t.Email, t.Sex)
+		log.Println("token is ok")
+		id, err := model.AddUser(t.Username, password, t.Email, sexInt)
 		if err != nil {
 			InternalError(w, r, err)
+			return
 		}
-
 		//todo 注册成功返回token
 		log.Printf("insert user %d ok", id)
 		Result(w, r, id)
 		return
 	}
+
+	log.Println("[[[[[]]]]]]")
 
 	Unauthorized(w, r)
 }

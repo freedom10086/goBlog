@@ -18,11 +18,14 @@ func init() {
 }
 
 func main() {
+	if err := model.SendMail("2351386755@qq.com", "testemmial", "测试内容"); err != nil {
+		log.Println(err)
+	}
+
 	defer model.CloseDB()
 	go func() {
-		log.Printf("http listen on %s%s", config.SiteAddr, config.SitePort)
 		http.ListenAndServe(config.SitePort, &router.RedirectHandler{
-			Url:  "https://127.0.0.1",
+			Url:  "https://" + config.SiteIpAddr,
 			Port: config.SitePortSSL,
 		})
 	}()

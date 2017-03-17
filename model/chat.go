@@ -11,30 +11,29 @@ type Chat struct {
 	Username string `json:",omitempty"` //N 一直是对方用户名，不是tuid的用户名，有可能tuid是自己
 	Content  string
 	IsRead   bool
-	Created  time.Time                  //时间
+	Created  time.Time //时间
 }
 
 //发送私信
-func AddChat(uid, tuid int, content string) (int64, error) {
+func AddChat(uid, tuid int, content string) (int, error) {
 	if uid == tuid {
 		return -1, ErrParama
 	}
-	sql := "INSERT INTO `chat` (`uid`, `tuid`,`content`) VALUES ($1,$2,$3)"
+	sql := "INSERT INTO chat (uid, tuid,content) VALUES ($1,$2,$3) RETURNING id"
 	return add(sql, uid, tuid, content)
 }
 
 //撤回
 //只能撤回未读的消息
 func DelChat(id int) (int64, error) {
-	sql := "delete from `chat` where id = $1 and isread = false"
+	sql := "delete from chat where id = $1 and isread = false"
 	return del(sql, id)
 }
 
 //获得我和另一个人的对话
 func GetChats(uid, tuid, page, pageSize int) (cs []*Chat, err error) {
 	offset := (page - 1) * pageSize
-	s := `
-	SELECT id,uid,tuid,content,created FROM chat
+	s := `SELECT id,uid,tuid,content,created FROM chat
 	WHERE
 	(uid = $1 AND tuid = $2)
 	OR
@@ -63,20 +62,20 @@ func GetChats(uid, tuid, page, pageSize int) (cs []*Chat, err error) {
 //sender 1-表示这条消息是发送方是我
 //       0-表示这条消息接收方是我
 func GetRecentChats(uid, page, pageSize int) (cs []*Chat, err error) {
-	s := `
-	SELECT t.id,t.ouid,u.username,t.content,t.sender,t.created
-	FROM (
-	SELECT id,ouid,content,sender,created FROM
-		((SELECT id,tuid as ouid,content, 1 as sender,created FROM chat WHERE uid = $1)
-	 	UNION
-	 	(SELECT id,uid as ouid,content,0 as sender,created FROM chat WHERE tuid = $1)
-	 	ORDER BY id DESC)
-		as tmp
-		GROUP BY tmp.ouid
-		ORDER BY tmp.id DESC
-		limit $2 OFFSET $3
-	) as t
-	LEFT JOIN user AS u ON t.ouid = u.uid`
+	s :=
+		`SELECT t.id,t.ouid,u.username,t.content,t.sender,t.created
+		FROM (
+		SELECT id,ouid,content,sender,created FROM
+			((SELECT id,tuid as ouid,content, 1 as sender,created FROM chat WHERE uid = $1)
+			 UNION
+			 (SELECT id,uid as ouid,content,0 as sender,created FROM chat WHERE tuid = $1)
+			 ORDER BY id DESC)
+			as tmp
+			GROUP BY tmp.ouid
+			ORDER BY tmp.id DESC
+			limit $2 OFFSET $3
+		) as t
+		LEFT JOIN user AS u ON t.ouid = u.uid`
 	offset := (page - 1) * pageSize
 	rows, err := db.Query(s, uid, pageSize, offset)
 	if err != nil {

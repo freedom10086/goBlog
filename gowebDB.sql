@@ -332,7 +332,7 @@ INTO tuid
 FROM post
 WHERE tid = in_tid;
 IF tuid IS NOT NULL THEN
-INSERT INTO COMMENT (tid, uid, tuid, content) VALUES (in_tid, in_uid, tuid, in_content);
+INSERT INTO COMMENT (tid, uid, tuid, content) VALUES (in_tid, in_uid, tuid, in_content) RETURNING id;
 RETURN TRUE;
 END IF;
 RETURN FALSE;
@@ -351,7 +351,7 @@ FROM comment
 WHERE tid = in_tid AND id = in_pid;
 
 IF czuid IS NOT NULL THEN
-INSERT INTO COMMENT (tid, pid, uid, tuid, content) VALUES (in_tid, in_pid, in_uid, czuid, in_content);
+INSERT INTO COMMENT (tid, pid, uid, tuid, content) VALUES (in_tid, in_pid, in_uid, czuid, in_content) RETURNING id;
 SET result = TRUE;
 END IF;
 RETURN result;

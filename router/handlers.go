@@ -10,12 +10,13 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"html/template"
 )
 
 var config *conf.Config
 
 type BaseHandler struct {
-	Token     *model.Token
+	Token *model.Token
 }
 
 func init() {
@@ -86,6 +87,20 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 		return
 	} else {
 		w.Write(b)
+	}
+}
+
+//todo 当作变量存在内存
+func Template(w http.ResponseWriter, tmpl string, data interface{}) {
+	filepath := config.SiteStaticDir + tmpl + ".html"
+	t, err := template.ParseFiles(filepath)
+	if err != nil {
+		Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, data)
+	if err != nil {
+		Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 

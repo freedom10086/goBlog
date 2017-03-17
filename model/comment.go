@@ -18,7 +18,7 @@ type Comment struct {
 }
 
 //发表回复回复楼主
-func AddCommentLz(tid, uid int, content string) (int64, error) {
+func AddCommentLz(tid, uid int, content string) (int, error) {
 	if status, err := getPostStatus(tid); err != nil {
 		return -1, err
 	} else if status != 0 {
@@ -29,7 +29,7 @@ func AddCommentLz(tid, uid int, content string) (int64, error) {
 }
 
 //发表回复回复层主
-func AddCommentCz(tid, pid, uid int, content string) (int64, error) {
+func AddCommentCz(tid, pid, uid int, content string) (int, error) {
 	if status, err := getPostStatus(tid); err != nil {
 		return -1, err
 	} else if status != 0 {
@@ -54,22 +54,22 @@ func ADelComment(id int) (int64, error) {
 
 //修改回复
 func UpdateComment(id int, content string) (int64, error) {
-	s := "UPDATE `comment` SET `content` = $1, `updated` = now() WHERE `id` = $2"
+	s := "UPDATE comment SET content = $1, updated = now() WHERE id = $2"
 	return update(s, content, id)
 }
 
 //获得评论
 func GetComment(id int) (*Comment, error) {
 	c := &Comment{Id: id}
-	s := "SELECT  `tid`,`pid`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` FROM `comment` WHERE `id` = $1"
-	err := queryA1(s, id, &c.Tid, &c.Pid, &c.Uid, &c.Tuid, &c.Content, &c.Replys, &c.Created, &c.Updated)
+	s := "SELECT  tid,pid,uid,tuid,content,replys,created,updated FROM comment WHERE id = $1"
+	err := db.QueryRow(s, id).Scan(&c.Tid, &c.Pid, &c.Uid, &c.Tuid, &c.Content, &c.Replys, &c.Created, &c.Updated)
 	return c, err
 }
 
 //获得某一文章的所有评论
 func GetComments(tid int, page, pagesize int) (cs []*Comment, err error) {
-	s := "SELECT `id`,`pid`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` " +
-		"FROM `comment` WHERE `tid` = $1 ORDER BY tid ASC LIMIT $2 OFFSET $3"
+	s := "SELECT id,pid,uid,tuid,content,replys,created,updated " +
+		"FROM comment WHERE tid = $1 ORDER BY tid ASC LIMIT $2 OFFSET $3"
 	offset := (page - 1) * pagesize
 	var rows *sql.Rows
 	if rows, err = db.Query(s, tid, pagesize, offset); err != nil {
@@ -95,8 +95,8 @@ func GetComments(tid int, page, pagesize int) (cs []*Comment, err error) {
 func GetCommentsLzl(tid, id int) (css []*Comment, err error) {
 	var rows *sql.Rows
 	if rows, err = db.Query(
-		"SELECT  `id`,`uid`,`tuid`,`content`,`replys`,`created`,`updated` " +
-			"FROM `comment` WHERE  `tid` = $1 AND `pid` = $2", tid, id); err != nil {
+		"SELECT id,uid,tuid,content,replys,created,updated " +
+			"FROM comment WHERE  tid = $1 AND pid = $2", tid, id); err != nil {
 		return
 	}
 	defer rows.Close()
