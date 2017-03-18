@@ -3,7 +3,7 @@
   "SiteIpAddr": "127.0.0.1",
   "SitePort": ":8080",
   "SitePortSSL": ":10443",
-  "SiteStaticDir": "static/",
+  "SiteStaticDir": "static",
   "SecretKey": "jA8/}~-)n?'z#!`+",
   "DbUsername": "yang",
   "DbPassword": "justice",

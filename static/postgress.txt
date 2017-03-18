@@ -1,6 +1,6 @@
 Windows
 初始化 initdb.exe -D C:\app\pgsql-9.6.2\data -E UTF8
-启动 pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
+启动 .\pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
 
 警告:为本地连接启动了 "trust" 认证.
 你可以通过编辑 pg_hba.conf 更改或你下次

@@ -5,6 +5,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"log"
 )
 
 var htmlReplacer = strings.NewReplacer(
@@ -27,7 +28,7 @@ const (
 
 func init() {
 	routers = make(map[string]MyHandler)
-	routers["/"] = &StaticFileHandler{}
+	routers["/static/"] = &StaticFileHandler{}
 	routers["/categorys"] = &CateHandler{}
 	routers["/users"] = &UserHandler{}
 	routers["/auth"] = &OauthHandler{}
@@ -42,9 +43,8 @@ type MyRouter struct {
 
 type muxEntry struct {
 	h       MyHandler
-	pattern string
+	pattern string //pattern /static->path /static/->目录
 }
-
 
 //子类要实现此接口中的方法如果不实现
 //由父类代替
@@ -67,6 +67,7 @@ func NewRouter() *MyRouter {
 }
 
 func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Printf("method:%s path:%s", r.Method, r.URL.Path)
 	if r.RequestURI == "*" {
 		if r.ProtoAtLeast(1, 1) {
 			w.Header().Set("Connection", "close")
@@ -75,7 +76,20 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h, _ := mux.getHandler(r); h != nil {
+	//代理
+	if r.Method == "CONNECT" {
+		NotAllowed(w, r)
+		return
+	}
+
+	var p string
+	if p = cleanPath(r.URL.Path); p != r.URL.Path {
+		log.Printf("Redirect:%s", p)
+		Redirect(w, r, p, http.StatusMovedPermanently)
+		return
+	}
+
+	if h := mux.handle(p); h != nil {
 		var method int
 		switch r.Method {
 		case "GET":
@@ -121,73 +135,58 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	NotFound(w, r)
 }
 
+//暴露自定义MyHandler接口
 func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
 	mux.mu.Lock()
 	defer mux.mu.Unlock()
-
 	n := len(pattern)
 	if n == 0 || pattern[0] != '/' {
 		panic("http: pattern shou be not null and start with / for:" + pattern)
 	}
-
-	// /tree/-> /tree
-	if n > 1 && pattern[n - 1] == '/' {
-		pattern = pattern[:n - 1]
-	}
-
 	if mux.m == nil {
 		mux.m = make(map[string]muxEntry)
 	}
-
 	if _, ok := mux.m[pattern]; ok {
 		panic("http: multiple registrations for " + pattern)
 	}
-
 	mux.m[pattern] = muxEntry{h: handler, pattern: pattern}
 }
 
-func (mux *MyRouter) getHandler(r *http.Request) (h MyHandler, pattern string) {
-	if r.Method != "CONNECT" {
-		if p := cleanPath(r.URL.Path); p != r.URL.Path {
-			r.URL.Path = p
-		}
-	}
-
+func (mux *MyRouter) handle(path string) (h MyHandler) {
 	mux.mu.RLock()
 	defer mux.mu.RUnlock()
-
-	//找到匹配最长的url
-	var n = 0
-	for k, v := range mux.m {
-		if !pathMatch(k, r.URL.Path) {
+	var maxn = 0
+	for pattern, mux := range mux.m {
+		//找到匹配最长的url
+		//如 有 /static/ 和 /static/js/ 2个pattern
+		//path为/static/js/my.js将会匹配到后一个
+		if !pathMatch(pattern, path) {
 			continue
 		}
-		if h == nil || len(k) > n {
-			n = len(k)
-			h = v.h
-			pattern = v.pattern
+		n := len(pattern)
+		if h == nil || n > maxn {
+			maxn = n
+			h = mux.h
 		}
 	}
 	return
 }
 
+//isdir 表示pattern是否为目录
 func pathMatch(pattern, path string) bool {
-	if len(pattern) == 0 {
-		// should not happen
-		return false
-	}
-	n := len(pattern)
-	if pattern[n - 1] != '/' {
+	if pattern[len(pattern) - 1] != '/' {
+		//如果不是目录比较是否相等
 		return pattern == path
 	}
-	return len(path) >= n && path[0:n] == pattern
+	//是目录则前部分匹配即可
+	return strings.HasPrefix(path, pattern)
 }
 
+//最少也要返回/
 func cleanPath(p string) string {
 	if p == "" {
 		return "/"
-	}
-	if p[0] != '/' {
+	} else if p[0] != '/' {
 		p = "/" + p
 	}
 	np := path.Clean(p)

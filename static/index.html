@@ -1,75 +1,76 @@
 <!doctype html>
-<html manifest="cache.appcache">
+<html manifest="app.manifest">
 <head>
-  <meta charset="utf-8"/>
-  <title>Markdown 在线编辑器</title>
-  <link rel="stylesheet" href="styles/default.css">
-  <link rel="stylesheet" href="styles/markdown.css">
-  <link rel="stylesheet" href="styles/editormd.css">
-  <link rel="stylesheet" href="styles/font-awesome.css">
-  <script src="js/marked.js"></script>
-  <script src="js/highlight.pack.js"></script>
-  <script src="js/jquery-3.1.1.min.js"></script>
-  <script src="js/my.js"></script>
+    <meta charset="utf-8"/>
+    <title>Markdown 在线编辑器</title>
+    <link rel="stylesheet" href="styles/default.css">
+    <link rel="stylesheet" href="styles/markdown.css">
+    <link rel="stylesheet" href="styles/editormd.css">
+    <link rel="stylesheet" href="styles/font-awesome.css">
+    <script src="js/marked.js"></script>
+    <script src="js/highlight.pack.js"></script>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/my.js"></script>
 </head>
 <body style="margin: 0;padding: 0">
-	<h1 id="title" style="text-align:center;">Markdown 在线编辑器 --by:yang</h1>
-	<div id="myeditor" class="myeditor">
-		<div id = "inputholder" style="float:left;">
-			<div id="toolbar" class="editormd-toolbar">
-				
-			</div>
-			<textarea id = "input"></textarea>
-		</div>
-		<div id="preview" class="markdown-body" style="float:right;overflow-y:auto;"></div>
-	</div>
+<h1 id="title" style="text-align:center;">Markdown 在线编辑器 --by:yang</h1>
+<div id="myeditor" class="myeditor">
+    <div id="inputholder" style="float:left;">
+        <div id="toolbar" class="editormd-toolbar">
 
-	<script>
-		//窗口载入完成
-		window.onload = function(){
-			console.log("hello");
+        </div>
+        <textarea id="input"></textarea>
+    </div>
+    <div id="preview" class="markdown-body" style="float:right;overflow-y:auto;"></div>
+</div>
 
-			document.getElementById('input').innerHTML = '# Marked in browser\n\nRendered by **marked**.\n```go\npackage main\nimport (\n    "fmt";\n    "io";\n    "os"\n    "bufio"\n    "bytes"\n)\nfunc main() {\n    fmt.Println("Hello, 世界")\n    var r io.Reader\n    r = os.Stdin\n    r = bufio.NewReader(r)\n    r = new(bytes.Buffer)\n} \n```';
+<script>
+    //窗口载入完成
+    window.onload = function () {
+        console.log("hello");
 
-		  	createToolBar();
-		  	setViewSizes();
+        document.getElementById('input').innerHTML = '# Marked in browser\n\nRendered by **marked**.\n```go\npackage main\nimport (\n    "fmt";\n    "io";\n    "os"\n    "bufio"\n    "bytes"\n)\nfunc main() {\n    fmt.Println("Hello, 世界")\n    var r io.Reader\n    r = os.Stdin\n    r = bufio.NewReader(r)\n    r = new(bytes.Buffer)\n} \n```';
 
-		  	marked.setOptions({
-			  highlight: function (code,lang) {
-			  	if (lang && hljs.getLanguage(lang)) {
-		      		try {
-		      			console.log(lang);
-		        		return hljs.highlight(lang, code).value;
-		      		} catch (err) {
-		      			console.log(err);
-		      		}
-	    		}
-			    try {
-			      	return hljs.highlightAuto(code).value;
-			    } catch (err) {
-			    	console.log(err);
-			    }
+        createToolBar();
+        setViewSizes();
 
-	    		return code; 
-			}});
+        marked.setOptions({
+            highlight: function (code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        console.log(lang);
+                        return hljs.highlight(lang, code).value;
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+                try {
+                    return hljs.highlightAuto(code).value;
+                } catch (err) {
+                    console.log(err);
+                }
 
-			markedinputstr();
-			var inputaera = document.getElementById("input");
-			
-			inputaera.oninput = function(){
-				markedinputstr();
-			};
+                return code;
+            }
+        });
 
-			inputaera.onscroll = function(){
-				scrollbar_l();
-			}
-		};
+        markedinputstr();
+        var inputaera = document.getElementById("input");
 
-		//窗口大小改变
-		window.onresize = function(){
-			setViewSizes();
-		}
+        inputaera.oninput = function () {
+            markedinputstr();
+        };
 
-	</script>
+        inputaera.onscroll = function () {
+            scrollbar_l();
+        }
+    };
+
+    //窗口大小改变
+    window.onresize = function () {
+        setViewSizes();
+    }
+
+</script>
 </body>
 </html>

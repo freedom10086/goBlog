@@ -7,13 +7,13 @@ import (
 	"goBlog/conf"
 	"goBlog/model"
 	"net/http"
-	"net/url"
-	"path"
 	"strings"
 	"html/template"
 )
 
 var config *conf.Config
+
+const templateDir = "template/"
 
 type BaseHandler struct {
 	Token *model.Token
@@ -92,7 +92,7 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 
 //todo 当作变量存在内存
 func Template(w http.ResponseWriter, tmpl string, data interface{}) {
-	filepath := config.SiteStaticDir + tmpl + ".html"
+	filepath := templateDir + tmpl + ".html"
 	t, err := template.ParseFiles(filepath)
 	if err != nil {
 		Error(w, err.Error(), http.StatusInternalServerError)
@@ -128,36 +128,26 @@ func BadParament(w http.ResponseWriter, r *http.Request) {
 	Error(w, "400 Bad Request", http.StatusBadRequest)
 }
 
-func Redirect(w http.ResponseWriter, r *http.Request, urlStr string, code int) {
-	if u, err := url.Parse(urlStr); err == nil {
-		if u.Scheme == "" && u.Host == "" {
-			oldpath := r.URL.Path
-			if oldpath == "" {
-				oldpath = "/"
-			}
-			if urlStr == "" || urlStr[0] != '/' {
-				olddir, _ := path.Split(oldpath)
-				urlStr = olddir + urlStr
-			}
-			var query string
-			if i := strings.Index(urlStr, "?"); i != -1 {
-				urlStr, query = urlStr[:i], urlStr[i:]
-			}
-			trailing := strings.HasSuffix(urlStr, "/")
-			urlStr = path.Clean(urlStr)
-			if trailing && !strings.HasSuffix(urlStr, "/") {
-				urlStr += "/"
-			}
-			urlStr += query
-		}
+
+//path 要转到的url
+//注意这事是站内redirect
+//最终setheader例子 /index.html
+func Redirect(w http.ResponseWriter, r *http.Request, path string, code int) {
+	oldFullUrl := r.URL.String();
+	if i := strings.Index(oldFullUrl, "?"); i != -1 {
+		path += oldFullUrl[i:]//加上query参数
 	}
 
-	w.Header().Set("Location", urlStr)
+	w.Header().Set("Location", path)
 	w.WriteHeader(code)
+
+	if !strings.HasSuffix(path, "http") {
+		path = r.Host + path
+	}
 
 	// Shouldn't send the response for POST or HEAD; that leaves GET.
 	if r.Method == "GET" {
-		note := "<a href=\"" + htmlEscape(urlStr) + "\">" + http.StatusText(code) + "</a>.\n"
+		note := "<a href=\"" + htmlEscape(path) + "\">" + http.StatusText(code) + "</a>.\n"
 		fmt.Fprintln(w, note)
 	}
 }
