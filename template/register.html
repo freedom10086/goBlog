@@ -16,7 +16,10 @@
     <label for="email">邮箱</label>
     <span id="emailInfo" style="color:red"></span>
     <br/>
-    <input type="email" name="email" required id="email" placeholder="邮箱" autocomplete="email" maxlength="25">
+    <input type="email" name="email" required id="email" placeholder="邮箱"
+           autocomplete="email" maxlength="25" list="email-hint">
+    <datalist id="email-hint">
+    </datalist>
     <br/>
     <label for="valid">验证码</label>
     <span id="validInfo" style="color:red"></span>
@@ -32,8 +35,8 @@
     <br/>
     <button type="submit" style="margin-top: 12px" disabled>提交</button>
 </form>
-<script type="text/javascript" src="../static/js/base.js"></script>
-<script type="text/javascript">
+<script src="../static/js/base.js" defer></script>
+<script>
     const usernameInput = document.querySelector("#username");
     const emailInput = document.querySelector("#email");
     const validCodeInput = document.querySelector("#valid");
@@ -44,6 +47,9 @@
     const button = document.querySelector("button");
     const form = document.querySelector("#form");
     const yzmCanvas = document.querySelector("#validcanvas");
+    const emailHint = document.querySelector("#email-hint");
+
+    const emails = ['@qq.com', '@163.com', '@126.com', '@gmail.com', '@hotmail.com'];
 
     let usernameState = false;
     let emailState = false;
@@ -99,6 +105,9 @@
     emailInput.addEventListener("keyup", function () {
         emailState = false;
         emailInfo.innerHTML = "";
+        let val = emailInput.value;
+        if (val.length > 2 && val.endsWith('@'))
+            emailHint.innerHTML = `${emails.map(email => `<option value="${val.substr(0, val.indexOf('@')) + email}"/>`).join('')}`
     });
     emailInput.addEventListener("change", function () {
         emailState = false;
@@ -109,39 +118,23 @@
         if (!usernameInput.checkValidity()) {
             return;
         }
-        ajax.get(window.location.href,
-            {mod: 'checkUsername', username: username},
-            function (status, response) {
-                usernameState = true;
-                usernameInfo.style.color = 'green';
-                usernameInfo.innerHTML = "可用";
-
-            },
-            function (status, response) {
-                console.log(status, response);
-                usernameState = false;
-                usernameInfo.style.color = 'red';
-                usernameInfo.innerHTML = username + "不可用";
-            });
+        Api.checkUsername(username, function (isok) {
+            usernameState = isok;
+            usernameInfo.style.color = isok ? 'green' : 'red';
+            usernameInfo.innerHTML = isok ? "可用" : username + "不可用";
+        });
     }
 
     function checkEmail(email) {
         if (!emailInput.checkValidity()) {
             return
         }
-        ajax.get(window.location.href,
-            {mod: 'checkEmail', email: email},
-            function (status, response) {
-                emailState = true;
-                emailInfo.style.color = 'green';
-                emailInfo.innerHTML = "可用";
-            },
-            function (status, response) {
-                console.log(status, response);
-                emailState = false;
-                emailInfo.style.color = 'red';
-                emailInfo.innerHTML = email + "不可用";
-            });
+
+        Api.checkEmail(email, function (isok) {
+            emailState = isok;
+            emailInfo.style.color = isok?'green':'red';
+            emailInfo.innerHTML = isok?"可用":email + "不可用";
+        });
     }
 
     let code = [];

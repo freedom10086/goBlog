@@ -32,7 +32,7 @@ func init() {
 	routers["/categorys"] = &CateHandler{}
 	routers["/users"] = &UserHandler{}
 	routers["/auth"] = &OauthHandler{}
-	routers["/regiest"] = &RegisterHandler{}
+	routers["/register"] = &RegisterHandler{}
 	routers["/chats"] = &ChatHandler{}
 }
 
