@@ -58,60 +58,54 @@
 </head>
 <body>
 <button id="smileybtn">表情</button>
-<!--<div id="smiley" class="smiley">-->
-<!--<ul>-->
-<!--<li class="on">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--</li>-->
-<!--<li>-->
-<!--<img src="smiley/xds/xds1.webp">-->
-<!--</li>-->
-<!--</ul>-->
-<!--<div class="row" style="padding: 5px;">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--<img src="smiley/tb/tb1.png">-->
-<!--</div>-->
-<!--</div>-->
+
 <script>
-    var SmileyBox = {
-        smileys : ["tb", 33, ".png", "xds", 15, ".webp", "bz", 15, ".webp", "qy", 20, ".webp"],
-        titles:{
+    const SmileyBox = {
+        smiley: null,
+        smileys: [
+            ["tb", 33, ".png"],
+            ["xds", 15, ".webp"],
+            ["bz", 15, ".webp"],
+            ["qy", 20, ".webp"]],
+        titles: {
             "tb": ['贴吧', '惊哭', '呼~', '喷', '生气', '不高兴', '惊讶', '酷', '疑问', '吐舌', '泪', '哈哈', '怒', '鄙视', '勉强', '花心',
                 '啊', '乖', '钱', '委屈', '黑线', '睡觉', '呵呵', '太开心', '真棒', '咦', '汗', '阴险', '狂汗', '滑稽', '开心', '笑眼', '吐', '冷'],
             "xds": ['小电视', '笑', '发愁', '赞', '差评', '嘟嘴', '汗', '害羞', '吃惊', '哭泣', '太喜欢', '好怒啊', '困惑', '我好兴奋', '思索', '无语'],
             "bz": ['2233娘', '大笑', '吃惊', '大哭', '耶', '卖萌', '疑问', '汗', '困惑', '怒', '委屈', '郁闷', '第一', '喝茶', '吐魂', '无言'],
             "qy": ['蛆音娘', '卖萌', '吃瓜群众', '吃惊', '害怕', '扶额', '滑稽', '哼', '机智', '哭泣', '睡觉觉', '生气', '偷看', '吐血', '无语', '摇头', '疑问', 'die', 'OK', '肥皂', '大笑']
         },
-        createSmiley:function () {
-            var div = document.createElement("div");
-            div.id = "smiley";
-            div.className = "smiley";
+        initSmiley: function (button) {
+            console.log("init");
+            const btn = document.getElementById(button);
+            this.btn = btn;
+            btn.addEventListener('click', function () {
+                this.smiley = document.getElementById("smiley");
+                if (!this.smiley) {
+                    SmileyBox.createSmiley();
+                } else {
+                    SmileyBox.switchState();
+                }
+            });
+        },
+        createSmiley: function () {
+            this.smiley = document.createElement("div");
+            this.smiley.id = "smiley";
+            this.smiley.className = "smiley";
+            let htmlstr = `<ul>
+        ${this.smileys.map(item => `
+                    <li><img src="smiley/' + ${item[0]} + '/tb/image_emoticon1.png'"></li>`).join('')}
+        </ul>
 
-            var htmlstr = '<ul>';
-            for (var i = 0; i < this.smileys.length / 3; i++) {
-                htmlstr += '<li><img src="smiley/' + this.smileys[i * 3] + '/' + (this.smileys[i * 3] + '1' + this.smileys[i * 3 + 2]) + '"></li>';
-            }
-            htmlstr += '<li class="horizon-stretch"><i class="fa fa-close" style="float: right;"></i></li></ul><div class="row">';
-            htmlstr += '</div>';
+        <li class="horizon-stretch"><i class="fa fa-close" style="float: right;"></i></li>
+        </ul>
+        <div class="row">
+        </div>
+        `;
 
-            div.innerHTML = htmlstr;
-            document.body.appendChild(div);
-            var lis = div.querySelectorAll("ul li");
-            lis.forEach(function (v, k) {
-                if (k != lis.length - 1) {
+            this.smiley.innerHTML = htmlstr;
+            document.body.appendChild(this.smiley);
+            [...this.smiley.querySelectorAll("ul li")].forEach(function (v, k) {
+                if (k != SmileyBox.smileys.length) {
                     v.addEventListener("click", function () {
                         SmileyBox.switchSmiley(k);
                     })
@@ -120,45 +114,44 @@
 
             this.switchSmiley(0);
 
-            var closebtn = div.querySelector(".fa-close");
+            let closebtn = this.smiley.querySelector(".fa-close");
             closebtn.addEventListener('click', function () {
-                div.style.display = "none";
+                SmileyBox.smiley.style.display = "none";
             })
         },
-        switchSmiley: function(index) {
-            var smiley = document.querySelector("#smiley");
-            var lis = smiley.querySelectorAll("ul li");
-            var cuur = smiley.querySelector("ul li.on");
+        switchSmiley: function (index) {
+            let smiley = this.smiley;
+            let lis = smiley.querySelectorAll("ul li");
+            let cuur = smiley.querySelector("ul li.on");
 
-            var curindex = -1;
-            if(cuur){
+            let curindex = -1;
+            if (cuur) {
                 lis.forEach(function (v, k) {
                     if (v == cuur) {
                         curindex = k;
                     }
                 });
 
-                if (curindex == index&&curindex!=-1) {
+                if (curindex == index && curindex != -1) {
                     return;
                 }
             }
 
-            if(curindex==-1){
-                curindex =0;
+            if (curindex == -1) {
+                curindex = 0;
             }
             console.log("switch" + index);
             lis[curindex].className = "";
             lis[index].className = "on";
-
-            var imgcontainer = smiley.querySelector(".row");
-            var str = "";
-            var mytitles = this.titles[this.smileys[index * 3]];
-            for (var i = 1; i <= this.smileys[index * 3 + 1]; i++) {
-                str += '<img src="smiley/' + this.smileys[index * 3] + '/' + (this.smileys[index * 3] + i + this.smileys[index * 3 + 2]) + '" title="' + mytitles[i] + '">';
+            let imgcontainer = smiley.querySelector(".row");
+            let str = "";
+            let mytitles = this.titles[this.smileys[index]];
+            for (let i = 1; i <= this.smileys[index][1]; i++) {
+                str += '<img src="smiley/tb/image_emoticon1.png">';
             }
             imgcontainer.innerHTML = str;
 
-            var imgs = smiley.querySelectorAll(".row img");
+            let imgs = smiley.querySelectorAll(".row img");
             imgs.forEach(function (v, k) {
                 if (k != lis.length - 1) {
                     v.onclick = function () {
@@ -168,29 +161,29 @@
                 }
             });
         },
-        switchState:function (callback) {
-            var state = 0;
-            var smileybox = document.getElementById("smiley");
+        switchState: function (callback) {
+            let state = 0;
+            let smileybox = document.getElementById("smiley");
             if (smileybox.style.display === "none") {
-                var tops = this.btn.offsetTop + this.btn.height;
-                var lefts = this.btn.offsetLeft - smileybox.width / 2;
+                let tops = this.btn.offsetTop + this.btn.height;
+                let lefts = this.btn.offsetLeft - smileybox.width / 2;
                 smileybox.style.left = (lefts + 10) + 'px';
                 smileybox.style.top = (tops + 10) + 'px';
                 smileybox.style.display = "block";
                 state = 1;
                 //拖拽
                 smileybox.onmousedown = function (ev) {
-                    var oEvent = ev || event;
-                    var mx = oEvent.clientX;
-                    var my = oEvent.clientY;
-                    var disX = mx - smileybox.offsetLeft;
-                    var disY = my - smileybox.offsetTop;
+                    let oEvent = ev || event;
+                    let mx = oEvent.clientX;
+                    let my = oEvent.clientY;
+                    let disX = mx - smileybox.offsetLeft;
+                    let disY = my - smileybox.offsetTop;
                     document.onmousemove = function (ev) {
-                        var oEvent = ev || event;
-                        var mx = oEvent.clientX;
-                        var my = oEvent.clientY;
-                        var x = mx - disX;
-                        var y = my - disY;
+                        let oEvent = ev || event;
+                        let mx = oEvent.clientX;
+                        let my = oEvent.clientY;
+                        let x = mx - disX;
+                        let y = my - disY;
                         if (x < 0) {
                             x = 0;
                         } else if (x > document.documentElement.clientWidth - smileybox.offsetWidth) {
@@ -216,27 +209,13 @@
                 state = 0;
             }
             //this.initDrag(state);
-            if(callback){
+            if (callback) {
                 callback(state);
             }
         },
-        initsmiley:function(btn) {
-            console.log("init");
-            var btn = document.getElementById(btn);
-            this.btn = btn;
-
-            btn.addEventListener('click', function () {
-                var smileybox = document.getElementById("smiley");
-                if(!smileybox){
-                    SmileyBox.createSmiley();
-                }else{
-                    SmileyBox.switchState();
-                }
-            });
-        }
     };
 
-    SmileyBox.initsmiley('smileybtn');
+    SmileyBox.initSmiley('smileybtn');
 </script>
 
 </body>

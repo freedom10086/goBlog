@@ -3,7 +3,7 @@ CACHE MANIFEST
 
 CACHE:
 js/marked.js
-js/highlight.pack.js
+js/highlight.js
 index.html
 404.html
 

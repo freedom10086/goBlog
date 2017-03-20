@@ -1,0 +1,236 @@
+.editor {
+    display: flex;
+    overflow: hidden;
+    width: 85%;
+    max-width: 1500px;
+    min-width: 600px;
+    height: 720px;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .20);
+}
+
+.full-screen {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border: none;
+    margin: 0 auto;
+}
+
+.editor-toolbar {
+    user-select: none;
+    background: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 3px #ddd;
+    z-index: 10;
+}
+
+.editor-toolbar > li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    border-radius: 2px;
+    border: 1px solid #fff;
+    color: #666;
+    transition: all 300ms ease-out;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    margin: 2px 4px;
+}
+
+.editor-toolbar > li:hover, .editor-toolbar > li.active {
+    border: 1px solid #ddd;
+    background: #eee;
+}
+
+.editor textarea {
+    font-family: "Microsoft YaHei", 微软雅黑, monospace;
+    height: 100%;
+    color: #05a;
+    line-height: 1.5em;
+    text-align: left;
+    border: 1px solid #fff;
+    padding: 0.5em 1em;
+    outline: 0;
+    font-size: 15px;
+}
+
+.editor textarea:hover {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #E8F2FF;
+    transition: border-color ease-in-out 0.5s;
+}
+
+.editor-preview {
+    width: 50%;
+    height: 100%;
+    padding: 0.5em 1em;
+    font-family: "Microsoft YaHei", 微软雅黑, serif;
+    font-size: 14px;
+    line-height: 1.5em;
+    overflow-y: auto;
+}
+
+.editor-left {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ddd;
+    align-items: stretch;
+    width: 50%;
+    height: 100%;
+}
+
+.editor ::-webkit-scrollbar {
+    height: 10px;
+    width: 7px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.editor ::-webkit-scrollbar:hover {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.editor ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+}
+
+.editor ::-webkit-scrollbar-thumb:hover {
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.25);
+    /* IE9+, News */
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.editor .editor-btn-close {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+    border-radius: 500px;
+    position: relative;
+    top: 32px;
+    right: 32px;
+    z-index: 12;
+    color: #888;
+    transition: color 300ms ease-out;
+    cursor: pointer;
+}
+
+.editor .editor-btn-close:hover {
+    color: #666;
+}
+
+.smiley_box {
+    position: absolute;
+    display: none;
+    z-index: 20;
+}
+
+/*
+
+Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
+
+*/
+
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: #F0F0F0;
+}
+
+/* Base color: saturation 0; */
+
+.hljs,
+.hljs-subst {
+    color: #444;
+}
+
+.hljs-comment {
+    color: #888888;
+}
+
+.hljs-keyword,
+.hljs-attribute,
+.hljs-selector-tag,
+.hljs-meta-keyword,
+.hljs-doctag,
+.hljs-name {
+    font-weight: bold;
+}
+
+/* User color: hue: 0 */
+
+.hljs-type,
+.hljs-string,
+.hljs-number,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-quote,
+.hljs-template-tag,
+.hljs-deletion {
+    color: #880000;
+}
+
+.hljs-title,
+.hljs-section {
+    color: #880000;
+    font-weight: bold;
+}
+
+.hljs-regexp,
+.hljs-symbol,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+    color: #BC6060;
+}
+
+/* Language color: hue: 90; */
+
+.hljs-literal {
+    color: #78A960;
+}
+
+.hljs-built_in,
+.hljs-bullet,
+.hljs-code,
+.hljs-addition {
+    color: #397300;
+}
+
+/* Meta color: hue: 200 */
+
+.hljs-meta {
+    color: #1f7199;
+}
+
+.hljs-meta-string {
+    color: #4d99bf;
+}
+
+/* Misc effects */
+
+.hljs-emphasis {
+    font-style: italic;
+}
+
+.hljs-strong {
+    font-weight: bold;
+}
