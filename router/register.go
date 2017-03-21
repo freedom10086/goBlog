@@ -37,7 +37,7 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
 			//返回完善信息页面,完善成功后
 			//post /users 插入数据库完成注册
-			Template(w, "true_register", &CompeteRegData{
+			Template(w, "register2", &CompeteRegData{
 				PostUrl:"/users",
 				Token:token,
 				Email:t.Email,

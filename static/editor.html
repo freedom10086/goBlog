@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8"/>
     <title>发表新帖</title>
-    <link rel="stylesheet" href="styles/my.css">
+    <link rel="stylesheet" href="styles/base.css">
     <link rel="stylesheet" href="styles/editor.css">
     <link rel="stylesheet" href="styles/font-md.css">
     <script src="js/marked.js"></script>
     <script src="js/highlight.js"></script>
+    <script src="js/smiley.js"></script>
     <script src="js/editor.js"></script>
 
 </head>
@@ -43,8 +44,9 @@
             ...`;
     //窗口载入完成
     window.onload = function () {
-        let editor = document.querySelector("#editor");
-        initEditor(editor);
+        let editorbox = document.querySelector("#editor");
+        new Editor(editorbox);
+
         let preview = document.querySelector("#markdown-preview");
         let input = document.querySelector("#editor-input");
         let textarea = document.querySelector("textarea");

@@ -76,16 +76,6 @@
     transition: border-color ease-in-out 0.5s;
 }
 
-.editor-preview {
-    width: 50%;
-    height: 100%;
-    padding: 0.5em 1em;
-    font-family: "Microsoft YaHei", 微软雅黑, serif;
-    font-size: 14px;
-    line-height: 1.5em;
-    overflow-y: auto;
-}
-
 .editor-left {
     display: flex;
     flex-direction: column;
@@ -93,27 +83,6 @@
     align-items: stretch;
     width: 50%;
     height: 100%;
-}
-
-.editor ::-webkit-scrollbar {
-    height: 10px;
-    width: 7px;
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.editor ::-webkit-scrollbar:hover {
-    background: rgba(0, 0, 0, 0.15);
-}
-
-.editor ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
-}
-
-.editor ::-webkit-scrollbar-thumb:hover {
-    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.25);
-    /* IE9+, News */
-    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .editor .editor-btn-close {
@@ -134,10 +103,118 @@
     color: #666;
 }
 
-.smiley_box {
+/**
+表情编辑框
+ */
+.smiley {
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     position: absolute;
     display: none;
     z-index: 20;
+    width: 350px;
+}
+
+.smiley .smiley-tab-box {
+    user-select: none;
+    background-color: #f4f5f7;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+}
+
+.smiley .smiley-tab {
+    cursor: pointer;
+}
+
+.smiley .smiley-tab.on {
+    background-color: #fff;
+}
+
+.smiley .smiley-tab img {
+    border: none;
+    width: 24px;
+    height: 24px;
+    padding: 5px;
+}
+
+.smiley .smiley-container {
+    max-height: 250px;
+    padding: 4px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-y: auto;
+}
+
+.smiley .smiley-container img {
+    cursor: pointer;
+    border-radius: 2px;
+    border: 1px transparent solid;
+    width: 32px;
+    height: 32px;
+    margin: 2px;
+    padding: 2px;
+    vertical-align: middle;
+    transition: all 300ms ease-out;
+}
+
+.smiley .smiley-container img:hover {
+    border: 1px solid #ddd;
+    background: #eee;
+}
+
+.smiley .btn-close {
+    font-size: 14px;
+    border: 2px solid #f2f2f2;
+    padding: 2px;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    z-index: 20;
+    float: right;
+    margin-top: -6px;
+    margin-right: -6px;
+    background: #f4f5f7;
+    color: #888;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.smiley .btn-close:hover {
+    border: 2px solid #eee;
+    color: #666;
+}
+
+/*
+
+markdown
+
+*/
+.editor-preview {
+    width: 50%;
+    height: 100%;
+    padding: 0.5em 1em;
+    font-size: 14px;
+    line-height: 1.5em;
+    overflow-y: auto;
+}
+
+.editor-preview pre {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: #F0F0F0;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+
+.editor-preview h1, h2, h3 {
+    border-bottom: 1px solid #e2e2e2;
 }
 
 /*
@@ -145,17 +222,6 @@
 Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 
 */
-
-.hljs {
-    display: block;
-    overflow-x: auto;
-    padding: 0.5em;
-    background: #F0F0F0;
-}
-
-/* Base color: saturation 0; */
-
-.hljs,
 .hljs-subst {
     color: #444;
 }
