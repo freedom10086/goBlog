@@ -1,5 +1,37 @@
 /*! normalize.css v5.0.0 | MIT License | github.com/necolas/normalize.css */
 /*https://github.com/sindresorhus/github-markdown-css*/
+
+:root {
+    --color-bg-primary: #fff; /*主背景色*/
+    --color-bg-secondary: #f4f5f7; /*副背景色*/
+    --color-bg-hover: #eee; /*背景颜色加深*/
+    --color-accent: #rgb(0, 85, 170); /*亮色*/
+    --color-primary: #rgb(225, 235, 245); /*主色调*/
+    --color-primary-dark: #rgb(209, 225, 240); /*主色调加深*/
+    --color-text-primary: #222; /*字体颜色主色调*/
+    --color-text-primary-inverse: #f1f1f1; /*字体颜色主色调-反*/
+    --color-text-secondary: #333; /*二级字颜色*/
+    --color-text-secondary-inverse: #e1e1e1; /*二级字颜色-反*/
+    --color-text-disable: #555; /*disable颜色*/
+    --color-text-hint: #666; /*hint颜色*/
+    --color-icon: #777; /*icon颜色*/
+    --color-icon-hover: #666; /*icon颜色-激活*/
+    --color-border: #ddd; /*边框颜色*/
+    --color-border-hover: #ccc; /*边框颜色hover*/
+    --color-border-focus: #5cb3fd; /*边框颜色激活*/
+    --color-link: #00a1d6; /*链接颜色*/
+
+    --siez-text: 15px;
+    --siez-text-secondary: 13px;
+    --size-text-title: 18px;
+    --siez-text-small: 11px;
+
+    --size-4: 4px;
+    --size-8: 8px;
+    --size-12: 12px;
+    --size-16: 16px;
+}
+
 html {
     -ms-overflow-style: scrollbar;
     -webkit-tap-highlight-color: transparent;
@@ -9,19 +41,16 @@ html {
 body {
     margin: 0;
     font-family: "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-    font-size: 14px;
+    font-size: var(--siez-text);
     font-weight: normal;
     line-height: 1.5;
-    color: #292b2c;
-    background-color: #fff;
-    /*overflow-x: hidden;*/
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-primary);
 }
 
 main {
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    padding: 10px 0;
+    padding: var(--size-12) 0;
     min-height: calc(100% - 64px);
     align-items: flex-start;
 }
@@ -33,7 +62,7 @@ ul, ol, dl {
 
 ul li, ol li {
     padding: 0;
-    margin: 0 5px;
+    margin: 0 var(--size-4);
 }
 
 article,
@@ -183,10 +212,6 @@ template {
     display: none;
 }
 
-[hidden] {
-    display: none;
-}
-
 [tabindex="-1"]:focus {
     outline: none !important;
 }
@@ -229,12 +254,7 @@ a {
     font-weight: normal;
 }
 
-a.gray {
-    color: #99a2aa;
-}
-
-a:active,
-a:hover {
+a:active, a:hover {
     color: #00a1d6;
 }
 
@@ -250,120 +270,6 @@ a:not([href]):not([tabindex]):focus, a:not([href]):not([tabindex]):hover {
 
 a:not([href]):not([tabindex]):focus {
     outline: 0;
-}
-
-.link-btn {
-    padding: 0 5px;
-    border-radius: 4px;
-    margin-right: 5px;
-    cursor: pointer;
-    display: inline-block;
-}
-
-.link-btn:hover {
-    color: #00a1d6;
-    background: #e5e9ef;
-}
-
-.link-btn-blue {
-    padding: 2px 3px;
-    border-radius: 4px;
-    color: #00a1d6;
-    cursor: pointer;
-}
-
-.link-btn-blue:hover {
-    background: #e5e9ef;
-    color: #00a1d6;
-}
-
-a.user {
-    color: rgb(109, 117, 122);
-    cursor: pointer;
-    display: inline;
-    font-size: 0.9em;
-    font-weight: bold;
-    line-height: 18px;
-    outline-color: rgb(109, 117, 122);
-    text-decoration: none;
-    vertical-align: middle;
-    word-wrap: break-word;
-}
-
-a.user:hover {
-    color: #00a1d6;
-}
-
-a.tab:link, a.tab:visited, a.tab:active {
-    display: inline-block;
-    font-size: 13px;
-    line-height: 13px;
-    padding: 5px 8px 5px 8px;
-    margin-right: 5px;
-    border-radius: 3px;
-    color: #555;
-}
-
-a.tab:hover {
-    background-color: #f5f5f5;
-    color: #000;
-    text-decoration: none;
-}
-
-a.tab_current:link, a.tab_current:visited, a.tab_current:active {
-    display: inline-block;
-    font-size: 13px;
-    line-height: 13px;
-    padding: 5px 8px 5px 8px;
-    margin-right: 5px;
-    border-radius: 3px;
-    background-color: #334;
-    color: #fff;
-}
-
-a.tab_current:hover {
-    background-color: #445;
-    color: #fff;
-    text-decoration: none;
-}
-
-a.cate:link, a.cate:visited, a.cate:active {
-    background-color: #f5f5f5;
-    font-size: 10px;
-    line-height: 10px;
-    display: inline-block;
-    padding: 4px 4px 4px 4px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    border-radius: 2px;
-    text-decoration: none;
-    color: #999;
-}
-
-a.cate:hover {
-    text-decoration: none;
-    background-color: #e2e2e2;
-    color: #777;
-}
-
-a.tag_s:link, a.tag_s:visited {
-    padding: 5px 10px 5px 10px;
-    line-height: 100%;
-    background-color: #f0f0f0;
-    text-decoration: none;
-    border-radius: 10px;
-    margin: 0 5px;
-    display: inline-block;
-}
-
-a.tag_s:hover {
-    background-color: #99a;
-    color: #fff;
-    text-decoration: none;
-}
-
-a.tag_s > span {
-    opacity: .15;
 }
 
 figure {
@@ -427,7 +333,7 @@ button:hover {
     color: #111;
 }
 
-input {
+input:not([type=file]):not([type=button]) {
     padding: 0.25rem 0.3rem;
     line-height: 1.25;
     color: #222;
@@ -438,7 +344,7 @@ input {
     box-shadow ease-in-out 0.3s;
 }
 
-input:focus {
+input:not([type=file]):not([type=button]):focus {
     background-color: #fff;
     border-color: #5cb3fd;
     outline: none;
@@ -458,6 +364,7 @@ input[type="search"] {
 }
 
 textarea {
+    font-family: "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
     resize: none;
     font-size: 0.9em;
     display: inline-block;
@@ -501,22 +408,22 @@ output {
     display: none !important;
 }
 
+img.avater {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid #FFF;
+    /*border-radius: 50%;*/
+}
+
+img.avater:hover {
+    border: 1px solid hsl(209, 51%, 88%);
+}
+
 .container {
     position: relative;
     margin-left: auto;
     margin-right: auto;
-}
-
-.info .info-item {
-    margin-right: 8px;
-}
-
-.post-content > *:first-child {
-    margin-top: 0 !important;
-}
-
-.post-content > *:last-child {
-    margin-bottom: 0 !important;
 }
 
 .pull-right {
@@ -561,6 +468,22 @@ output {
     flex-grow: 1;
 }
 
+.tag:link, .tag:visited {
+    color: var(--color-text-primary);
+    padding: 2px 4px;
+    background-color: #ccc;
+    text-decoration: none;
+    border-radius: 8px;
+    margin: 0 5px;
+    display: inline-block;
+    font-size: var(--siez-text-small);
+}
+
+.tag:hover, .tag:active {
+    background-color: #bbb;
+    text-decoration: none;
+}
+
 /* PAGE */
 a.page:link, a.page:visited, a.page:active {
     display: inline-block;
@@ -601,16 +524,56 @@ a.page_current:hover {
     text-decoration: none;
 }
 
-img.avater {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 1px solid #FFF;
-    /*border-radius: 50%;*/
+a.tab:link, a.tab:visited, a.tab:active {
+    display: inline-block;
+    font-size: 13px;
+    line-height: 13px;
+    padding: 5px 8px 5px 8px;
+    margin-right: 5px;
+    border-radius: 3px;
+    color: #555;
 }
 
-img.avater:hover {
-    border: 1px solid hsl(209, 51%, 88%);
+a.tab:hover {
+    background-color: #f5f5f5;
+    color: #000;
+    text-decoration: none;
+}
+
+a.tab_current:link, a.tab_current:visited, a.tab_current:active {
+    display: inline-block;
+    font-size: 13px;
+    line-height: 13px;
+    padding: 5px 8px 5px 8px;
+    margin-right: 5px;
+    border-radius: 3px;
+    background-color: #334;
+    color: #fff;
+}
+
+a.tab_current:hover {
+    background-color: #445;
+    color: #fff;
+    text-decoration: none;
+}
+
+a.cate:link, a.cate:visited, a.cate:active {
+    background-color: #f5f5f5;
+    font-size: 10px;
+    line-height: 10px;
+    display: inline-block;
+    padding: 4px 4px 4px 4px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    text-decoration: none;
+    color: #999;
+}
+
+a.cate:hover {
+    text-decoration: none;
+    background-color: #e2e2e2;
+    color: #777;
 }
 
 /*
@@ -619,10 +582,20 @@ dialog
 
 .dialog {
     border: none;
-    box-shadow: 0 9px 46px 8px rgba(0, 0, 0, 0.14), 0 11px 15px -7px rgba(0, 0, 0, 0.12), 0 24px 38px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 9px 46px 8px rgba(0, 0, 0, 0.14),
+    0 11px 15px -7px rgba(0, 0, 0, 0.12),
+    0 24px 38px 3px rgba(0, 0, 0, 0.2);
     width: 320px;
     border-radius: 3px;
     padding: 0;
+}
+
+.post-content > *:first-child {
+    margin-top: 0 !important;
+}
+
+.post-content > *:last-child {
+    margin-bottom: 0 !important;
 }
 
 .comment-item {
@@ -816,7 +789,7 @@ dialog
         background: hsl(209, 51%, 92%);
     }
 
-    main.container {
+    main {
         display: flex;
         flex-direction: column;
     }
@@ -831,7 +804,7 @@ dialog
         max-width: 1000px;
     }
 
-    main.container {
+    main {
         display: flex;
         flex-direction: row;
     }
