@@ -9,11 +9,13 @@ import (
 	"net/http"
 	"strings"
 	"html/template"
+	"log"
 )
 
 var config *conf.Config
 
-const templateDir = "template/"
+const templateDir = "./template/"
+const staticDir = "/static/"
 
 type BaseHandler struct {
 	Token *model.Token
@@ -90,8 +92,16 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 	}
 }
 
-//todo 当作变量存在内存
+//todo 当作变量存在内存 http2 push相关文件css/js/图片等
 func Template(w http.ResponseWriter, tmpl string, data interface{}) {
+	//http2 push
+	pusher, ok := w.(http.Pusher)
+	if ok { // Push is supported. Try pushing rather than waiting for the browser.
+		if err := pusher.Push(staticDir+"styles/base.css", nil); err != nil {
+			log.Printf("Failed to push: %v", err)
+		}
+	}
+
 	filepath := templateDir + tmpl + ".html"
 	t, err := template.ParseFiles(filepath)
 	if err != nil {
@@ -105,7 +115,7 @@ func Template(w http.ResponseWriter, tmpl string, data interface{}) {
 }
 
 func InternalError(w http.ResponseWriter, r *http.Request, err error) {
-	Error(w, "500 Internal Server Error:" + err.Error(), http.StatusInternalServerError)
+	Error(w, "500 Internal Server Error:"+err.Error(), http.StatusInternalServerError)
 }
 
 func Unauthorized(w http.ResponseWriter, r *http.Request) {
@@ -128,14 +138,13 @@ func BadParament(w http.ResponseWriter, r *http.Request) {
 	Error(w, "400 Bad Request", http.StatusBadRequest)
 }
 
-
 //path 要转到的url
 //注意这事是站内redirect
 //最终setheader例子 /index.html
 func Redirect(w http.ResponseWriter, r *http.Request, path string, code int) {
 	oldFullUrl := r.URL.String();
 	if i := strings.Index(oldFullUrl, "?"); i != -1 {
-		path += oldFullUrl[i:]//加上query参数
+		path += oldFullUrl[i:] //加上query参数
 	}
 
 	w.Header().Set("Location", path)

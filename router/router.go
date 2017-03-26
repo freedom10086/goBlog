@@ -19,7 +19,7 @@ var htmlReplacer = strings.NewReplacer(
 var routers map[string]MyHandler
 
 const (
-	MethodGet = iota
+	MethodGet    = iota
 	MethodPost
 	MethodDelete
 	MethodUpdate
@@ -174,7 +174,7 @@ func (mux *MyRouter) handle(path string) (h MyHandler) {
 
 //isdir 表示pattern是否为目录
 func pathMatch(pattern, path string) bool {
-	if pattern[len(pattern) - 1] != '/' {
+	if pattern[len(pattern)-1] != '/' {
 		//如果不是目录比较是否相等
 		return pattern == path
 	}
@@ -190,7 +190,7 @@ func cleanPath(p string) string {
 		p = "/" + p
 	}
 	np := path.Clean(p)
-	if p[len(p) - 1] == '/' && np != "/" {
+	if p[len(p)-1] == '/' && np != "/" {
 		np += "/"
 	}
 	return np

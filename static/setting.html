@@ -4,163 +4,108 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="styles/base.css">
+    <style>
+        .row {
+            padding: 8px 0;
+        }
+        .row > label {
+            width: 100px;
+            text-align: right;
+            margin-right: 12px;
+        }
+        .box {
+            padding: 20px;
+        }
+        input:not([type=radio]), textarea {
+            width: 280px;
+        }
+        canvas {
+            border: 1px solid var(--color-border);
+            margin-right: 12px;
+        }
+    </style>
 </head>
 <body>
-<header>
-    <span class="title">这是网站logo</span>
-    <nav>
-        <a href="#" class="active">Help</a>
-        <a href="#">Privacy</a>
-        <a href="#">Help</a>
-        <a href="#">Help</a>
-        <a href="#">Help</a>
-    </nav>
-    <input type="text" placeholder="搜索你感兴趣的内容..." style="width: 320px;height: 32px;">
-</header>
 
-<main>
-    <div id="content">
-        <div class="box" style="border-bottom: 0;">
-            <div class="rowb" style="font-size: 14px;"><a href="/">V2EX</a><span class="chevron">&nbsp;&nbsp;›&nbsp;&nbsp;</span>Go
-            </div>
-            <div class="rowb">
-                设置头像
-            </div>
-            <div class="row" style="align-items: flex-end;justify-content: center">
-                <canvas id="canvas" width="200" height="200" style="border: 1px solid #e2e2e2;"></canvas>
-                <canvas id="canvas2" width="112" height="112" style="border: 1px solid #e2e2e2;margin: 0 10px;"></canvas>
-                <canvas id="canvas3" width="48" height="48" style="border: 1px solid #e2e2e2;"></canvas>
-            </div>
-            <div class="rowb" style="padding: 5px 10px 10px 10px;justify-content: center">
-                <button class="button">保存</button>
-                <button id="preview" style="margin-left: 10px;display: none" class="button">预览</button>
-                <input style="margin-left: 20px;" id="imginput" type="file" accept="image/jpeg,image/png,image/gif">
-            </div>
-            <div class="row">
-                关于头像的规则
-                <ul style="width: 100%">
-                    <li>V2EX 禁止使用任何低俗或者敏感图片作为头像</li>
-                    <li>如果你是男的，请不要用女人的照片作为头像，这样可能会对其他会员产生误导</li>
-                </ul>
+<main class="container">
+    <div class="box">
+        <label>设置头像</label>
+        <div class="row" style="align-items: flex-end">
+            <canvas id="avatar" width="160" height="160" title="设置头像"></canvas>
+            <input id="avatar_input" type="file" accept="image/*;"/>
+        </div>
+        <label>个人信息设置</label>
+        <div class="row">
+            <label for="description">个人简介:</label>
+            <textarea id="description" style="height: 4em;" placeholder="个人简介"></textarea>
+        </div>
+        <div class="row">
+            <label>性别:</label>
+            <div>
+                <label><input name="sex" type="radio" value="0"/>保密</label>
+                <label><input name="sex" type="radio" value="1"/>男</label>
+                <label><input name="sex" type="radio" value="2"/>女</label>
             </div>
         </div>
-
-        <div class="vgap20"></div>
-        <div class="box">
-            <div class="rowb">
-                个人信息设置
-            </div>
-
-            <div class="row" style="align-items: flex-start;justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px;" for="description">个人简介:</label>
-                <textarea id="description" style="height: 4em;width: 320px" class="textarea" placeholder="个人简介"></textarea>
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px">性别:</label>
-                <div style="width: 320px">
-                    <label><input name="sex" type="radio" value="" />保密 </label>
-                    <label><input name="sex" type="radio" value="" />男 </label>
-                    <label><input name="sex" type="radio" value="" />女 </label>
-                </div>
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px" for="birthday">出生日期:</label>
-                <input id="birthday" style="width: 320px" type="date" class="sl">
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px" for="site">个人主页:</label>
-                <input id="site" style="width: 320px" type="url" class="sl" placeholder="个人主页" minlength="3">
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px" for="phone">手机:</label>
-                <input id="phone" style="width: 320px" type="tel" class="sl" minlength="11" maxlength="11" placeholder="手机" pattern="^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$">
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px" for="email">邮箱:</label>
-                <input id="email" style="width: 320px" type="tel" class="sl"  placeholder="邮箱" value="2351386755@qq.com" readonly>
-            </div>
-            <button class="button" style="margin-left: 275px;margin-bottom: 10px;margin-top: 5px;">保存设置</button>
-
+        <div class="row">
+            <label for="birthday">出生日期:</label>
+            <input id="birthday" type="date">
         </div>
-        <div class="vgap20"></div>
-        <div class="box">
-            <div class="rowb">
-                密码设置
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px;" for="passpre">当前密码:</label>
-                <input id="passpre" style="width: 320px" type="password" class="sl">
-            </div>
-
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px" for="passnew">新密码:</label>
-                <input id="passnew" style="width: 320px" type="password" class="sl" minlength="6" maxlength="20">
-            </div>
-            <div class="row" style="justify-content: center">
-                <label style="width: 60px;text-align: right;margin-right: 10px" for="passnewr">确认密码:</label>
-                <input id="passnewr" style="width: 320px" type="password" class="sl" minlength="6" maxlength="20">
-            </div>
-            <button class="button" style="margin-left: 275px;margin-bottom: 10px;margin-top: 5px;">修改密码</button>
+        <div class="row">
+            <label for="site">个人主页:</label>
+            <input id="site" type="url" placeholder="个人主页" minlength="3">
         </div>
+        <div class="row">
+            <label for="phone">手机:</label>
+            <input id="phone" type="tel" minlength="11" maxlength="11"
+                   placeholder="手机" pattern="^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$">
+        </div>
+        <div class="row">
+            <label for="email">邮箱:</label>
+            <input id="email" type="tel" placeholder="邮箱" value="2351386755@qq.com" readonly>
+        </div>
+        <label>密码设置</label>
+        <div class="row">
+            <label for="passpre">当前密码:</label>
+            <input id="passpre" type="password">
+        </div>
+        <div class="row">
+            <label for="passnew">新密码:</label>
+            <input id="passnew" type="password" minlength="6" maxlength="20">
+        </div>
+        <div class="row">
+            <label for="passnewr">确认密码:</label>
+            <input id="passnewr" type="password" minlength="6" maxlength="20">
+        </div>
+        <button class="button">保存修改</button>
     </div>
-
-
 </main>
 
-<footer>
-    <div>Title</div>
-</footer>
 <script>
+    const avatar_big = document.querySelector("#avatar");
+    const imginput = document.querySelector("#avatar_input");
 
-    var canvas = document.getElementById("canvas");
-    var imginput = document.getElementById("imginput");
-    var canvas2 = document.getElementById("canvas2");
-    var canvas3 = document.getElementById("canvas3");
-    var btnpreview = document.getElementById("preview");
+    let context;
+    let img, imgX = 0, imgY = 0, imgScale = 1;
 
-
-    var context;
-    var img, imgX = 0, imgY = 0, imgScale = 1;
-
-    var len = canvas.offsetWidth;
-    context = canvas.getContext('2d');
-    var imgWidth, imgHeight;
+    let len = avatar_big.offsetWidth;
+    context = avatar_big.getContext('2d');
+    let imgWidth, imgHeight;
 
     imginput.onchange = function (e) {
-        var file = e.target.files[0];
-        var size = file.size;
-        var kbsize  = Math.round(size * 100 / 1024) / 100;
-
-        if(kbsize>2048){
-            alert("图片太大,大小为"+kbsize+"kb！请选择小于2M的图片");
+        let file = e.target.files[0];
+        let size = file.size;
+        let kbsize = Math.round(size * 100 / 1024) / 100;
+        if (kbsize > 2048) {
+            alert("图片太大,大小为" + kbsize + "kb！请选择小于2M的图片");
             return false;
         }
-
-        var reader = new FileReader();
+        let reader = new FileReader();
         reader.onload = function () {
-            var res = reader.result;
+            let res = reader.result;
             img = new Image();
             img.src = res;
             img.onload = function () {
-                btnpreview.style.display = 'block';
-                btnpreview.onclick = function () {
-                    var newimg = new Image();
-                    newimg.src = canvas.toDataURL();
-
-                    var context2 = canvas2.getContext('2d');
-                    context2.clearRect(0,0,112,112);
-                    context2.drawImage(newimg,0,0,112, 112);
-
-                    var context3 = canvas3.getContext('2d');
-                    context3.clearRect(0,0,48,48);
-                    context3.drawImage(newimg,0,0,48, 48);
-                };
                 imgX = imgY = 0;
                 if (img.width < img.height) {//w小
                     imgWidth = len;
@@ -170,10 +115,9 @@
                     imgWidth = img.width * len / img.height;
                 }
                 //图片的坐标
-                var px = (len - imgWidth) / 2;
-                var py = (len - imgHeight) / 2;
+                let px = (len - imgWidth) / 2;
+                let py = (len - imgHeight) / 2;
                 context.clearRect(0, 0, len, len);
-                //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
                 context.drawImage(img, px, py, imgWidth, imgHeight);
             }
         };
@@ -183,47 +127,47 @@
 
     function drawImage() {
         context.clearRect(0, 0, len, len);
-        context.drawImage(img,imgX, imgY, imgWidth * imgScale, imgHeight * imgScale);
+        context.drawImage(img, imgX, imgY, imgWidth * imgScale, imgHeight * imgScale);
     }
 
-    canvas.onmousedown = function (event) {
-        var pos = windowToCanvas(canvas, event.clientX, event.clientY);
-        canvas.onmousemove = function (event) {
-            canvas.style.cursor = "move";
-            var pos1 = windowToCanvas(canvas, event.clientX, event.clientY);
-            var x = pos1.x - pos.x;
-            var y = pos1.y - pos.y;
+    avatar_big.onmousedown = function (event) {
+        let pos = windowToCanvas(avatar_big, event.clientX, event.clientY);
+        avatar_big.onmousemove = function (event) {
+            avatar_big.style.cursor = "move";
+            let pos1 = windowToCanvas(avatar_big, event.clientX, event.clientY);
+            let x = pos1.x - pos.x;
+            let y = pos1.y - pos.y;
             pos = pos1;
             imgX += x;
             imgY += y;
 
-            if(imgX<len-imgWidth * imgScale){
-                imgX = len-imgWidth * imgScale;
+            if (imgX < len - imgWidth * imgScale) {
+                imgX = len - imgWidth * imgScale;
             }
-            if(imgX>0){
+            if (imgX > 0) {
                 imgX = 0;
             }
-            if(imgY<len-imgHeight * imgScale){
-                imgY = len-imgHeight * imgScale;
+            if (imgY < len - imgHeight * imgScale) {
+                imgY = len - imgHeight * imgScale;
             }
-            if(imgY>0){
+            if (imgY > 0) {
                 imgY = 0;
             }
             drawImage();
         };
 
         document.onmouseup = function () {
-            canvas.onmousemove = null;
+            avatar_big.onmousemove = null;
             document.onmouseup = null;
-            canvas.style.cursor = "default";
+            avatar_big.style.cursor = "default";
         };
 
         return false;
     };
 
-    canvas.onmousewheel = function (event) {
-        var pos = windowToCanvas(canvas, event.clientX, event.clientY);
-        console.log("pos:",pos.x);
+    avatar_big.onmousewheel = function (event) {
+        let pos = windowToCanvas(avatar_big, event.clientX, event.clientY);
+        console.log("pos:", pos.x);
         if (event.wheelDelta > 0) {
             imgScale *= 2;
             if (imgScale > 5) {
@@ -233,7 +177,7 @@
             imgX = imgX * 2 - pos.x;
             imgY = imgY * 2 - pos.y;
             drawImage();
-        }else {
+        } else {
             imgScale /= 2;
             if (imgScale < 1 || imgWidth * imgScale < len || imgHeight * imgScale < len) {
                 imgScale *= 2;
@@ -243,11 +187,11 @@
             imgY = imgY / 2 + pos.y / 2;
             drawImage();
         }
-
+        return false;
     };
 
     function windowToCanvas(canvas, x, y) {
-        var bbox = canvas.getBoundingClientRect();
+        let bbox = canvas.getBoundingClientRect();
         return {
             x: x - bbox.left - (bbox.width - canvas.width) / 2,
             y: y - bbox.top - (bbox.height - canvas.height) / 2
