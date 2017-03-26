@@ -1,40 +1,3 @@
-Windows
-初始化 initdb.exe -D C:\app\pgsql-9.6.2\data -E UTF8
-启动 .\pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
-
-警告:为本地连接启动了 "trust" 认证.
-你可以通过编辑 pg_hba.conf 更改或你下次
-行 initdb 时使用 -A或者--auth-local和--auth-host选项.
-
-//创建用户 超级用户要谨慎
-createuser [--superuser] yang
-
-//设置密码 用postgres超级管理员登陆
-//为刚刚创建的用户设置密码
-psql postgres
-\password yang
-\q
-
-#创建数据库 指定所有权yang
-createdb -O yang -p 5432 goblog
-
-#登陆数据库
-//-U 用户
-//-d 数据库
-//-h host
-//-p 端口
-psql -U yang -d goblog -h 127.0.0.1 -p 5432
-（简略模式 psql mydb）
-
-
-//linux
-sudo apt-get install postgresql-client
-sudo apt-get install postgresql
-su postgress //切换到postgress用户
-psql//使用psql命令登录PostgreSQL控制台，以postgress用户
-\password postgres //更改密码
-
-
 恢复psql mydb < mydb.sql
 
 控制台命令 pg_ctl -D 
@@ -48,31 +11,6 @@ psql//使用psql命令登录PostgreSQL控制台，以postgress用户
 \du：列出所有用户。
 \e：打开文本编辑器。
 \conninfo：列出当前数据库和连接的信息。
-
-
-# 创建新表 
-CREATE TABLE user_tbl(name VARCHAR(20), signup_date DATE);
-# 插入数据 
-INSERT INTO user_tbl(name, signup_date) VALUES('张三', '2013-12-22');
-INSERT INTO "public"."user" ("name") VALUES ('张三') RETURNING "uid", "name"
-# 选择记录 
-SELECT * FROM user_tbl;
-# 更新数据 
-UPDATE user_tbl set name = '李四' WHERE name = '张三';
-# 删除记录 
-DELETE FROM user_tbl WHERE name = '李四' ;
-# 添加栏位 
-ALTER TABLE user_tbl ADD email VARCHAR(40);
-# 更新结构 
-ALTER TABLE user_tbl ALTER COLUMN signup_date SET NOT NULL;
-# 更名栏位 
-ALTER TABLE user_tbl RENAME COLUMN signup_date TO signup;
-# 删除栏位 
-ALTER TABLE user_tbl DROP COLUMN email;
-# 表格更名 
-ALTER TABLE user_tbl RENAME TO backup_tbl;
-# 删除表格 
-DROP TABLE IF EXISTS backup_tbl;
 
 
 Name	Aliases	Description
