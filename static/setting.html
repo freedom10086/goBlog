@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/bootstrap.css">
     <style>
         .row {
-            padding: 8px 0;
+            margin-bottom: 1rem;
+            align-items: center;
         }
-        .row > label {
+
+        .row > label:first-child {
             width: 100px;
-            text-align: right;
-            margin-right: 12px;
         }
-        .box {
-            padding: 20px;
+
+        input:not([type=radio]) {
+            flex-grow: 1;
         }
-        input:not([type=radio]), textarea {
-            width: 280px;
-        }
+
         canvas {
             border: 1px solid var(--color-border);
             margin-right: 12px;
@@ -28,56 +28,68 @@
 <body>
 
 <main class="container">
-    <div class="box">
-        <label>设置头像</label>
-        <div class="row" style="align-items: flex-end">
-            <canvas id="avatar" width="160" height="160" title="设置头像"></canvas>
-            <input id="avatar_input" type="file" accept="image/*;"/>
+    <b>设置头像</b>
+    <div class="row align-items-end">
+        <canvas id="avatar" width="160" height="160" title="设置头像"></canvas>
+        <input id="avatar_input" type="file" accept="image/*;"/>
+    </div>
+    <b>个人信息</b>
+    <div class="row">
+        <label for="description">个人简介</label>
+        <textarea id="description" class="form-control col-auto" style="height: 4em;"
+                  placeholder="个人简介"></textarea>
+    </div>
+    <div class="row">
+        <label>性别</label>
+        <div class="col-auto">
+            <label class="custom-control custom-radio">
+                <input type="radio" name="sex" class="custom-control-input">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">保密</span>
+            </label>
+            <label class="custom-control custom-radio">
+                <input type="radio" name="sex" class="custom-control-input">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">男</span>
+            </label>
+            <label class="custom-control custom-radio">
+                <input type="radio" name="sex" class="custom-control-input">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">女</span>
+            </label>
         </div>
-        <label>个人信息设置</label>
-        <div class="row">
-            <label for="description">个人简介:</label>
-            <textarea id="description" style="height: 4em;" placeholder="个人简介"></textarea>
-        </div>
-        <div class="row">
-            <label>性别:</label>
-            <div>
-                <label><input name="sex" type="radio" value="0"/>保密</label>
-                <label><input name="sex" type="radio" value="1"/>男</label>
-                <label><input name="sex" type="radio" value="2"/>女</label>
-            </div>
-        </div>
-        <div class="row">
-            <label for="birthday">出生日期:</label>
-            <input id="birthday" type="date">
-        </div>
-        <div class="row">
-            <label for="site">个人主页:</label>
-            <input id="site" type="url" placeholder="个人主页" minlength="3">
-        </div>
-        <div class="row">
-            <label for="phone">手机:</label>
-            <input id="phone" type="tel" minlength="11" maxlength="11"
-                   placeholder="手机" pattern="^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$">
-        </div>
-        <div class="row">
-            <label for="email">邮箱:</label>
-            <input id="email" type="tel" placeholder="邮箱" value="2351386755@qq.com" readonly>
-        </div>
-        <label>密码设置</label>
-        <div class="row">
-            <label for="passpre">当前密码:</label>
-            <input id="passpre" type="password">
-        </div>
-        <div class="row">
-            <label for="passnew">新密码:</label>
-            <input id="passnew" type="password" minlength="6" maxlength="20">
-        </div>
-        <div class="row">
-            <label for="passnewr">确认密码:</label>
-            <input id="passnewr" type="password" minlength="6" maxlength="20">
-        </div>
-        <button class="button">保存修改</button>
+    </div>
+    <div class="row">
+        <label for="birthday">出生日期</label>
+        <input id="birthday" type="date" class="form-control col-auto">
+    </div>
+    <div class="row">
+        <label for="site">个人主页</label>
+        <input id="site" type="url" placeholder="个人主页" minlength="3" class="form-control col-auto">
+    </div>
+    <div class="row">
+        <label for="phone">手机</label>
+        <input id="phone" type="tel" minlength="11" maxlength="11"
+               placeholder="手机" pattern="^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$"
+               class="form-control col-auto">
+    </div>
+    <div class="row">
+        <label for="email">邮箱</label>
+        <input id="email" type="tel" placeholder="邮箱" value="2351386755@qq.com" readonly
+               class="form-control col-auto">
+    </div>
+    <b>密码设置</b>
+    <div class="row">
+        <label for="passpre">当前密码</label>
+        <input id="passpre" type="password" class="form-control col-auto">
+    </div>
+    <div class="row">
+        <label for="passnew">新密码</label>
+        <input id="passnew" type="password" minlength="6" maxlength="20" class="form-control col-auto">
+    </div>
+    <div class="row">
+        <label for="passnewr">确认密码</label>
+        <input id="passnewr" type="password" minlength="6" maxlength="20" class="form-control col-auto">
     </div>
 </main>
 

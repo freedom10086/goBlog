@@ -41,3 +41,5 @@ color-link #00a1d6;
 评论列表comments
 导航栏nav
 评论框comment-box
+
+todo css3 rem 相当于html标签font-size相对值,px 改用rem

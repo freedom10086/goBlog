@@ -3,52 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <title>注册</title>
-    <link rel="stylesheet" href="../static/styles/base.css">
-</head>
-<body class="container">
-<h1>注册</h1>
-<form id="form" method="post" onsubmit="return validInput()">
-    <label for="username">用户名</label>
-    <span id="usernameInfo" style="color:red"></span>
-    <br/>
-    <input type="text" name="username" required id="username" placeholder="用户名" minlength="3" maxlength="25"
-           autocomplete="name">
-    <br/>
-    <label for="email">邮箱</label>
-    <span id="emailInfo" style="color:red"></span>
-    <br/>
-    <input type="email" name="email" required id="email" placeholder="邮箱"
-           autocomplete="email" maxlength="25" list="email-hint">
-    <datalist id="email-hint">
-    </datalist>
-    <br/>
-    <label for="valid">验证码</label>
-    <span id="validInfo" style="color:red"></span>
-    <br/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/styles/bootstrap.css">
+    <style>
+        html {
+            height: 100%;
+        }
 
-    <div class="row">
-        <input id="valid" placeholder="验证码" required style="width: 120px" type="text"
-               pattern="[a-zA-Z\d]{4}" maxlength="4">
-        <canvas id="validcanvas" width="100" height="28" style="border: 1px solid #ddd;margin-left: 12px">
-            你的浏览器不支持canvas请使用chrome或者firefox浏览器
-        </canvas>
-    </div>
-    <br/>
-    <input type="checkbox" id="checkbox"><a href="https://www.baidu.com/">同意协议</a>
-    <br/>
-    <button type="submit" style="margin-top: 12px" disabled>提交</button>
-</form>
+        body {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .card {
+            max-width: 450px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">注册</div>
+    <form class="card-block" method="post" onsubmit="return validInput();">
+        <div class="form-group row">
+            <label for="username" class="col-sm-3 col-form-label">用户名</label>
+            <div class="col-sm-9">
+                <input type="text" name="username" required id="username" placeholder="用户名" minlength="3"
+                       maxlength="20" class="form-control"
+                       autocomplete="name">
+                <small class="form-text text-muted">最短3个字符,最长不超过20个字符</small>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="email" class="col-sm-3 col-form-label">邮箱</label>
+            <div class="col-sm-9">
+                <input type="email" name="email" required id="email" placeholder="邮箱"
+                       autocomplete="email" maxlength="25" list="email-hint" class="form-control">
+                <datalist id="email-hint">
+                </datalist>
+                <small class="form-text text-muted">Example help text that remains unchanged.</small>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="valid" class="col-sm-3 col-form-label">验证码</label>
+            <div class="col-sm-9 row">
+                <input id="valid" placeholder="验证码" required style="flex-grow: 2;flex-basis: 100px" type="text"
+                       pattern="[a-zA-Z\d]{4}" maxlength="4" class="form-control">
+                <canvas id="validcanvas" width="100" height="28"
+                        style="border: 1px solid #ddd;margin-left: 12px;flex-grow: 1">
+                    你的浏览器不支持canvas请使用chrome或者firefox浏览器
+                </canvas>
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <label class="custom-control custom-checkbox">
+                <input type="checkbox" id="checkbox" class="custom-control-input">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">同意协议</span>
+            </label>
+        </div>
+        <div class="row justify-content-center">
+            <button class="btn btn-primary" disabled>注册</button>
+            <a href="#" class="btn btn-link">已有账号去登陆</a>
+        </div>
+    </form>
+</div>
+
 <script src="../static/js/base.js" defer></script>
 <script>
     const usernameInput = document.querySelector("#username");
     const emailInput = document.querySelector("#email");
     const validCodeInput = document.querySelector("#valid");
-    const usernameInfo = document.querySelector("#usernameInfo");
-    const emailInfo = document.querySelector("#emailInfo");
-    const validInfo = document.querySelector("#validInfo");
     const checkBox = document.querySelector("#checkbox");
     const button = document.querySelector("button");
-    const form = document.querySelector("#form");
     const yzmCanvas = document.querySelector("#validcanvas");
     const emailHint = document.querySelector("#email-hint");
 
@@ -96,7 +127,9 @@
 
     usernameInput.addEventListener("keyup", function () {
         usernameState = false;
-        usernameInfo.innerHTML = "";
+        if (usernameInput.className !== "form-control") {
+            setUserNameEmailState(this, 0);
+        }
     });
 
     usernameInput.addEventListener("change", function () {
@@ -107,7 +140,9 @@
 
     emailInput.addEventListener("keyup", function () {
         emailState = false;
-        emailInfo.innerHTML = "";
+        if (emailInput.className !== "form-control") {
+            setUserNameEmailState(this, 0);
+        }
         let val = emailInput.value;
         if (val.length > 2 && val.endsWith('@'))
             emailHint.innerHTML = `${emails.map(email => `<option value="${val.substr(0, val.indexOf('@')) + email}"/>`).join('')}`
@@ -117,14 +152,30 @@
         checkEmail(emailInput.value);
     });
 
+    //0-clear -1-error 1-success
+    function setUserNameEmailState(node, state) {
+        if (state === -1) {
+            node.parentNode.className = "col-sm-9 has-danger";
+            node.className = "form-control form-control-danger";
+            node.title = "不可用";
+        } else if (state === 1) {
+            node.parentNode.className = "col-sm-9 has-success";
+            node.className = "form-control form-control-success";
+            node.title = "可用";
+        } else {
+            node.parentNode.className = "col-sm-9";
+            node.className = "form-control";
+            node.title = "";
+        }
+    }
+
     function checkUsername(username) {
         if (!usernameInput.checkValidity()) {
             return;
         }
         Api.checkUsername(username, function (isok) {
             usernameState = isok;
-            usernameInfo.style.color = isok ? 'green' : 'red';
-            usernameInfo.innerHTML = isok ? "可用" : username + "不可用";
+            setUserNameEmailState(usernameInput, isok ? 1 : -1);
         });
     }
 
@@ -132,11 +183,9 @@
         if (!emailInput.checkValidity()) {
             return
         }
-
         Api.checkEmail(email, function (isok) {
             emailState = isok;
-            emailInfo.style.color = isok ? 'green' : 'red';
-            emailInfo.innerHTML = isok ? "可用" : email + "不可用";
+            setUserNameEmailState(emailInput, isok ? 1 : -1);
         });
     }
 
@@ -144,21 +193,22 @@
     function checkValid(valid) {
         valid = validCodeInput.value;
         console.log(valid.length);
-        if (valid.length == 4) {
+        if (valid.length === 4) {
             for (let i = 0; i < 4; i++) {
-                if (valid[i].toUpperCase() != code[i]) {
+                if (valid[i].toUpperCase() !== code[i]) {
                     break;
                 }
-                if (i == 3) {
-                    validInfo.style.color = "green";
-                    validInfo.innerHTML = "ok";
+                if (i === 3) {
+                    validCodeInput.parentNode.className = "col-sm-9 row has-success";
+                    validCodeInput.className = "form-control form-control-success";
+                    validCodeInput.title = "";
                     return true
                 }
             }
         }
-
-        validInfo.style.color = "red";
-        validInfo.innerHTML = "验证码不匹配";
+        validCodeInput.parentNode.className = "col-sm-9 row has-danger";
+        validCodeInput.className = "form-control form-control-danger";
+        validCodeInput.title = "验证码不匹配";
         return false;
     }
 

@@ -1,27 +1,25 @@
 /*! normalize.css v5.0.0 | MIT License | github.com/necolas/normalize.css */
 /*https://github.com/sindresorhus/github-markdown-css*/
 
-/*navbar*/
-.nav {
-    display: flex;
-    flex-direction: row;
+header {
     background-color: hsl(209, 51%, 92%);
     border-bottom: 1px solid hsl(209, 51%, 88%);
+}
+
+/*navbar*/
+.navbar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     position: relative; /*fixed*/
-    justify-content: center;
+    padding: 0.5rem 1rem;
+    margin-right: auto;
+    margin-left: auto;
+    align-items: center;
+    max-width: 1200px;
 }
 
-.nav .nav-toggle-icon {
-    display: inline-block;
-    width: 1.5em;
-    height: 1.5em;
-    vertical-align: middle;
-    content: "";
-    background-size: 100% 100%;
-    background: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E") no-repeat center center;
-}
-
-.nav .nav-brand {
+.navbar .nav-brand {
     display: inline-block;
     margin-right: 1rem;
     font-size: 1.15rem;
@@ -32,82 +30,74 @@
     text-decoration: none;
 }
 
-.nav-ul {
+.navbar-form {
     display: flex;
-    flex-direction: column;
-    padding-left: 0;
-    margin-bottom: 0;
-    list-style: none;
+    flex-wrap: nowrap;
+    padding: 0 .5rem;
 }
 
-.nav-ul a {
+.navbar-form input {
+    margin-right: 10px;
+}
+
+.navbar .form-control {
+    min-width: 200px;
+}
+
+.navbar-navs a {
     color: #333;
+    text-decoration: none;
+    padding-right: .5rem;
+    padding-left: .5rem;
 }
 
-.nav-ul a:hover, .nav-ul a:active {
+.navbar-navs a:hover, .navbar-navs a:active {
+    color: #00a1d6;
+    text-decoration: none;
+}
+
+.navbar .active {
     color: #00a1d6;
 }
 
-.nav-ul a.active {
-    color: #00a1d6;
-}
-
-.nav .search-box {
+.navbar .search-box {
     display: flex;
     flex-flow: row wrap;
     align-items: center;
 }
 
+.navbar .nav-toggle {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    content: "";
+    background-size: 100% 100%;
+    position: absolute;
+    right: 1rem;
+    border-radius: 0.25rem;
+    background: transparent;
+    border: 1px solid #e2e2e2;
+    background: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E") no-repeat center center;
+}
+
+.nav-toggle:focus, .nav-toggle:hover {
+    text-decoration: none;
+}
+
 /*屏幕适配*/
 /*小屏幕*/
-@media (max-width: 991px) {
-    .nav {
-        padding: 0.3rem 0.4rem;
-    }
-
-    .nav .nav-toggle {
+@media (max-width: 767px) {
+    .navbar .nav-toggle {
         position: absolute;
         top: .8rem;
         right: 1rem;
     }
-
-    .nav .nav-item {
-        padding-top: .4rem;
-        padding-bottom: .4rem;
-    }
 }
 
 /*大屏幕*/
-@media (min-width: 992px) {
-    .nav {
-        padding: 0.5rem 1rem;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        align-items: center;
-    }
-
-    .nav .nav-ul {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .nav .nav-item {
-        padding-right: .5rem;
-        padding-left: .5rem;
-    }
-
-    .nav > .container {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
-    }
-
-    .nav .navbar-collapse {
-        display: flex !important;
-        width: 100%;
-    }
-
-    .nav .nav-toggle {
+@media (min-width: 768px) {
+    .navbar .nav-toggle {
         display: none;
     }
 }
