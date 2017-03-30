@@ -28,18 +28,15 @@
 }
 
 html {
-    -ms-overflow-style: scrollbar;
     -webkit-tap-highlight-color: transparent;
-    font-family: sans-serif;
-    line-height: 1.15;
     box-sizing: border-box;
+    font-size: 15px;
+    line-height: 1.5;
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
 }
 
-*,
-*::before,
-*::after {
+* {
     box-sizing: inherit;
 }
 
@@ -49,8 +46,6 @@ body {
     font-weight: normal;
     color: var(--color-text-primary);
     background-color: var(--color-bg-primary);
-    font-size: 1rem;
-    line-height: 1.5;
 }
 
 a,
@@ -446,11 +441,13 @@ summary {
 table {
     width: 100%;
     max-width: 100%;
-    margin-bottom: 1rem;
+    border-spacing: 0;
+    border-collapse: collapse;
 }
 
-th {
+td, th {
     text-align: left;
+    padding: 0;
 }
 
 textarea {
@@ -466,29 +463,30 @@ textarea:hover {
 }
 
 /*
-滚动条
+scrollbar
  */
 ::-webkit-scrollbar {
-    height: 8px;
-    width: 6px;
-    background: rgba(0, 0, 0, 0.1);
+    height: .25rem;
+    width: .5rem;
+    background: transparent;
     transition: all 300ms ease-out;
-}
-
-::-webkit-scrollbar:hover {
-    background: rgba(0, 0, 0, 0.12);
 }
 
 ::-webkit-scrollbar-thumb {
     transition: all 300ms ease-out;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.22);
     /* IE9+, News */
     background-color: rgba(0, 0, 0, 0.28);
+}
+
+::selection {
+    color: #FFFFFF;
+    background-color: #FF6384;
 }
 
 /*min-height: calc(100% - 64px);*/
@@ -506,37 +504,129 @@ textarea:hover {
     padding-left: 15px;
 }
 
-@media (max-width: 575px) {
+/*0-767*/
+@media (max-width: 767px) {
     .container {
         padding-right: 0;
         padding-left: 0;
     }
 }
 
-@media (min-width: 576px) {
+/*768-991*/
+@media (min-width: 768px) and (max-width: 991px) {
     .container {
-        width: 540px;
+        width: 93%;
         max-width: 100%;
     }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) and (max-width: 1199px) {
     .container {
-        width: 720px;
-        max-width: 100%;
-    }
-}
-
-@media (min-width: 992px) {
-    .container {
-        width: 960px;
-        max-width: 100%;
+        width: 87%;
+        max-width: 1080px;
     }
 }
 
 @media (min-width: 1200px) {
     .container {
-        width: 1140px;
-        max-width: 100%;
+        width: 82%;
+        max-width: 1440px;
     }
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-250px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(100px) rotate3d(0, 0, 1, 8deg);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.slide-down {
+    animation-name: slide-down;
+    animation-duration: 300ms;
+}
+
+.fade-in,
+.fade-in-up {
+    animation-fill-mode: forwards;
+    animation-duration: 1000ms;
+    animation-timing-function: ease-in-out;
+}
+
+.cssanimations .fade-in,
+.cssanimations .fade-in-up {
+    opacity: 0;
+}
+
+.fade-in {
+    animation-name: fade-in;
+}
+
+.fade-in-up {
+    animation-name: fade-in-up;
+    transform-origin: right middle;
+}
+
+.animation-delay__1 {
+    animation-delay: 100ms;
+}
+
+.animation-delay__2 {
+    animation-delay: 200ms;
+}
+
+.animation-delay__3 {
+    animation-delay: 300ms;
+}
+
+.animation-delay__4 {
+    animation-delay: 400ms;
+}
+
+.animation-delay__5 {
+    animation-delay: 500ms;
+}
+
+.animation-delay__6 {
+    animation-delay: 600ms;
+}
+
+.animation-delay__7 {
+    animation-delay: 700ms;
+}
+
+.animation-delay__8 {
+    animation-delay: 800ms;
+}
+
+.animation-delay__9 {
+    animation-delay: 900ms;
+}
+
+.animation-delay__10 {
+    animation-delay: 1000ms;
 }

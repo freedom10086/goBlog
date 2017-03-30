@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/styles/base.css">
+    <link rel="stylesheet" href="../static/styles/bootstrap.css">
+    <style>
+        th{
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
+            max-width: 250px;
+            min-width: 30px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="container">
+
+<ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link" href="admin_home.html">站点统计</a></li>
+    <li class="nav-item"><a class="nav-link" href="admin_category.html">分类管理</a></li>
+    <li class="nav-item"><a class="nav-link" href="admin_user.html">用户管理</a></li>
+    <li class="nav-item"><a class="nav-link active" href="#">文章管理</a></li>
+    <li class="nav-item"><a class="nav-link" href="admin_comment.html">评论管理</a></li>
+</ul>
+
+<div class="form-inline my-2">
+    <select class="custom-select mr-sm-2 mb-sm-0 mb-2" id="type">
+        <option value="1" selected>标题</option>
+        <option value="2">Tid</option>
+        <option value="3">用户Id</option>
+        <option value="3">用户名</option>
+    </select>
+
+    <label class="sr-only" for="input">input</label>
+    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+        <input type="text" class="form-control" id="input" placeholder="搜索文章...">
+        <button class="btn input-group-addon">搜索</button>
+    </div>
+</div>
+
+<div class="row mb-2">
+    <label class="custom-control custom-radio">
+        <input name="radio" type="radio" checked class="custom-control-input">
+        <span class="custom-control-indicator"></span>
+        <span class="custom-control-description">按发帖时间倒序</span>
+    </label>
+    <label class="custom-control custom-radio">
+        <input name="radio" type="radio" class="custom-control-input">
+        <span class="custom-control-indicator"></span>
+        <span class="custom-control-description">按发帖时间正序</span>
+    </label>
+
+    <label class="custom-control custom-radio">
+        <input name="radio" type="radio" class="custom-control-input">
+        <span class="custom-control-indicator"></span>
+        <span class="custom-control-description">按最后回复倒序</span>
+    </label>
+
+    <label class="custom-control custom-radio">
+        <input name="radio" type="radio" class="custom-control-input">
+        <span class="custom-control-indicator"></span>
+        <span class="custom-control-description">按最后回复正序</span>
+    </label>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead class="thead-default">
+        <tr>
+            <th>#Tid</th>
+            <th>分类</th>
+            <th>用户</th>
+            <th>标题</th>
+            <th>内容</th>
+            <th>发表日期</th>
+            <th>最后回复</th>
+            <th>查看/评论</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>张三</td>
+            <td>男</td>
+            <td>2351386755@qq.com23513867 55@qq.com</td>
+            <td>2351386755@qq. 755@qq 5@qq.com2351386755@qq.com</td>
+            <td>999</td>
+            <td>666</td>
+            <td>888/66</td>
+            <td>
+                <button class="btn btn-info">关闭回复</button>
+                <button class="btn btn-success">精华</button>
+                <button class="btn btn-danger">删除</button>
+            </td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>张三</td>
+            <td>男</td>
+            <td>2351386755@qq.com2351386755@qq.com</td>
+            <td>2351386755@qq.com2351386 @qq. @qq.com2351386755@qq.com</td>
+            <td>999</td>
+            <td>666</td>
+            <td>888/66</td>
+            <td>
+                <button class="btn btn-info">关闭回复</button>
+                <button class="btn btn-warning">精华</button>
+                <button class="btn btn-danger">删除</button>
+            </td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>张三</td>
+            <td>男</td>
+            <td>2351386755@qq.com2351386755@qq. com2351386755@qq.com</td>
+            <td>2017-03-282351386755 @qq.com2 @qq.com2351386755@qq.com2351386755@qq.com</td>
+            <td>999</td>
+            <td>666</td>
+            <td>888/66</td>
+            <td>
+                <button class="btn btn-info">关闭回复</button>
+                <button class="btn btn-warning">精华</button>
+                <button class="btn btn-danger">删除</button>
+            </td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>张三</td>
+            <td>男</td>
+            <td>2351386755@qq.com2351386755@qq.com23513867 55@qq.com</td>
+            <td>2017-03-282351386755@qq.com2 @qq.@qq.com2351386755@qq.com</td>
+            <td>999</td>
+            <td>666</td>
+            <td>888/66</td>
+            <td>
+                <button class="btn btn-info">关闭回复</button>
+                <button class="btn btn-warning">精华</button>
+                <button class="btn btn-danger">删除</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<ul class="pagination justify-content-end mt-2">
+    <li class="page-item">
+        <a class="page-link" href="#" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Previous</span>
+        </a>
+    </li>
+    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item">
+        <a class="page-link" href="#" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Next</span>
+        </a>
+    </li>
+</ul>
+</body>
+</html>

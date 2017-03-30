@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/styles/base.css">
+    <link rel="stylesheet" href="../static/styles/bootstrap.css">
+    <style>
+        th {
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
+            max-width: 250px;
+            min-width: 30px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="container">
+
+<ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link" href="admin_home.html">站点统计</a></li>
+    <li class="nav-item"><a class="nav-link active" href="#">分类管理</a></li>
+    <li class="nav-item"><a class="nav-link" href="admin_user.html">用户管理</a></li>
+    <li class="nav-item"><a class="nav-link" href="admin_post.html">文章管理</a></li>
+    <li class="nav-item"><a class="nav-link" href="admin_comment.html">评论管理</a></li>
+</ul>
+
+<div class="form-inline my-2">
+    <label class="sr-only" for="input">input</label>
+    <div class="input-group mb-2 mb-sm-0 mr-sm-2">
+        <div class="input-group-addon">分类名称</div>
+        <input type="text" class="form-control" id="input" placeholder="名称...">
+    </div>
+
+    <label class="sr-only" for="input2">input</label>
+    <div class="input-group mb-2 mb-sm-0 mr-sm-2">
+        <div class="input-group-addon">分类描述</div>
+        <input type="text" class="form-control" id="input2" placeholder="描述...">
+    </div>
+    <button class="btn btn-primary">新增</button>
+</div>
+
+<table class="table">
+    <thead class="thead-default">
+    <tr>
+        <th>#Cid</th>
+        <th>名称</th>
+        <th>描述</th>
+        <th>创建日期</th>
+        <th>文章/评论</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1</td>
+        <td>帖子标题</td>
+        <td>描述描述描述描述描述描述描述</td>
+        <td>2017-03-12 00-00-00</td>
+        <td>666/888</td>
+        <td>
+            <button class="btn btn-success" data-type="edit">修改</button>
+            <button class="btn btn-danger" data-type="delete">删除</button>
+        </td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>帖子标题</td>
+        <td>描述描述描述描述描述描述描述</td>
+        <td>2017-03-12 00-00-00</td>
+        <td>666/888</td>
+        <td>
+            <button class="btn btn-success" data-type="edit">修改</button>
+            <button class="btn btn-danger" data-type="delete">删除</button>
+        </td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>帖子标题</td>
+        <td>描述描述描述描述描述描述描述</td>
+        <td>2017-03-12 00-00-00</td>
+        <td>666/888</td>
+        <td>
+            <button class="btn btn-success" data-type="edit">修改</button>
+            <button class="btn btn-danger" data-type="delete">删除</button>
+        </td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>帖子标题</td>
+        <td>描述描述描述描述描述描述描述</td>
+        <td>2017-03-12 00-00-00</td>
+        <td>666/888</td>
+        <td>
+            <button class="btn btn-success" data-type="edit">修改</button>
+            <button class="btn btn-danger" data-type="delete">删除</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<!-- Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 class="modal-title">修改分类</h5>
+            <button type="button" class="close" data-type="close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+
+            <label class="sr-only" for="input">input</label>
+            <div class="input-group mb-2 mb-sm-0 mr-sm-2">
+                <div class="input-group-addon">分类id</div>
+                <input type="text" class="form-control" id="input6" value="1" readonly>
+            </div>
+
+            <div class="input-group mt-2">
+                <div class="input-group-addon">分类名称</div>
+                <input type="text" class="form-control" id="input7" placeholder="名称...">
+            </div>
+
+            <div class="input-group mt-2">
+                <div class="input-group-addon">分类描述</div>
+                <input type="text" class="form-control" id="input8" placeholder="描述...">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary">保存</button>
+            <button type="button" class="btn btn-info" data-type="close">取消</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 class="modal-title">删除分类</h5>
+            <button type="button" class="close" data-type="close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <label class="sr-only" for="input">input</label>
+            <div class="input-group mb-2 mb-sm-0 mr-sm-2">
+                <div class="input-group-addon">分类id</div>
+                <input type="text" class="form-control" value="1" readonly>
+            </div>
+
+            <div class="input-group mt-2">
+                <div class="input-group-addon">合并id</div>
+                <input type="text" class="form-control" placeholder="id...">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger">删除并合并</button>
+            <button type="button" class="btn btn-info" data-type="close">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modalEdit = document.querySelector("#editModal");
+
+    [...modalEdit.querySelectorAll("[data-type=close]")].forEach((v, k) => {
+        v.addEventListener('click', () => {
+            modalEdit.style.display = "none";
+            modalEdit.querySelector(".modal-dialog").className = "modal-dialog";
+        });
+    });
+
+    [...document.querySelectorAll("table button[data-type=edit]")].forEach(function (v, k) {
+        v.addEventListener("click", () => {
+            modalEdit.querySelector(".modal-dialog").className = "modal-dialog slide-down";
+            modalEdit.style.display = "block";
+        })
+    });
+
+    const modalDelete = document.querySelector("#deleteModal");
+    [...modalDelete.querySelectorAll("[data-type=close]")].forEach((v, k) => {
+        v.addEventListener('click', () => {
+            modalDelete.style.display = "none";
+            modalDelete.querySelector(".modal-dialog").className = "modal-dialog";
+        });
+    });
+
+    [...document.querySelectorAll("table button[data-type=delete]")].forEach(function (v, k) {
+        v.addEventListener("click", () => {
+            modalDelete.querySelector(".modal-dialog").className = "modal-dialog slide-down";
+            modalDelete.style.display = "block";
+        })
+    });
+</script>
+</body>
+</html>

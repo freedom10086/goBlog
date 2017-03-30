@@ -1,195 +1,145 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="UTF-8">
     <title>{{.Title}}</title>
-    <link rel="stylesheet" type="text/css" href="../static/styles/markdown.css">
-    <link rel="stylesheet" type="text/css" href="../static/styles/base.css">
-    <script type="text/javascript" src="../static/js/marked.js"></script>
-    <script type="text/javascript" src="../static/js/highlight.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/styles/base.css">
+    <link rel="stylesheet" href="../static/styles/bootstrap.css">
 </head>
-<body style="margin: 0;padding: 0">
+<body class="container row">
 
+<article class="col-sm-9">
+    <header>
+        <nav class="breadcrumb">
+            <a class="breadcrumb-item" href="#">Home</a>
+            <a class="breadcrumb-item" href="#">Library</a>
+            <a class="breadcrumb-item" href="#">Data</a>
+            <span class="breadcrumb-item active">Bootstrap</span>
+        </nav>
+        <h1 id="title">{{.Title}}</h1>
+        <span class="text-muted small">
+            作者:<a href="#">{{.Author}}</a>
+            发布日期:<time datetime="{{.Created}}">{{.Created}}</time>
+            浏览数:{{.Views}}
+            回复数:<a href="#comment">{{.Replys}}</a>
+        </span>
+        <hr/>
+    </header>
+    <main id="content">
+        <p>
+            几年前，电子竞技或许还是男生的专利。如今，芬达、小蕊、小洁、紫薇和然然，五个女孩聚在一起，成为安徽首个电竞女子职业战队成员，她们有梦想，颜值高，收入丰。她们加入电子竞技的背后，是整个电竞行业进入正规化、产业化的一个缩影。
+            一直以来，很多人把玩游戏称之不务正业。然而，近两年随着电子竞技的蓬勃发展，部分高校也开设了电竞专业。依靠电竞行业所衍生的解说、主播、媒体等相关行业方兴未艾。
+            “我们战队是1年前成立的，这5个女孩都是通过招聘考试选拔进来的，都是95后。”NY战队的老板杨天琪告诉记者，“合肥的电竞市场才刚刚起步，前景巨大，而女子职业战队还比较新鲜，关注度也高。”在日常的训练之余，杨天琪会经常带着战队成员奔赴全国各地打比赛，以及对接一些商业活动。
+            这五个“95后”女孩，每周一休息，其它时间从下午1点到晚上10点，都在训练。“除了吃饭、睡觉，基本上一直都在打游戏。”来自湖北的小蕊说，她玩游戏已经四五年之久，“成为职业选手之后一开始有点累，但能和队友在一起，觉得时间过得特别快，尤其是现在终于能做自己喜欢的事情了。”
+            “我比较享受大家在一起训练、打比赛的那种气氛。”然然觉得以前的生活没有方向，而现在有了希望，步入了正轨，“虽然每天晚上训练结束之后，很疲惫，但第二天早上起来，又满血复活了。”
+            五个女孩热爱游戏，热爱生活，认为游戏是改变生活的一种方式，代表了她们对生活的态度。更为重要的是，她们能够通过游戏养活自己，改变了别人对她们的看法。
+            NY战队队员每个月的底薪为5000元，奖金另算，包吃包住。“我是大二休学来打电竞的，以前的朋友同学都挺羡慕我的，现在长辈们也能接受我从事这个行业。”紫薇说，电竞行业的产业化，使得很多人对这一行有了全新的认识，“玩游戏并不是那么简单，更不是玩物丧志，通过训练和比赛不仅可以锻炼我们的团队合作精神，反应能力、逻辑思维能力等都会得到提升，而且同其它行业一样，我们也拿工资，也有稳定的收入。”
+            相对于男子战队，女子电竞市场犹如一座等待挖掘的金山。现在大多数女队都会选择让自己的队员在直播平台上直播。她们边打游戏边解说，实时播出全程。直播可以帮助女队宣传自己的品牌和增加人气，影响力，更有不菲的收入。NY战队也不例外，队员芬达已经成为一个小有名气的主播。
+        </p>
 
-<main class="container">
-    <div class="left">
-        <div class="info"><a class="gray" href="#">首页</a> > <a class="gray" href="#">短片·手书·配音</a></div>
-        <h1 id="title">这是一个标题标题这是一个标题标题</h1>
-        <div class="info" style="border-bottom: 1px solid #e2e2e2;">
-            <span class="info-item">作者：<a class="gray" href="#">马卡</a></span>
-            <span class="info-item">2017-1-24 19:37:35</span>
-            <span class="info-item">查看:999</span>
-            <a class="gray" href="#comment">评论:999</a>
-        </div>
-        <div id="content" class="markdown"></div>
-        <div id="comment" class="comment">
-            <h2>995 评论</h2>
-            <div id="comment-box"
-                 style="display: flex;
-				flex-direction: row;
-				align-items: flex-start;
-				border-bottom: 1px solid #e2e2e2;
-				padding-bottom: 15px;">
-                <img class="avater" src="images/avater.jpg">
-                <div style="display: flex;flex-direction: column; flex-grow:1;margin: 0 15px;">
-                    <textarea name="content" style="max-height: 200px;"></textarea>
-                    <span class="comment-btn">表情</span>
+        <p>
+            “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
+        </p>
+        <p>
+            在合肥第十一届全民运动会电子竞技比赛上，与男选手同场竞技的NY女子战队，获得了第5名的好成绩。杨天琪期待，“在合肥举办的比赛越来越多，职业战队也越来越多，这样我们的发展就会越来越好，投入和付出，也会有回报。”（文/摄
+            苏扬）
+        </p>
+        <p>
+            芬达、小蕊、小洁、紫薇和然然，五个女孩聚在了一起，成为安徽第一支电竞女子职业战队队员。她们有梦想，颜值高，收入丰。她们加入电子竞技的背后，是整个电竞行业进入正规化、产业化的一个缩影。图为NY女子电竞战队合影。
+        </p>
+
+    </main>
+    <footer>
+        <hr/>
+        <p>最后更新
+            <time datetime="{{.Updated}}">{{.Updated}}</time>
+        </p>
+    </footer>
+    <section id="comment">
+        <strong>评论<span class="badge badge-default ml-1">199</span></strong>
+        <hr/>
+        <ul class="pagination justify-content-end">
+            <li class="page-item">
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                </a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </li>
+        </ul>
+        <ul id="comment-list">
+            <li>
+                <img class="avater" src="../static/images/avater.jpg">
+                <a href="#">{{.UserName}}</a>
+                <div>
+                    “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
                 </div>
+                <div class="text-muted small">2017-03-20</div>
+            </li>
+            <li>
+                <img class="avater" src="../static/images/avater.jpg">
+                <a href="#">{{.UserName}}</a>
+                <div>
+                    “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
+                </div>
+                <div class="text-muted small">2017-03-20</div>
+                <a href="#" class="btn btn-outline-primary">回复</a>
+            </li>
+        </ul>
+    </section>
+    <section id="reply-box">
+        <textarea placeholder="回复" class="form-control"></textarea>
+        <a href="#" class="btn btn-outline-primary">表情</a>
+        <a href="#" class="btn btn-outline-primary">发表</a>
+    </section>
+</article>
 
-                <button style="width: 64px;height: 64px;padding: 15px;">发表评论</button>
-            </div>
-            <ul id="comment-list">
-                <li class="comment-item">
-                    <img class="avater" src="images/avater.jpg">
-                    <div class="comment-content-box">
-                        <div><a class="user" href="#">打败拉面大魔王</a><span class="level l2"></span></div>
-                        <div class="comment-text">感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wkefhiweuhfiuwehfuwehruwgeurgwu
-                        </div>
-                        <div class="info align-end">
-                            <span class="info-item">#25</span>
-                            <span class="info-item">2017-01-26 14:54</span>
-                            <span class="info-item like"><i></i><span>(0)</span></span>
-                            <span class="link-btn">回复(317)</span>
-                        </div>
-                        <ul class="sub-comment-list">
-                            <li class="sub-comment-item">
-                                <div><a class="gray" href="#">打败拉面大魔王:</a>感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wwu</div>
-                                <div class="info align-end">
-                                    <span class="info-item">2017-01-26 14:54</span>
-                                    <span class="info-item like"><i></i><span>(0)</span></span>
-                                    <span class="link-btn">回复</span>
-                                </div>
-                            </li>
-                            <li class="sub-comment-item">
-                                <div><a class="gray" href="#">打败拉面大魔王:</a>感觉这是一只心机狗本想把崽牢牢地抓在手心然本想把崽牢牢地本本想把崽牢牢地抓在手心然想把崽牢牢地抓在手本想把崽牢牢地抓在手心然心然本想把崽牢牢地抓在手心然抓在手本想把崽牢牢地抓在手心然心然后一不小心玩本想把崽牢牢地抓在手心然脱的历程←_←wwu
-                                </div>
-                                <div class="info align-end">
-                                    <span class="info-item">2017-01-26 14:54</span>
-                                    <span class="info-item like"><i></i><span>(0)</span></span>
-                                    <span class="link-btn">回复</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="comment-item">
-                    <img class="avater" src="images/avater.jpg">
-                    <div class="comment-content-box">
-                        <div><a class="user" href="#">打败拉面大魔王</a><span class="level l2"></span></div>
-                        <div class="comment-text">感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wkefhiweuhfiuwehfuwehruwgeurgwu
-                        </div>
-                        <div class="info align-end">
-                            <span class="info-item">#25</span>
-                            <span class="info-item">2017-01-26 14:54</span>
-                            <span class="info-item like"><i></i><span>(0)</span></span>
-                            <span class="link-btn">回复(317)</span>
-                        </div>
-                    </div>
-                </li>
-                <li class="comment-item">
-                    <img class="avater" src="images/avater.jpg">
-                    <div class="comment-content-box">
-                        <div><a class="user" href="#">打败拉面大魔王</a><span class="level l2"></span></div>
-                        <div class="comment-text">感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wkefhiweuhfiuwehfuwehruwgeurgwu
-                        </div>
-                        <div class="info align-end">
-                            <span class="info-item">#25</span>
-                            <span class="info-item">2017-01-26 14:54</span>
-                            <span class="info-item like"><i></i><span>(0)</span></span>
-                            <span class="link-btn">回复(317)</span>
-                        </div>
-                    </div>
-                </li>
-                <li class="comment-item">
-                    <img class="avater" src="images/avater.jpg">
-                    <div class="comment-content-box">
-                        <div><a class="user" href="#">打败拉面大魔王</a><span class="level l2"></span></div>
-                        <div class="comment-text">感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wkefhiweuhfiuwehfuwehruwgeurgwu
-                        </div>
-                        <div class="info align-end">
-                            <span class="info-item">#25</span>
-                            <span class="info-item">2017-01-26 14:54</span>
-                            <span class="info-item like"><i></i><span>(0)</span></span>
-                            <span class="link-btn">回复(317)</span>
-                        </div>
-                    </div>
-                </li>
-                <li class="comment-item">
-                    <img class="avater" src="images/avater.jpg">
-                    <div class="comment-content-box">
-                        <div><a class="user" href="#">打败拉面大魔王</a><span class="level l2"></span></div>
-                        <div class="comment-text">感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wkefhiweuhfiuwehfuwehruwgeurgwu
-                        </div>
-                        <div class="info align-end">
-                            <span class="info-item">#25</span>
-                            <span class="info-item">2017-01-26 14:54</span>
-                            <span class="info-item like"><i></i><span>(0)</span></span>
-                            <span class="link-btn">回复(317)</span>
-                        </div>
-                    </div>
-                </li>
-                <li class="comment-item">
-                    <img class="avater" src="images/avater.jpg">
-                    <div class="comment-content-box">
-                        <div class="comment-text"><a class="user" href="#">打败拉面大魔王</a><span class="level l2"></span>
-                        </div>
-                        <div>感觉这是一只心机狗本想把崽牢牢地抓在手心然后一不小心玩脱的历程←_←wkefhiweuhfiuwehfuwehruwgeurgwu</div>
-                        <div class="info align-end">
-                            <span class="info-item">#25</span>
-                            <span class="info-item">2017-01-26 14:54</span>
-                            <span class="info-item like"><i></i><span>(0)</span></span>
-                            <span class="link-btn">回复(317)</span>
-                        </div>
-                    </div>
-                </li>
-            </ul>
+<aside class="col-sm-3">
+    <div class="list-group my-2">
+        <div class="list-item list-item-info">分类</div>
+        <a href="#" class="list-item justify-content-between">技术<span
+                class="badge badge-default badge-pill">14</span></a>
+        <a href="#" class="list-item justify-content-between">杂谈<span
+                class="badge badge-default badge-pill">14</span></a>
+        <a href="#" class="list-item justify-content-between">分享<span
+                class="badge badge-default badge-pill">14</span></a>
+        <a href="#" class="list-item justify-content-between">福利<span
+                class="badge badge-default badge-pill">14</span></a>
+        <a href="#" class="list-item justify-content-between">未分类<span
+                class="badge badge-default badge-pill">14</span></a>
+    </div>
+
+    <div class="card mb-2">
+        <div class="card-header">标签</div>
+        <div class="card-block">
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
+            <a href="#" class="badge badge-default">标签1</a>
         </div>
     </div>
 
-    <aside class="right">
+    <div class="list-group mb-2">
+        <div href="#" class="list-item list-item-info">热门文章</div>
+        <a href="#" class="list-item">11111</a>
+        <a href="#" class="list-item">22222</a>
+        <a href="#" class="list-item">Porta ac consectetur ac</a>
+        <a href="#" class="list-item disabled">Vestibulum at eros</a>
+    </div>
+</aside>
 
-    </aside>
-</main>
-
-<footer>
-    <div>footer</div>
-</footer>
-
-<script>
-    var markstr = '# Marked in browser\n\nRendered by **marked**.\n```go\npackage main\nimport (\n    "fmt";\n    "io";\n    "os"\n    "bufio"\n    "bytes"\n)\nfunc main() {\n    fmt.Println("Hello, 世界")\n    var r io.Reader\n    r = os.Stdin\n    r = bufio.NewReader(r)\n    r = new(bytes.Buffer)\n} \n```';
-
-    function markedinputstr() {
-        marked(markstr, function (err, content) {
-            if (err) throw err;
-            document.getElementById("content").innerHTML = content;
-        });
-    }
-
-    //窗口载入完成
-    window.onload = function () {
-        marked.setOptions({
-            highlight: function (code, lang) {
-                if (lang && hljs.getLanguage(lang)) {
-                    try {
-                        console.log(lang);
-                        return hljs.highlight(lang, code).value;
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-                try {
-                    return hljs.highlightAuto(code).value;
-                } catch (err) {
-                    console.log(err);
-                }
-
-                return code;
-            }
-        });
-
-        markedinputstr();
-    };
-
-</script>
 </body>
 </html>

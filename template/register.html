@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>注册</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../static/styles/base.css">
     <link rel="stylesheet" href="../static/styles/bootstrap.css">
     <style>
         html {
@@ -17,11 +18,6 @@
             justify-content: center;
             flex-direction: column;
         }
-
-        .card {
-            max-width: 450px;
-        }
-
     </style>
 </head>
 <body>
@@ -29,48 +25,41 @@
 <div class="card">
     <div class="card-header">注册</div>
     <form class="card-block" method="post" onsubmit="return validInput();">
-        <div class="form-group row">
-            <label for="username" class="col-sm-3 col-form-label">用户名</label>
-            <div class="col-sm-9">
-                <input type="text" name="username" required id="username" placeholder="用户名" minlength="3"
-                       maxlength="20" class="form-control"
-                       autocomplete="name">
-                <small class="form-text text-muted">最短3个字符,最长不超过20个字符</small>
-            </div>
+        <label for="username" class="form-label">用户名</label>
+        <input type="text" name="username" required id="username" placeholder="用户名" minlength="3"
+               maxlength="20" class="form-control"
+               autocomplete="name">
+        <small class="form-text text-muted">最短3个字符,最长不超过20个字符</small>
+
+        <label for="email" class="form-label">邮箱</label>
+        <input type="email" name="email" required id="email" placeholder="邮箱"
+               autocomplete="email" maxlength="25" list="email-hint" class="form-control">
+        <datalist id="email-hint">
+        </datalist>
+        <small class="form-text text-muted">Example help text that remains unchanged.</small>
+
+        <label for="valid" class="form-label">验证码</label>
+        <div class="row">
+            <input id="valid" placeholder="验证码" required style="flex-grow: 2;flex-basis: 100px" type="text"
+                   pattern="[a-zA-Z\d]{4}" maxlength="4" class="form-control">
+            <canvas id="validcanvas" width="100" height="28"
+                    style="border: 1px solid #ddd;margin-left: 12px;flex-grow: 1">
+                你的浏览器不支持canvas请使用chrome或者firefox浏览器
+            </canvas>
         </div>
-        <div class="form-group row">
-            <label for="email" class="col-sm-3 col-form-label">邮箱</label>
-            <div class="col-sm-9">
-                <input type="email" name="email" required id="email" placeholder="邮箱"
-                       autocomplete="email" maxlength="25" list="email-hint" class="form-control">
-                <datalist id="email-hint">
-                </datalist>
-                <small class="form-text text-muted">Example help text that remains unchanged.</small>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="valid" class="col-sm-3 col-form-label">验证码</label>
-            <div class="col-sm-9 row">
-                <input id="valid" placeholder="验证码" required style="flex-grow: 2;flex-basis: 100px" type="text"
-                       pattern="[a-zA-Z\d]{4}" maxlength="4" class="form-control">
-                <canvas id="validcanvas" width="100" height="28"
-                        style="border: 1px solid #ddd;margin-left: 12px;flex-grow: 1">
-                    你的浏览器不支持canvas请使用chrome或者firefox浏览器
-                </canvas>
-            </div>
-        </div>
-        <div class="row justify-content-end">
+
+        <div class="row justify-content-between mt-2">
             <label class="custom-control custom-checkbox">
                 <input type="checkbox" id="checkbox" class="custom-control-input">
                 <span class="custom-control-indicator"></span>
                 <span class="custom-control-description">同意协议</span>
             </label>
-        </div>
-        <div class="row justify-content-center">
             <button class="btn btn-primary" disabled>注册</button>
-            <a href="#" class="btn btn-link">已有账号去登陆</a>
         </div>
     </form>
+    <div class="card-footer">
+        <a href="#" class="small">已有账号去登陆</a>
+    </div>
 </div>
 
 <script src="../static/js/base.js" defer></script>

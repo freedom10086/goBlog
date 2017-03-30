@@ -399,6 +399,10 @@ END;
 $$ LANGUAGE plpgsql;
 ```
 
+## 依赖及参考
+- [Chart.js](http://chartjs.org/)
+- [highlight.js](http://git.io/hljslicense)
+- [bootstrap](https://getbootstrap.com)
 ## bug 反馈
 
 [2351386755@qq.com](mailto://2351386755@qq.com)

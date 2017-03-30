@@ -137,9 +137,9 @@
 
 .smiley .smiley-tab img {
     border: none;
-    width: 24px;
-    height: 24px;
-    padding: 5px;
+    width: 30px;
+    height: 30px;
+    padding: 4px;
 }
 
 .smiley .smiley-container {
@@ -171,7 +171,6 @@
 .smiley .btn-close {
     font-size: 14px;
     border: 2px solid #f2f2f2;
-    padding: 2px;
     width: 16px;
     height: 16px;
     text-align: center;
