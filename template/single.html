@@ -5,7 +5,8 @@
     <title>{{.Title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="../static/styles/base.css">
-    <link rel="stylesheet" href="../static/styles/bootstrap.css">
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <link rel="stylesheet" href="../static/styles/post.css">
 </head>
 <body class="container row">
 
@@ -52,58 +53,139 @@
     </main>
     <footer>
         <hr/>
-        <p>最后更新
-            <time datetime="{{.Updated}}">{{.Updated}}</time>
-        </p>
+        <span class="text-muted small">最后更新<time datetime="{{.Updated}}">{{.Updated}}</time> by <a
+                href="#">yang</a></span>
+        <div><b>相似文章</b></div>
+        <ul>
+            <li><a href="#">loelfjoifjws</a></li>
+            <li><a href="#">loelfjoifjws</a></li>
+            <li><a href="#">loelfjoifjws</a></li>
+            <li><a href="#">loelfjoifjws</a></li>
+        </ul>
     </footer>
     <section id="comment">
-        <strong>评论<span class="badge badge-default ml-1">199</span></strong>
+        <div class="row justify-content-between">
+            <strong>评论<span class="badge badge-default ml-1">199</span></strong>
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
         <hr/>
-        <ul class="pagination justify-content-end">
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="sr-only">Previous</span>
-                </a>
-            </li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </li>
-        </ul>
-        <ul id="comment-list">
-            <li>
-                <img class="avater" src="../static/images/avater.jpg">
-                <a href="#">{{.UserName}}</a>
-                <div>
+        <ul id="comment-list" style="list-style: none" class="p-0">
+            <li class="comment-item">
+                <div class="comment-header">
+                    <img class="avater" src="../static/images/avater.jpg">
+                    <a class="ml-2" href="#">{{.UserName}}</a>
+                    <span class="badge badge-info" href="#">lv4</span>
+                </div>
+                <div class="comment-body">
                     “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
                 </div>
-                <div class="text-muted small">2017-03-20</div>
+                <div class="comment-footer">
+                    <span class="badge badge-default">5#</span>
+                    <div class="mx-2">2017-03-20 20:00:00</div>
+                    <a href="#" class="btn btn-outline-primary">回复</a>
+                </div>
             </li>
-            <li>
-                <img class="avater" src="../static/images/avater.jpg">
-                <a href="#">{{.UserName}}</a>
-                <div>
+            <li class="comment-item">
+                <div class="comment-header">
+                    <img class="avater" src="../static/images/avater.jpg">
+                    <a class="ml-2" href="#">{{.UserName}}</a>
+                    <span class="badge badge-info" href="#">lv4</span>
+                </div>
+                <div class="comment-body">
                     “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
                 </div>
-                <div class="text-muted small">2017-03-20</div>
-                <a href="#" class="btn btn-outline-primary">回复</a>
+                <div class="comment-footer">
+                    <span class="badge badge-default">5#</span>
+                    <div class="mx-2">2017-03-20 20:00:00</div>
+                    <a href="#" class="btn btn-outline-primary">回复</a>
+                </div>
+            </li>
+            <li class="comment-item">
+                <div class="comment-header">
+                    <img class="avater" src="../static/images/avater.jpg">
+                    <a class="ml-2" href="#">{{.UserName}}</a>
+                    <span class="badge badge-info" href="#">lv4</span>
+                </div>
+                <div class="comment-body">
+                    “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
+                </div>
+                <div class="comment-footer">
+                    <span class="badge badge-default">5#</span>
+                    <div class="mx-2">2017-03-20 20:00:00</div>
+                    <a href="#" class="btn btn-outline-primary">回复</a>
+                </div>
+            </li>
+            <li class="comment-item">
+                <div class="comment-header">
+                    <img class="avater" src="../static/images/avater.jpg">
+                    <a class="ml-2" href="#">{{.UserName}}</a>
+                    <span class="badge badge-info" href="#">lv4</span>
+                </div>
+                <div class="comment-body">
+                    “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
+                </div>
+                <div class="comment-footer">
+                    <span class="badge badge-default">5#</span>
+                    <div class="mx-2">2017-03-20 20:00:00</div>
+                    <a href="#" class="btn btn-outline-primary">回复</a>
+                </div>
+            </li>
+            <li class="comment-item">
+                <div class="comment-header">
+                    <img class="avater" src="../static/images/avater.jpg">
+                    <a class="ml-2" href="#">{{.UserName}}</a>
+                    <span class="badge badge-info" href="#">lv4</span>
+                </div>
+                <div class="comment-body">
+                    “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
+                </div>
+                <div class="comment-footer">
+                    <span class="badge badge-default">5#</span>
+                    <div class="mx-2">2017-03-20 20:00:00</div>
+                    <a href="#" class="btn btn-outline-primary">回复</a>
+                </div>
+            </li>
+            <li class="comment-item">
+                <div class="comment-header">
+                    <img class="avater" src="../static/images/avater.jpg">
+                    <a class="ml-2" href="#">{{.UserName}}</a>
+                    <span class="badge badge-info" href="#">lv4</span>
+                </div>
+                <div class="comment-body">
+                    “我们每个月的常规开销在6万元左右。”在杨天琪看来，处于萌芽期的女子战队，未来的潜力和商业市场巨大，“女队的竞争并不激烈，在安徽目前只有我们一家，更容易接到商业活动，现在收益也不错。”正如杨天琪所说，性别的先天优势和颜值吸引，对于广大男性玩家而言，女子战队拥有着天生的吸引力。随着女子联赛和女子战队汹涌而来，无论是粉丝经济的拥戴还是商业代言的宣传，抑或是与直播平台的合作，女子战队都将有着数倍于男子战队的商业价值。
+                </div>
+                <div class="comment-footer">
+                    <span class="badge badge-default">5#</span>
+                    <div class="mx-2">2017-03-20 20:00:00</div>
+                    <a href="#" class="btn btn-outline-primary">回复</a>
+                </div>
             </li>
         </ul>
     </section>
-    <section id="reply-box">
-        <textarea placeholder="回复" class="form-control"></textarea>
-        <a href="#" class="btn btn-outline-primary">表情</a>
-        <a href="#" class="btn btn-outline-primary">发表</a>
+    <section class="row justify-content-end">
+        <textarea placeholder="回复" class="form-control mb-2" style="height: 100px"></textarea>
+        <a href="#" class="btn btn-warning">表情</a>
+        <a href="#" class="btn btn-primary ml-2">发表</a>
     </section>
 </article>
 
-<aside class="col-sm-3">
+<aside class="col-sm-3 mt-5">
     <div class="list-group my-2">
         <div class="list-item list-item-info">分类</div>
         <a href="#" class="list-item justify-content-between">技术<span
@@ -119,7 +201,7 @@
     </div>
 
     <div class="card mb-2">
-        <div class="card-header">标签</div>
+        <div class="card-header card-header-info">标签</div>
         <div class="card-block">
             <a href="#" class="badge badge-default">标签1</a>
             <a href="#" class="badge badge-default">标签1</a>

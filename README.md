@@ -1,4 +1,6 @@
-# 我的博客系统文档
+# goblog
+
+a simple golang blog system
 
 
 ## 1.配置psql

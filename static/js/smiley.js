@@ -14,7 +14,7 @@ const SmileyBox = {
             return
         }
         this.callback = callback;
-        console.log("callback",callback);
+        console.log("callback", callback);
         let _this = this;
         console.log("init");
         this.btn = button;
@@ -39,9 +39,9 @@ const SmileyBox = {
                     <div class = "smiley-tab">
                     <img title="${item[2]}" src="smiley/${item[1]}/${item[1]}${2}${item[4]}">
                     </div>`).join('')}
-                    <div style="width: 100%;">
-                        <i class="icon-md btn-close">close</i>
-                    </div>
+                    <button type="button" class="close">
+                        <span>×</span>
+                    </button>
                 </div>
         <div class="smiley-container">
 
@@ -59,7 +59,7 @@ const SmileyBox = {
         });
 
         this.switchSmiley(0);
-        this.smiley.querySelector(".btn-close").addEventListener('click', function () {
+        this.smiley.querySelector(".close").addEventListener('click', function () {
             SmileyBox.smiley.style.display = "none";
         });
         this.setDrag(true);
