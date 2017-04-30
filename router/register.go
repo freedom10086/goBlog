@@ -16,7 +16,6 @@ func (h *RegisterHandler) DoAuth(method int, r *http.Request) error {
 	if method == MethodGet || method == MethodPost {
 		return nil
 	}
-
 	return h.BaseHandler.DoAuth(method, r)
 }
 

@@ -2225,6 +2225,11 @@ a.list-item:active {
     background-color: #fff;
 }
 
+.list-info{
+    color: #31708f;
+    background-color: #d9edf7;
+}
+
 .embed-responsive {
     position: relative;
     display: block;

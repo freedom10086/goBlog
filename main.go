@@ -9,12 +9,26 @@ import (
 	"time"
 )
 
+//配置文件
 var config *conf.Config
+
+//路由列表
+var routers map[string]router.Handler
 
 func init() {
 	config = conf.Conf
 	model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
 	log.Printf("==%s started==", config.SiteName)
+
+	routers = map[string]router.Handler{
+		"/static/":   &router.StaticFileHandler{},
+		"/categorys": &router.CateHandler{},
+		"/users":     &router.UserHandler{},
+		"/auth":      &router.OauthHandler{},
+		"/login":     &router.LoginHandler{},
+		"/register":  &router.RegisterHandler{},
+		"/chats":     &router.ChatHandler{},
+	}
 }
 
 func main() {
@@ -28,14 +42,18 @@ func main() {
 	}()
 
 	r := router.NewRouter()
+	for key, value := range routers {
+		r.Register(key, value)
+	}
+
 	server := &http.Server{
-		Addr:         config.SitePortSSL,
-		Handler:      r,
-		WriteTimeout: 8 * time.Second,
-		ReadTimeout:  8 * time.Second,
+		Addr:           config.SitePortSSL,
+		Handler:        r,
+		WriteTimeout:   8 * time.Second,
+		ReadTimeout:    8 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
 
 	log.Printf("https listen on %s%s", "https://127.0.0.1", config.SitePortSSL)
-	err := server.ListenAndServeTLS("cert.pem", "key.pem")
-	log.Fatal(err)
+	log.Fatal(server.ListenAndServeTLS("cert.pem", "key.pem"))
 }

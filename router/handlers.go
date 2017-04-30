@@ -13,39 +13,20 @@ import (
 )
 
 var config *conf.Config
-
-const templateDir = "./template/"
-const staticDir = "/static/"
-
-type BaseHandler struct {
-	Token *model.Token
-}
+//模板文件目录
+var templateDir = "template/"
+//静态文件目录
+var staticDir = "static/"
 
 func init() {
 	config = conf.Conf
-}
-
-//基础auth 子类可以重写此方法实现自定义auth
-func (h *BaseHandler) DoAuth(method int, r *http.Request) error {
-	t, err := BaseAuth(method, r)
-	if err != nil {
-		return err
+	if config.DirTemplate != "" {
+		templateDir = config.DirTemplate
 	}
-	h.Token = t
-	return nil
-}
 
-func (*BaseHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	NotAllowed(w, r)
-}
-func (*BaseHandler) DoPost(w http.ResponseWriter, r *http.Request) {
-	NotAllowed(w, r)
-}
-func (*BaseHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
-	NotAllowed(w, r)
-}
-func (*BaseHandler) DoUpdate(w http.ResponseWriter, r *http.Request) {
-	NotAllowed(w, r)
+	if config.DirStatic != "" {
+		staticDir = config.DirStatic
+	}
 }
 
 type ResultData struct {
@@ -102,8 +83,8 @@ func Template(w http.ResponseWriter, tmpl string, data interface{}) {
 		}
 	}
 
-	filepath := templateDir + tmpl + ".html"
-	t, err := template.ParseFiles(filepath)
+	filename := templateDir + tmpl + ".html"
+	t, err := template.ParseFiles(filename)
 	if err != nil {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return

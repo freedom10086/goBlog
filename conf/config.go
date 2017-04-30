@@ -2,15 +2,15 @@ package conf
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
 var Conf *Config
 
 type Config struct {
 	SiteName      string `json:"SiteName"`
-	SiteIpAddr      string `json:"SiteIpAddr"`
+	SiteIpAddr    string `json:"SiteIpAddr"`
 	SitePort      string `json:"SitePort"`
 	SitePortSSL   string `json:"SitePortSSL"`
 	SiteStaticDir string `json:"SiteStaticDir"`
@@ -18,7 +18,13 @@ type Config struct {
 	DbUsername    string `json:"DbUsername"`
 	DbPassword    string `json:"DbPassword"`
 	DbName        string `json:"DbName"`
+	DirTemplate   string `json:"DirTemplate"`
+	DirStatic     string `json:"DirStatic"`
 }
+
+const (
+	dir_config = "./conf/config.json"
+)
 
 func init() {
 	Conf = readConfig()
@@ -26,23 +32,17 @@ func init() {
 }
 
 func readConfig() *Config {
-	if Conf != nil {
-		return Conf
-	}
-	inputFile := "./conf/config.json"
-	buf, err := ioutil.ReadFile(inputFile)
+	file, err := os.Open(dir_config)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
+	defer file.Close()
 
-	log.Println(string(buf))
-
-	var c *Config = &Config{}
-	err = json.Unmarshal(buf, c)
+	conf := &Config{}
+	err = json.NewDecoder(file).Decode(conf)
 
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
-
-	return c
+	return conf
 }

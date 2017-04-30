@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+//url路径替换字符
 var htmlReplacer = strings.NewReplacer(
 	"&", "&amp;",
 	"<", "&lt;",
@@ -16,8 +17,10 @@ var htmlReplacer = strings.NewReplacer(
 	"'", "&#39;",
 )
 
-var routers map[string]MyHandler
+//路由列表
+var mux map[string]Handler
 
+//http method
 const (
 	MethodGet    = iota
 	MethodPost
@@ -26,60 +29,42 @@ const (
 	MethodOther
 )
 
-func init() {
-	routers = make(map[string]MyHandler)
-	routers["/static/"] = &StaticFileHandler{}
-	routers["/categorys"] = &CateHandler{}
-	routers["/users"] = &UserHandler{}
-	routers["/auth"] = &OauthHandler{}
-	routers["/register"] = &RegisterHandler{}
-	routers["/chats"] = &ChatHandler{}
-}
-
 type MyRouter struct {
 	mu sync.RWMutex
 	m  map[string]muxEntry
 }
 
+//pattern /static->path /static/->目录
 type muxEntry struct {
-	h       MyHandler
-	pattern string //pattern /static->path /static/->目录
-}
-
-//子类要实现此接口中的方法如果不实现
-//由父类代替
-//int HttpMethod
-type MyHandler interface {
-	DoAuth(int, *http.Request) error
-	DoGet(http.ResponseWriter, *http.Request)
-	DoPost(http.ResponseWriter, *http.Request)
-	DoDelete(http.ResponseWriter, *http.Request)
-	DoUpdate(http.ResponseWriter, *http.Request)
+	h       Handler
+	pattern string
 }
 
 func NewRouter() *MyRouter {
 	r := new(MyRouter)
 
-	for i, v := range routers {
-		r.Handle(i, v)
+	for i, v := range mux {
+		r.Register(i, v)
 	}
 	return r
 }
 
+//http 请求会到这儿处理
 func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("method:%s path:%s", r.Method, r.URL.Path)
-	if r.RequestURI == "*" {
-		if r.ProtoAtLeast(1, 1) {
-			w.Header().Set("Connection", "close")
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
-	//代理
-	if r.Method == "CONNECT" {
-		NotAllowed(w, r)
-		return
+	var m int
+	switch r.Method {
+	case "GET":
+		m = MethodGet
+	case "POST":
+		m = MethodPost
+	case "DELETE":
+		m = MethodDelete
+	case "PUT", "PATCH":
+		m = MethodUpdate
+	default:
+		m = MethodOther
 	}
 
 	var p string
@@ -90,53 +75,31 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h := mux.handle(p); h != nil {
-		var method int
-		switch r.Method {
-		case "GET":
-			method = MethodGet
-			err := h.DoAuth(method, r)
-			if err != nil {
-				Unauthorized(w, r)
-				return
-			}
-			h.DoGet(w, r)
-		case "POST":
-			method = MethodPost
-			err := h.DoAuth(method, r)
-			if err != nil {
-				Unauthorized(w, r)
-				return
-			}
-			h.DoPost(w, r)
-		case "DELETE":
-			method = MethodDelete
-			err := h.DoAuth(method, r)
-			if err != nil {
-				Unauthorized(w, r)
-				return
-			}
-			h.DoDelete(w, r)
-		case "PUT":
-		case "PATCH":
-			method = MethodUpdate
-			err := h.DoAuth(method, r)
-			if err != nil {
-				Unauthorized(w, r)
-				return
-			}
-			h.DoUpdate(w, r)
-		default:
-			method = MethodOther
-			NotAllowed(w, r)
+		err := h.DoAuth(m, r)
+		if err != nil {
+			Unauthorized(w, r)
+			return
 		}
+		if m == MethodGet {
+			h.DoGet(w, r)
+		} else if m == MethodPost {
+			h.DoPost(w, r)
+		} else if m == MethodDelete {
+			h.DoDelete(w, r)
+		} else if m == MethodUpdate {
+			h.DoUpdate(w, r)
+		} else {
+			NotAllowed(w, r)
+			return
+		}
+	} else {
+		NotFound(w, r)
 		return
 	}
-
-	NotFound(w, r)
 }
 
-//暴露自定义MyHandler接口
-func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
+//注册路由
+func (mux *MyRouter) Register(pattern string, handler Handler) {
 	mux.mu.Lock()
 	defer mux.mu.Unlock()
 	n := len(pattern)
@@ -152,7 +115,7 @@ func (mux *MyRouter) Handle(pattern string, handler MyHandler) {
 	mux.m[pattern] = muxEntry{h: handler, pattern: pattern}
 }
 
-func (mux *MyRouter) handle(path string) (h MyHandler) {
+func (mux *MyRouter) handle(path string) (h Handler) {
 	mux.mu.RLock()
 	defer mux.mu.RUnlock()
 	var maxn = 0

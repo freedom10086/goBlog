@@ -44,5 +44,7 @@ color-link #00a1d6;
 
 todo css3 rem 相当于html标签font-size相对值,px 改用rem
 
+todo postgresql 10 新增分表
+
 
 git 取消已经加入的文件
