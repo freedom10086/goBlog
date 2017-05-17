@@ -103,8 +103,8 @@ func (h *StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", cacheControl)
 
 	w.WriteHeader(http.StatusOK)
-	size := fi.Size();
-	if (size > 2048) {
+	size := fi.Size()
+	if size > 2048 {
 		size = 2048
 	}
 	reader := bufio.NewReader(f)

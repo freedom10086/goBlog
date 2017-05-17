@@ -29,6 +29,8 @@ func init() {
 		"/login":     &router.LoginHandler{},
 		"/register":  &router.RegisterHandler{},
 		"/chats":     &router.ChatHandler{},
+		"/account/":  &router.AccountHandler{}, //reset_password reg_compete...
+		"/admin/":    &router.AdminHandler{},
 	}
 }
 

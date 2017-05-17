@@ -137,11 +137,12 @@ func (mux *MyRouter) handle(path string) (h Handler) {
 
 //isdir 表示pattern是否为目录
 func pathMatch(pattern, path string) bool {
-	if pattern[len(pattern)-1] != '/' {
+	if pattern[len(pattern)-1] != '/' || pattern == "/" {
 		//如果不是目录比较是否相等
 		return pattern == path
 	}
-	//是目录则前部分匹配即可
+
+	//如果是目录 则只要目录部分相同就行
 	return strings.HasPrefix(path, pattern)
 }
 

@@ -10,6 +10,10 @@ import (
 	"strings"
 	"html/template"
 	"log"
+	"os"
+	"time"
+	"io/ioutil"
+	"strconv"
 )
 
 var config *conf.Config
@@ -85,23 +89,7 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 //todo 当作变量存在内存 http2 push相关文件css/js/图片等
 //res css 文件或者js文件或者其他资源文件
 func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
-	//http2 push
-	pusher, ok := w.(http.Pusher)
-	if ok { // 支持http push
-		//push css
-		for _, v := range data.Css {
-			if err := pusher.Push(staticDir+"styles/"+v, nil); err != nil {
-				log.Printf("Failed to push css: %v", err)
-			}
-		}
-
-		for _,v :=range data.Js{
-			if err := pusher.Push(staticDir+"js/"+v, nil); err != nil {
-				log.Printf("Failed to push js: %v", err)
-			}
-		}
-	}
-
+	httpPush(w, data)
 	var ts []string
 	for _, v := range tmpls {
 		ts = append(ts, templateDir+v+".html")
@@ -116,6 +104,61 @@ func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 	err = t.Execute(w, data)
 	if err != nil {
 		Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+//static html
+//静态的html 如登陆注册等页面
+func StaticTemplate(w http.ResponseWriter, data *TemplateData, file string) {
+	var filename string
+	if strings.HasSuffix(file, ".html") {
+		filename = templateDir + file
+	} else {
+		filename = templateDir + file + ".html"
+	}
+
+	fi, err := os.Stat(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			NotFound(w, nil)
+			return
+		}
+		InternalError(w, nil, err)
+		return
+	}
+
+	f, _ := os.Open(filename)
+	defer f.Close()
+	d, err := ioutil.ReadFile(filename)
+	if err != nil {
+		InternalError(w, nil, err)
+	}
+	httpPush(w, data)
+	w.Write(d)
+	cacheControl := fmt.Sprintf("public, max-age=%d", cacheTime/time.Second)
+	w.Header().Set("content-type", "text/html")
+	w.Header().Set("Content-Length", strconv.FormatInt(fi.Size(), 10))
+	w.Header().Set("Cache-Control", cacheControl)
+	w.WriteHeader(http.StatusOK)
+}
+
+//http2 server push
+func httpPush(w http.ResponseWriter, data *TemplateData) {
+	//http2 push
+	pusher, ok := w.(http.Pusher)
+	if ok { // 支持http push
+		//push css
+		for _, v := range data.Css {
+			if err := pusher.Push(staticDir+"styles/"+v, nil); err != nil {
+				log.Printf("Failed to push css: %v", err)
+			}
+		}
+
+		for _, v := range data.Js {
+			if err := pusher.Push(staticDir+"js/"+v, nil); err != nil {
+				log.Printf("Failed to push js: %v", err)
+			}
+		}
 	}
 }
 
