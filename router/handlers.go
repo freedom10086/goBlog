@@ -29,10 +29,19 @@ func init() {
 	}
 }
 
-type ResultData struct {
+//基本api返回data
+type ApiData struct {
 	Data    interface{}
 	Code    int
 	Message string
+}
+
+//基本模板data返回类型基类
+//返回类型要继承
+type TemplateData struct {
+	Data interface{}
+	Css  []string
+	Js   []string
 }
 
 //常用auth
@@ -57,7 +66,7 @@ func Error(w http.ResponseWriter, error string, code int) {
 }
 
 func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
-	res := &ResultData{
+	res := &ApiData{
 		Data:    data,
 		Code:    http.StatusOK,
 		Message: "",
@@ -74,21 +83,36 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 }
 
 //todo 当作变量存在内存 http2 push相关文件css/js/图片等
-func Template(w http.ResponseWriter, tmpl string, data interface{}) {
+//res css 文件或者js文件或者其他资源文件
+func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 	//http2 push
 	pusher, ok := w.(http.Pusher)
-	if ok { // Push is supported. Try pushing rather than waiting for the browser.
-		if err := pusher.Push(staticDir+"styles/base.css", nil); err != nil {
-			log.Printf("Failed to push: %v", err)
+	if ok { // 支持http push
+		//push css
+		for _, v := range data.Css {
+			if err := pusher.Push(staticDir+"styles/"+v, nil); err != nil {
+				log.Printf("Failed to push css: %v", err)
+			}
+		}
+
+		for _,v :=range data.Js{
+			if err := pusher.Push(staticDir+"js/"+v, nil); err != nil {
+				log.Printf("Failed to push js: %v", err)
+			}
 		}
 	}
 
-	filename := templateDir + tmpl + ".html"
-	t, err := template.ParseFiles(filename)
+	var ts []string
+	for _, v := range tmpls {
+		ts = append(ts, templateDir+v+".html")
+	}
+
+	t, err := template.ParseFiles(ts...)
 	if err != nil {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	err = t.Execute(w, data)
 	if err != nil {
 		Error(w, err.Error(), http.StatusInternalServerError)

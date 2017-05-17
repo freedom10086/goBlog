@@ -27,18 +27,18 @@ func (h *UserHandler) DoAuth(method int, r *http.Request) error {
 }
 
 func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	var sizeInt, pageInt int;
+	var sizeInt, pageInt int
 	var err error
 	//order := r.FormValue("order")
 	if page := r.FormValue("page"); page == "" {
-		pageInt = 1;
+		pageInt = 1
 	} else if pageInt, err = strconv.Atoi(page); err != nil || pageInt <= 0 {
 		BadParament(w, r)
 		return
 	}
 
 	if size := r.FormValue("size"); size == "" {
-		sizeInt = 30;
+		sizeInt = 30
 	} else if sizeInt, err = strconv.Atoi(size); err != nil || sizeInt <= 0 {
 		BadParament(w, r)
 		return
@@ -58,13 +58,13 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	token := r.PostFormValue("token")
 	password := r.PostFormValue("password")
 	sex := r.PostFormValue("sex")
-	sexInt := -1;
+	sexInt := -1
 	if sex == "0" {
-		sexInt = 0;
-	} else if (sex == "1") {
-		sexInt = 1;
-	} else if (sex == "2") {
-		sexInt = 2;
+		sexInt = 0
+	} else if sex == "1" {
+		sexInt = 1
+	} else if sex == "2" {
+		sexInt = 2
 	}
 	if len(token) < 32 || len(password) < 6 || sexInt < 0 || sexInt > 2 {
 		BadParament(w, r)

@@ -2,29 +2,7 @@
 /*https://github.com/sindresorhus/github-markdown-css*/
 
 :root {
-    --color-bg-primary: #fff; /*主背景色*/
-    --color-bg-secondary: rgb(244, 245, 247); /*副背景色*/
-    --color-bg-hover: #eee; /*背景颜色加深*/
-    --color-accent: #rgb(0, 85, 170); /*亮色*/
-    --color-primary: #rgb(225, 235, 245); /*主色调*/
-    --color-primary-dark: #rgb(209, 225, 240); /*主色调加深*/
-    --color-text-primary: #292b2c; /*字体颜色主色调*/
-    --color-text-primary-inverse: #f1f1f1; /*字体颜色主色调-反*/
-    --color-text-secondary: #333; /*二级字颜色*/
-    --color-text-secondary-inverse: #e1e1e1; /*二级字颜色-反*/
-    --color-text-disable: #555; /*disable颜色*/
-    --color-text-hint: #666; /*hint颜色*/
-    --color-icon: #777; /*icon颜色*/
-    --color-icon-hover: #666; /*icon颜色-激活*/
-    --color-border: #ddd; /*边框颜色*/
-    --color-border-hover: #ccc; /*边框颜色hover*/
-    --color-border-focus: #5cb3fd; /*边框颜色激活*/
-    --color-link: #00a1d6; /*链接颜色*/
 
-    --siez-text: 15px;
-    --siez-text-secondary: 13px;
-    --size-text-title: 18px;
-    --siez-text-small: 11px;
 }
 
 html {
@@ -34,7 +12,6 @@ html {
     line-height: 1.5;
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
-    background-color: var(--color-bg-secondary);
 }
 
 * {
@@ -45,8 +22,8 @@ body {
     margin: 0;
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Microsoft YaHei";
     font-weight: normal;
-    color: var(--color-text-primary);
-    background-color: var(--color-bg-primary);
+    color: #292b2c;
+    background-color: #fff;
 }
 
 a,
@@ -2225,7 +2202,7 @@ a.list-item:active {
     background-color: #fff;
 }
 
-.list-info{
+.list-info {
     color: #31708f;
     background-color: #d9edf7;
 }

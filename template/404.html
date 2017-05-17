@@ -6,5 +6,22 @@
 </head>
 <body>
 <h1>404-Not Found</h1>
+<hr>
+<h4 id="description">此页面不存在</h4>
+<script>
+    const u = window.location.href;
+    const url = (u.includes("?") ? u.substr(0, u.indexOf("?")) : u);
+    document.querySelector("#description").innerHTML =
+        `<a href="${url}">${url}</a><br>
+        此页面不存在
+        <br>
+        <br>
+        <a href="#" onclick="back();">返回上一页</a> <a href="/">返回首页</a>`;
+
+    function back() {
+        console.log("back");
+        window.history.back();
+    }
+</script>
 </body>
 </html>

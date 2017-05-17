@@ -1,4 +1,4 @@
-footer {
+footer, .footer {
     height: 56px;
     border-top: 1px solid hsl(209, 51%, 88%);
     color: #999;
@@ -6,4 +6,6 @@ footer {
     display: flex;
     align-items: center;
     width: 100%;
+    position: fixed;
+    bottom: 0;
 }

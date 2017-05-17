@@ -21,6 +21,7 @@ func init() {
 	log.Printf("==%s started==", config.SiteName)
 
 	routers = map[string]router.Handler{
+		"/":          &router.HomeHandler{},
 		"/static/":   &router.StaticFileHandler{},
 		"/categorys": &router.CateHandler{},
 		"/users":     &router.UserHandler{},

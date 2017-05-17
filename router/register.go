@@ -36,31 +36,37 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
 			//返回完善信息页面,完善成功后
 			//post /users 插入数据库完成注册
-			Template(w, "register2", &CompeteRegData{
-				PostUrl:"/users",
-				Token:token,
-				Email:t.Email,
-				Username:t.Username})
+			Template(w, &TemplateData{
+				Css: []string{"style.css"},
+				Js:  []string{"base.js"},
+				Data: &CompeteRegData{
+					PostUrl:  "/users",
+					Token:    token,
+					Email:    t.Email,
+					Username: t.Username},
+			},
+				"register_compete")
 		} else {
 			Unauthorized(w, r)
 		}
 		return
 	case "checkUsername":
 		if u := r.FormValue("username"); !model.CheckUsername(u) {
-			Error(w, u + "用户名不可用", 400)
+			Error(w, u+"用户名不可用", 400)
 		} else {
 			io.WriteString(w, "ok")
 		}
 		return
 	case "checkEmail":
 		if e := r.FormValue("email"); !model.CheckEmail(e) {
-			Error(w, e + "邮箱不可用", 400)
+			Error(w, e+"邮箱不可用", 400)
 		} else {
 			io.WriteString(w, "ok")
 		}
 		return
 	default:
-		Template(w, "register", nil)
+		Template(w,
+			&TemplateData{Css: []string{"style.css"}, Js: []string{"base.js"}, }, "register")
 	}
 }
 
@@ -75,21 +81,21 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !model.CheckUsername(username) {
-		Error(w, username + "用户名不可用", 400)
+		Error(w, username+"用户名不可用", 400)
 		return
 	}
 
 	if !model.CheckEmail(email) {
-		Error(w, email + "邮件不可用", 400)
+		Error(w, email+"邮件不可用", 400)
 		return
 	}
 
-	token := model.GenRegToken(username, email, config.SecretKey, time.Minute * 30)
+	token := model.GenRegToken(username, email, config.SecretKey, time.Minute*30)
 	go func() {
 		content := fmt.Sprintf("欢迎你注册%s,请点击以下链接来验证你的邮箱,请在%d分钟内完成验证\r\n <a href=\"%s\">点击这儿</a>",
 			config.SiteName,
 			30,
-			"https://" + config.SiteIpAddr + config.SitePortSSL + "/regiest?mod=competeRegiest&token=" + token,
+			"https://"+config.SiteIpAddr+config.SitePortSSL+"/regiest?mod=competeRegiest&token="+token,
 		)
 		model.SendMail(email, "验证你的注册邮件", content)
 	}()
