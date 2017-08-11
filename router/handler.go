@@ -42,12 +42,15 @@ func (h *BaseHandler) DoAuth(method int, r *http.Request) error {
 func (*BaseHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
+
 func (*BaseHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
+
 func (*BaseHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
+
 func (*BaseHandler) DoUpdate(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
