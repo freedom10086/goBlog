@@ -182,7 +182,7 @@ func NotAllowed(w http.ResponseWriter, r *http.Request) {
 	Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
-func BadParament(w http.ResponseWriter, r *http.Request) {
+func BadParameter(w http.ResponseWriter, r *http.Request) {
 	Error(w, "400 Bad Request", http.StatusBadRequest)
 }
 

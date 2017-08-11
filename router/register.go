@@ -76,7 +76,7 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	username := r.PostFormValue("username")
 	email := r.PostFormValue("email")
 	if username == "" || email == "" {
-		BadParament(w, r)
+		BadParameter(w, r)
 		return
 	}
 

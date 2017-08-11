@@ -33,14 +33,14 @@ func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	if page := r.FormValue("page"); page == "" {
 		pageInt = 1
 	} else if pageInt, err = strconv.Atoi(page); err != nil || pageInt <= 0 {
-		BadParament(w, r)
+		BadParameter(w, r)
 		return
 	}
 
 	if size := r.FormValue("size"); size == "" {
 		sizeInt = 30
 	} else if sizeInt, err = strconv.Atoi(size); err != nil || sizeInt <= 0 {
-		BadParament(w, r)
+		BadParameter(w, r)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		sexInt = 2
 	}
 	if len(token) < 32 || len(password) < 6 || sexInt < 0 || sexInt > 2 {
-		BadParament(w, r)
+		BadParameter(w, r)
 		return
 	}
 	if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
@@ -91,7 +91,7 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 func (*UserHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 	uid := r.PostFormValue("uid")
 	if uidInt, err := strconv.Atoi(uid); err != nil {
-		BadParament(w, r)
+		BadParameter(w, r)
 		return
 	} else {
 		if i, err := model.DelUser(uidInt); err != nil {

@@ -25,7 +25,7 @@ func (h *OauthHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		var err error
 		if decodeAuth, err = base64.URLEncoding.DecodeString(auth[6:]); err != nil {
 			log.Println(err)
-			BadParament(w, r)
+			BadParameter(w, r)
 			return
 		}
 

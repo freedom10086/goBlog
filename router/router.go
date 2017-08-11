@@ -55,13 +55,13 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var m int
 	switch r.Method {
-	case "GET":
+	case http.MethodGet:
 		m = MethodGet
-	case "POST":
+	case http.MethodPost:
 		m = MethodPost
-	case "DELETE":
+	case http.MethodDelete:
 		m = MethodDelete
-	case "PUT", "PATCH":
+	case http.MethodPut, http.MethodPatch:
 		m = MethodUpdate
 	default:
 		m = MethodOther

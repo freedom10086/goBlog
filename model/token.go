@@ -125,7 +125,7 @@ func ValidRegToken(token, secretKey string) (*RegToken, bool) {
 
 // 随机字符串
 func Krand(size int) string {
-	kinds, result := [][]int{[]int{10, 48}, []int{26, 97}, []int{26, 65}}, make([]byte, size)
+	kinds, result := [][]int{{10, 48}, {26, 97}, {26, 65}}, make([]byte, size)
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < size; i++ {
 		ikind := rand.Intn(3)
