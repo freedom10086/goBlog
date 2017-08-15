@@ -30,8 +30,13 @@ const (
 )
 
 type MyRouter struct {
-	mu sync.RWMutex
-	m  map[string]muxEntry
+	mu             sync.RWMutex
+	m              map[string]muxEntry
+	defaultHandler Handler //默认handler
+}
+
+func (mux *MyRouter) DefaultHandler(h Handler) {
+	mux.defaultHandler = h
 }
 
 //pattern /static->path /static/->目录
@@ -92,8 +97,8 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NotAllowed(w, r)
 			return
 		}
-	} else {
-		NotFound(w, r)
+	} else { //defaultHandler==nil 说明默认的handler未设置
+		NotAllowed(w, r)
 		return
 	}
 }
@@ -131,6 +136,10 @@ func (mux *MyRouter) handle(path string) (h Handler) {
 			maxn = n
 			h = mux.h
 		}
+	}
+
+	if h == nil { //最终还是nil 启用默认的handler
+		h = mux.defaultHandler
 	}
 	return
 }

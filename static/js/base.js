@@ -1,4 +1,3 @@
-console.log("==in base==");
 class Ajax {
     constructor(url, async = true) {
         this.url = url;
@@ -24,7 +23,7 @@ class Ajax {
         x.send(data)
     }
 
-    get(data, success, fail) {
+    get (data, success, fail) {
         let query = [];
         for (let key in data) {
             query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
@@ -66,13 +65,14 @@ function getJSON(url) {
 }
 
 function fetchJSON(url) {
-    fetch(url).then((res) => {
-        //console.log(res);
-        if (res.ok && res.status >= 200 && res.status < 300) {
-            return res.json();
-        }
-        throw new Error(res.status);
-    })
+    fetch(url)
+        .then((res) => {
+            //console.log(res);
+            if (res.ok && res.status >= 200 && res.status < 300) {
+                return res.json();
+            }
+            throw new Error(res.status);
+        })
         .then((json) => {
             console.log(json);
         })

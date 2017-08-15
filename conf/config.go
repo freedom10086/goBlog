@@ -18,7 +18,6 @@ type Config struct {
 	DbUsername    string `json:"DbUsername"`
 	DbPassword    string `json:"DbPassword"`
 	DbName        string `json:"DbName"`
-	DirTemplate   string `json:"DirTemplate"`
 	DirUpload   string `json:"DirUpload"`
 	DirStatic     string `json:"DirStatic"`
 }

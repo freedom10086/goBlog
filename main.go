@@ -17,21 +17,22 @@ var routers map[string]router.Handler
 
 func init() {
 	config = conf.Conf
-	model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
+	//todo
+	//model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
 	log.Printf("==%s started==", config.SiteName)
 
 	routers = map[string]router.Handler{
 		"/":          &router.HomeHandler{},
-		"/static/":   &router.StaticFileHandler{},
 		"/categorys": &router.CateHandler{},
 		"/users":     &router.UserHandler{},
 		"/auth":      &router.OauthHandler{},
 		"/login":     &router.LoginHandler{},
+		"/qrlogin":   &router.LoginHandler{},
 		"/register":  &router.RegisterHandler{},
 		"/chats":     &router.ChatHandler{},
 		"/account/":  &router.AccountHandler{}, //reset_password reg_compete...
 		"/admin/":    &router.AdminHandler{},
-		"/location": &router.LocationHandler{},
+		"/location":  &router.LocationHandler{},
 	}
 }
 
@@ -46,6 +47,7 @@ func main() {
 	}()
 
 	r := router.NewRouter()
+	r.DefaultHandler(&router.DefaultHandler{})
 	for key, value := range routers {
 		r.Register(key, value)
 	}

@@ -8,7 +8,6 @@
   "DbUsername": "yang",
   "DbPassword": "justice",
   "DbName": "goblog",
-  "DirTemplate": "template/",
   "DirUpload": "upload/",
   "DirStatic": "static/"
 }

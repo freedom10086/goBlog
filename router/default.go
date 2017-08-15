@@ -34,7 +34,8 @@ var mineTypes = map[string]string{
 	".manifest": "text/cache-manifest",
 }
 
-type StaticFileHandler struct {
+//默认的handler
+type DefaultHandler struct {
 	BaseHandler
 }
 
@@ -50,7 +51,7 @@ func MineType(name string) string {
 		for i := 0; i < len(ext); i++ {
 			c := ext[i]
 			if 'A' <= c && c <= 'Z' {
-				lower = append(lower, c + ('a' - 'A'))
+				lower = append(lower, c+('a'-'A'))
 			} else {
 				lower = append(lower, c)
 			}
@@ -66,12 +67,12 @@ func MineType(name string) string {
 	return defaultType
 }
 
-func (*StaticFileHandler) DoAuth(int, *http.Request) error {
+func (*DefaultHandler) DoAuth(int, *http.Request) error {
 	return nil
 }
 
-func (h *StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	filename := r.URL.Path[1:]
+func (h *DefaultHandler) DoGet(w http.ResponseWriter, r *http.Request) {
+	filename := staticDir + r.URL.Path[1:]
 	if strings.HasSuffix(r.URL.Path, "/") {
 		filename += "index.html"
 	}
@@ -82,7 +83,7 @@ func (h *StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		const modeType = os.ModeDir | os.ModeSymlink | os.ModeNamedPipe | os.ModeSocket | os.ModeDevice
-		if (fi.Mode() & modeType != 0) || os.IsPermission(err) {
+		if (fi.Mode()&modeType != 0) || os.IsPermission(err) {
 			Forbidden(w, r)
 			return
 		}
@@ -95,7 +96,7 @@ func (h *StaticFileHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer f.Close()
-	cacheControl := fmt.Sprintf("public, max-age=%d", cacheTime / time.Second)
+	cacheControl := fmt.Sprintf("public, max-age=%d", cacheTime/time.Second)
 	mineType := MineType(path.Ext(filename))
 
 	w.Header().Set("content-type", mineType)

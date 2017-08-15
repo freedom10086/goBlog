@@ -17,17 +17,11 @@ import (
 )
 
 var config *conf.Config
-//模板文件目录
-var templateDir = "template/"
-//静态文件目录
+//静态文件&模板目录
 var staticDir = "static/"
 
 func init() {
 	config = conf.Conf
-	if config.DirTemplate != "" {
-		templateDir = config.DirTemplate
-	}
-
 	if config.DirStatic != "" {
 		staticDir = config.DirStatic
 	}
@@ -92,7 +86,7 @@ func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 	httpPush(w, data)
 	var ts []string
 	for _, v := range tmpls {
-		ts = append(ts, templateDir+v+".html")
+		ts = append(ts, staticDir+v+".html")
 	}
 
 	t, err := template.ParseFiles(ts...)
@@ -112,9 +106,9 @@ func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 func StaticTemplate(w http.ResponseWriter, data *TemplateData, file string) {
 	var filename string
 	if strings.HasSuffix(file, ".html") {
-		filename = templateDir + file
+		filename = staticDir + file
 	} else {
-		filename = templateDir + file + ".html"
+		filename = staticDir + file + ".html"
 	}
 
 	fi, err := os.Stat(filename)
@@ -149,13 +143,13 @@ func httpPush(w http.ResponseWriter, data *TemplateData) {
 	if ok { // 支持http push
 		//push css
 		for _, v := range data.Css {
-			if err := pusher.Push(staticDir+"styles/"+v, nil); err != nil {
+			if err := pusher.Push("/styles/"+v, nil); err != nil {
 				log.Printf("Failed to push css: %v", err)
 			}
 		}
 
 		for _, v := range data.Js {
-			if err := pusher.Push(staticDir+"js/"+v, nil); err != nil {
+			if err := pusher.Push("/js/"+v, nil); err != nil {
 				log.Printf("Failed to push js: %v", err)
 			}
 		}
