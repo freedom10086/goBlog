@@ -388,7 +388,6 @@ class Editor {
     }
 }
 
-
 //同步滚动
 function syncScroll(item1, item2) {
     let scrool = item1.scrollTop;

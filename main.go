@@ -27,7 +27,7 @@ func init() {
 		"/users":     &router.UserHandler{},
 		"/auth":      &router.OauthHandler{},
 		"/login":     &router.LoginHandler{},
-		"/qrlogin":   &router.LoginHandler{},
+		"/qrlogin":   &router.QrLoginHandler{},
 		"/register":  &router.RegisterHandler{},
 		"/chats":     &router.ChatHandler{},
 		"/account/":  &router.AccountHandler{}, //reset_password reg_compete...

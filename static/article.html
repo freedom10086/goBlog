@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>单篇文章</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="styles/bootstrap.css">
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+        <a class="navbar-brand" href="#">我的博客</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02"
+                aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <ul class="navbar-nav mr-auto mt-2 mt-sm-0">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">分类</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">关于</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-sm-0">
+                <input class="form-control mr-sm-2" placeholder="搜索文章">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
+            </form>
+        </div>
+    </nav>
+</header>
+<main class="container">
+    <section id="header" class="mt-3">
+        <nav class="breadcrumb">
+            <a class="breadcrumb-item" href="/">首页</a>
+            <a class="breadcrumb-item" href="/">文章</a>
+            <a class="breadcrumb-item" href="/">分类1</a>
+            <span class="breadcrumb-item active">GoBlog文档{{.Title}}</span>
+        </nav>
+        <h1 id="title">GoBlog文档{{.Title}}</h1>
+        <span class="text-muted small">
+            <span>作者:<a href="#">{{.Author}}</a></span>
+            <span class="ml-2">发布日期:<time datetime="{{.Created}}">{{.Created}}</time></span>
+            <span class="ml-2">浏览数:{{.Views}}</span>
+            <span>回复数:<a href="#comment">{{.Replys}}</a></span>
+        </span>
+        <hr>
+    </section>
+    <div class="row">
+        <article class="col-sm-9">
+
+        </article>
+        <aside style="height: 500px;" class="col-sm-3 d-none d-sm-block">
+            <strong>目录</strong>
+            <ul class="small px-2">
+                <li><a href="#数据表定义">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+            </ul>
+
+            <strong class="mt-2">最近文章</strong>
+            <ul class="small px-2">
+                <li><a href="#数据表定义">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+                <li><a href="#">创建用户 超级用户要谨慎</a></li>
+            </ul>
+        </aside>
+    </div>
+
+    <section id="comments">
+
+    </section>
+    <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true"> &laquo; </span>
+            </a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true"> &raquo; </span>
+            </a>
+        </li>
+    </ul>
+    <section class="row justify-content-end">
+        <textarea placeholder="回复" class="form-control mb-2" style="height: 100px"></textarea>
+        <a href="#" class="btn btn-primary">发表</a>
+    </section>
+</main>
+<footer class="footer">
+    <div class="container">
+        <a href="https://github.com/freedom10086/goBlog" target="_blank">网站源码</a>
+        <span>|</span>
+        <a href="http://golang.org/">© 2017 YangLuo, Inc.</a>
+        <span class="float-right"><a href="#" onclick="backTop();" title="返回顶部">返回顶部</a></span>
+    </div>
+</footer>
+<script src="js/highlight.pack.js"></script>
+<script src="js/marked.min.js"></script>
+<script>
+    function backTop(acceleration, time) {
+        acceleration = acceleration || 0.1;
+        time = time || 13;
+        let x1 = 0;
+        let y1 = 0;
+        let x2 = 0;
+        let y2 = 0;
+
+        if (document.documentElement) {
+            x1 = document.documentElement.scrollLeft || 0;
+            y1 = document.documentElement.scrollTop || 0;
+        }
+        if (document.body) {
+            x2 = document.body.scrollLeft || 0;
+            y2 = document.body.scrollTop || 0;
+        }
+        let x3 = window.scrollX || 0;
+        let y3 = window.scrollY || 0;
+
+        // 滚动条到页面顶部的水平距离
+        const x = Math.max(x1, Math.max(x2, x3));
+        // 滚动条到页面顶部的垂直距离
+        const y = Math.max(y1, Math.max(y2, y3));
+        const speed = 1 + acceleration;
+        window.scrollTo(Math.floor(x / speed), Math.floor(y / speed));
+
+        if (x > 0 || y > 0) {
+            const invokeFunction = "goTop(" + acceleration + ", " + time + ")";
+            window.setTimeout(invokeFunction, time);
+        }
+    }
+
+    let preview;
+    //窗口载入完成
+    window.onload = function () {
+        preview = document.querySelector("article");
+        marked.setOptions({
+            highlight: function (code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(lang, code).value;
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+                try {
+                    return hljs.highlightAuto(code).value;
+                } catch (err) {
+                    console.log(err);
+                }
+                return code;
+            }
+        });
+
+        const client = new XMLHttpRequest();
+        client.onload = handler;
+        client.open("GET", "../README.md");
+        client.send();
+    };
+
+    function handler() {
+        console.log("status", this.status);
+        if (this.status === 200) {
+            marked(this.responseText, function (err, content) {
+                if (err) throw err;
+                preview.innerHTML = content;
+            });
+        } else {
+
+        }
+    }
+</script>
+</body>
+</html>

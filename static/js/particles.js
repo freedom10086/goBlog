@@ -1,5 +1,4 @@
 //仿知乎背景 https://github.com/sunweiling/zhihu-canvas
-
 class Circle {
     constructor(x, y) {
         this.x = x;
@@ -38,8 +37,6 @@ class Circle {
         this.y += this._my / 2;
     }
 }
-
-
 class currentCircle extends Circle {
     constructor(x, y) {
         super(x, y);
@@ -54,27 +51,20 @@ class currentCircle extends Circle {
         ctx.fill();
     }
 }
-
-
 window.requestAnimationFrame = window.requestAnimationFrame
     || window.mozRequestAnimationFrame
     || window.webkitRequestAnimationFrame
     || window.msRequestAnimationFrame;
-
-
 //=====vars=====
 let canvas, ctx, w, h;
 let circles = [];
 let current_circle = new currentCircle(0, 0);
-
-
 let init = function (num) {
     for (let i = 0; i < num; i++) {
         circles.push(new Circle(Math.random() * w, Math.random() * h));
     }
     draw();
 };
-
 let draw = function () {
     ctx.clearRect(0, 0, w, h);
     for (let i = 0; i < circles.length; i++) {
@@ -93,10 +83,7 @@ let draw = function () {
     }
     requestAnimationFrame(draw);
 };
-
-
 window.addEventListener('load', () => {
-    console.log(w, h);
     //1638 819
     canvas = document.createElement('canvas');
     canvas.style.position = 'absolute';
@@ -108,8 +95,6 @@ window.addEventListener('load', () => {
     h = canvas.height = canvas.offsetHeight;
     init(w * h / 12000);
 });
-
-
 window.onmousemove = function (e) {
     e = e || window.event;
     current_circle.x = e.clientX;
@@ -119,7 +104,6 @@ window.onmouseout = function () {
     current_circle.x = null;
     current_circle.y = null;
 };
-
 window.onresize = function () {
     w = canvas.width = canvas.offsetWidth;
     h = canvas.height = canvas.offsetHeight;

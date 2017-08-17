@@ -1,29 +1,25 @@
-# goblog
+# GO博客系统
+> a simple golang blog system
 
-a simple golang blog system
-
-
-## 1.配置psql
-
-### 初始化
-[Windows]
-```
-.\initdb.exe -D C:\app\pgsql-9.6.2\data -E UTF8
-.\pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
-```
-[linux]
-```
-sudo apt-get install postgresql-client
-sudo apt-get install postgresql
-su postgress //切换到postgress用户
-psql//使用psql命令登录PostgreSQL控制台，以postgress用户
-\password postgres //更改密码
-```
-
-### 创建用户 超级用户要谨慎
+## 配置psql
+1. 设置并启动psql
+    1. windows
+    ```
+    .\initdb.exe -D C:\app\pgsql-9.6.2\data -E UTF8
+    .\pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
+    ```
+    2. linux
+    ```
+    sudo apt-get install postgresql-client
+    sudo apt-get install postgresql
+    su postgress //切换到postgress用户
+    psql//使用psql命令登录PostgreSQL控制台，以postgress用户
+    \password postgres //更改密码
+    ```
+2. 创建用户 超级用户要谨慎
 `createuser [--superuser] yang`
 
-### 设置密码 用postgres超级管理员登陆
+3. 设置密码 用postgres超级管理员登陆
 > 为刚刚创建的用户设置密码
 
 `psql postgres`
@@ -32,10 +28,10 @@ psql//使用psql命令登录PostgreSQL控制台，以postgress用户
 
 `\q`
 
-### 创建数据库 指定所有权yang
+4. 创建数据库 指定所有权yang
 `createdb -O yang -p 5432 goblog`
 
-### 登陆数据库
+5. 登陆数据库
 `psql -U yang -d goblog -h 127.0.0.1 -p 5432`
 
 > -U 用户
@@ -405,11 +401,11 @@ $$ LANGUAGE plpgsql;
 - [Chart.js](http://chartjs.org/)
 - [highlight.js](http://git.io/hljslicense)
 - [bootstrap](https://getbootstrap.com)
+- [marked.js](https://github.com/chjj/marked)
+
 ## bug 反馈
-
-[2351386755@qq.com](mailto://2351386755@qq.com)
-
-[yangluo.chn@gmail.com](mailto://yangluo.chn@gmail.com)
+- [2351386755@qq.com](mailto://2351386755@qq.com)    
+- [yangluo.chn@gmail.com](mailto://yangluo.chn@gmail.com)
 
 ## License
 ```

@@ -23,7 +23,7 @@ class Ajax {
         x.send(data)
     }
 
-    get (data, success, fail) {
+    get(data, success, fail) {
         let query = [];
         for (let key in data) {
             query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
@@ -38,6 +38,39 @@ class Ajax {
             query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
         }
         this.send('POST', query.join('&'), success, fail)
+    }
+}
+
+//返回顶部
+function backTop(acceleration, time) {
+    acceleration = acceleration || 0.1;
+    time = time || 13;
+    let x1 = 0;
+    let y1 = 0;
+    let x2 = 0;
+    let y2 = 0;
+
+    if (document.documentElement) {
+        x1 = document.documentElement.scrollLeft || 0;
+        y1 = document.documentElement.scrollTop || 0;
+    }
+    if (document.body) {
+        x2 = document.body.scrollLeft || 0;
+        y2 = document.body.scrollTop || 0;
+    }
+    let x3 = window.scrollX || 0;
+    let y3 = window.scrollY || 0;
+
+    // 滚动条到页面顶部的水平距离
+    const x = Math.max(x1, Math.max(x2, x3));
+    // 滚动条到页面顶部的垂直距离
+    const y = Math.max(y1, Math.max(y2, y3));
+    const speed = 1 + acceleration;
+    window.scrollTo(Math.floor(x / speed), Math.floor(y / speed));
+
+    if (x > 0 || y > 0) {
+        const invokeFunction = "goTop(" + acceleration + ", " + time + ")";
+        window.setTimeout(invokeFunction, time);
     }
 }
 
@@ -183,6 +216,93 @@ class Modal {
         }
     }
 }
+
+const UserCard = {
+    card: null,
+    tmpl: `
+    <img class="card-img-top" src="images/card_img.webp" alt="Card image cap">
+    <div class="card-body">
+        <div class="row">
+            <a target="_blank" href="#" class="face"><img
+                    src="images/avater.jpg"></a>
+            <div class="user-info">
+                <a href="#">悬崖边缘的猫</a>
+                <span class="badge badge-info">男</span>
+                <span class="badge badge-success">13</span>
+            </div>
+        </div>
+        <p>
+            <a href="#" target="_blank">关注: 15</a>
+            <a href="#" target="_blank" class="ml-1">粉丝: 999</a>
+        </p>
+        <p class="sign">冷冷的猫粮在脸上胡乱的拍O__O</p>
+        <div class="d-flex justify-content-end">
+            <a class="btn btn-primary" href="#">+关注</a>
+            <a class="btn btn-info ml-2" href="#" target="_blank">私信</a>
+        </div>
+    </div>`,
+    mousemove: function (e) {
+        let x = e.clientX;
+        let y = e.clientY;
+        UserCard.hide(x, y);
+    },
+    isin: false,//鼠标是否在元素上
+    init: function (as) { //参数标签数组
+        [...as].forEach((v, k) => {
+            v.addEventListener("mouseover", function (e) {
+                //确定要显示的位置
+                UserCard.isin = true;
+                UserCard.show(e.clientX + 5, e.clientY + 5)
+            });
+
+            v.addEventListener("mouseout", function (e) {
+                UserCard.isin = false;
+                UserCard.show(e.clientX + 5, e.clientY + 5)
+            });
+        });
+    },
+
+    show: function (x, y) {
+        if (!UserCard.isin) {
+            return
+        }
+        if (this.card == null) {
+            this.card = document.createElement("div");
+            this.card.id = "user-card";
+            this.card.className = "user-card";
+            this.card.innerHTML = this.tmpl;
+            document.body.appendChild(this.card)
+        }
+
+        if (x && y && this.card.style.display.indexOf("none") == -1) {
+            this.card.style.left = x + 'px';
+            this.card.style.top = y + 'px';
+        }
+        document.addEventListener("mousemove", this.mousemove);
+        this.card.style.display = "";
+    },
+
+    hide: function (x, y) {
+        if (this.card == null) {
+            return
+        }
+
+        if (UserCard.isin) {
+            return
+        }
+
+        let width = this.card.offsetWidth;
+        let height = this.card.offsetHeight;
+        //移动到卡片上
+        if (x >= this.card.offsetLeft - 15 && x <= this.card.offsetLeft + width + 15
+            && y >= this.card.offsetTop - 15 && y <= this.card.offsetTop + height + 15) {
+            return
+        } else {
+            document.removeEventListener('mousemove', this.mousemove);
+            this.card.style.display = "none";
+        }
+    }
+};
 
 
 /*

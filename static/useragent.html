@@ -11,8 +11,11 @@
 
 </body>
 <script>
-    let s = `Mozilla/5.0 (Linux; Android 5.1; XT1040 Build/LPB23.13-35) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.84 Mobile Safari/537.36`;
-    console.log(UserAgent.getOsType(s));
+
+    //let s = `Mozilla/5.0 (Linux; Android 5.1; XT1040 Build/LPB23.13-35) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.84 Mobile Safari/537.36`;
+    console.log(UserAgent.getOsType(navigator.userAgent));
+
+    console.log("navigator.userAgent: " + navigator.userAgent);
 
 </script>
 </html>

@@ -28,7 +28,6 @@ const SmileyBox = {
             }
         });
     },
-
     createSmiley: function () {
         this.smiley = document.createElement("div");
         this.smiley.id = "smiley";
@@ -64,7 +63,6 @@ const SmileyBox = {
         });
         this.setDrag(true);
     },
-
     switchSmiley: function (index) {
         let smiley = this.smiley;
         let lis = [...smiley.querySelectorAll(".smiley-tab")];
@@ -95,7 +93,6 @@ const SmileyBox = {
             });
         });
     },
-
     switchState: function (callback) {
         console.log("switch state");
         let state = 0;
