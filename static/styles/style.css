@@ -480,62 +480,6 @@ textarea:hover {
     }
 }
 
-@keyframes slide-down {
-    from {
-        opacity: 0;
-        transform: translateY(-250px);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fade-in-up {
-    from {
-        opacity: 0;
-        transform: translateY(100px) rotate3d(0, 0, 1, 8deg);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-.slide-down {
-    animation-name: slide-down;
-    animation-duration: 300ms;
-}
-
-.fade-in,
-.fade-in-up {
-    animation-fill-mode: forwards;
-    animation-duration: 1000ms;
-    animation-timing-function: ease-in-out;
-}
-
-.cssanimations .fade-in,
-.cssanimations .fade-in-up {
-    opacity: 0;
-}
-
-.fade-in {
-    animation-name: fade-in;
-}
-
-.fade-in-up {
-    animation-name: fade-in-up;
-    transform-origin: right middle;
-}
 
 .lead {
     font-size: 1.25rem;
@@ -2377,7 +2321,9 @@ button.close {
     margin-top: -3px;
 }
 
-.tooltip.tooltip-top .tooltip-inner::before, .tooltip.bs-tether-element-attached-bottom .tooltip-inner::before {
+.tooltip.tooltip-top .tooltip-inner::before,
+.tooltip.bs-tether-element-attached-bottom
+.tooltip-inner::before {
     bottom: 0;
     left: 50%;
     margin-left: -5px;
@@ -3673,27 +3619,7 @@ a.text-danger:hover {
     }
 }
 
-/*
-scrollbar
- */
-::-webkit-scrollbar {
-    height: .25rem;
-    width: .5rem;
-    background: transparent;
-    transition: all 300ms ease-out;
-}
 
-::-webkit-scrollbar-thumb {
-    transition: all 300ms ease-out;
-    background: rgba(0, 0, 0, 0.18);
-    border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.22);
-    /* IE9+, News */
-    background-color: rgba(0, 0, 0, 0.28);
-}
 
 ::selection {
     color: #FFFFFF;

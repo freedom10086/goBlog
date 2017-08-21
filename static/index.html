@@ -135,60 +135,10 @@
 </footer>
 <script src="js/base.js"></script>
 <script>
-    class Toast {
-        constructor() {
-            this.tmpl = `<div class="toast">
-            <i class="loading"></i>
-            <p class="toast-content">加载中...</p>
-            </div>`
-        }
-
-        show() {
-            let toast = document.querySelector("#loadingToast");
-            if (toast == null) {
-                toast = document.createElement("div");
-                toast.id = "loadingToast";
-                toast.innerHTML = this.tmpl;
-                document.body.appendChild(toast)
-            }
-            toast.style = "";
-            return this;
-        }
-
-        dismiss() {
-            let toast = document.querySelector("#loadingToast");
-            if (toast) {
-                toast.style.display = "none";
-            }
-        }
-    }
-
-    class DropDown {
-        constructor() {
-            let drops = document.querySelectorAll(".dropdown");
-            [...drops].forEach((v, k) => {
-                const toggle = v.querySelector(".dropdown-toggle");
-                const dropContent = v.querySelector(".dropdown-menu");
-                toggle.addEventListener('click', () => {
-                    if (dropContent.className.includes("show")) {
-                        dropContent.className = "dropdown-menu";
-                    } else {
-                        dropContent.className = "dropdown-menu show";
-                    }
-                });
-
-                [...v.querySelectorAll('.dropdown-item')].forEach((v, k) => {
-                    v.addEventListener('click', () => {
-                        dropContent.className = "dropdown-menu";
-                    })
-                });
-            });
-        }
-    }
 
     new DropDown();
 
-    let toast = new Toast();
+    let toast = new Loading();
     toast.show();
 
     UserCard.init(document.querySelectorAll("a[href^=users]"))

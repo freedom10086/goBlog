@@ -97,50 +97,67 @@ function getJSON(url) {
     });
 }
 
-function fetchJSON(url) {
-    fetch(url)
-        .then((res) => {
-            //console.log(res);
-            if (res.ok && res.status >= 200 && res.status < 300) {
-                return res.json();
-            }
-            throw new Error(res.status);
-        })
-        .then((json) => {
-            console.log(json);
-        })
-        .catch(function (error) {
-            console.log('There has been a problem with your fetch operation: ' + error.message);
-        });
+/*
+ fetch api
+ https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+ */
+function fetchJSON(url, success) {
+    const myHeaders = new Headers({
+        "Content-Type": "text/plain",
+        "Accept": "application/json",
+    });
+    const myInit = {
+        method: 'GET',
+        headers: myHeaders,
+        mode: 'cors',
+        cache: 'default'
+    };
+
+    const myRequest = new Request(url, myInit);
+    fetch(myRequest).then(function (res) {
+        if (res.ok) {
+            return res.json();
+        }
+        throw new Error(res.status);
+    }).then(function (json) {
+        if (success) {
+            success(json);
+        }
+        console.log(json)
+    }).catch(function (error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+    });
 }
 
-const Api = {
-    version: '1.0'
-};
+//fetch text
+function fetchText(url, success) {
+    const myHeaders = new Headers({
+        "Content-Type": "text/plain",
+        "Accept": "text/plain",
+    });
+    const myInit = {
+        method: 'GET',
+        headers: myHeaders,
+        mode: 'cors',
+        cache: 'default'
+    };
 
-Api.checkEmail = function (email, result) {
-    console.log("check email:", email);
-    new Ajax('/register').get(
-        {mod: 'checkEmail', email},
-        function (status, res) {
-            result(true, res)
-        },
-        function (status, res) {
-            result(false, res)
-        })
-};
-
-Api.checkUsername = function (username, result) {
-    console.log("check username:", username);
-    new Ajax('/register').get(
-        {mod: 'checkUsername', username},
-        function (status, res) {
-            result(true, res)
-        },
-        function (status, res) {
-            result(false, res)
-        })
-};
+    const myRequest = new Request(url, myInit);
+    fetch(myRequest).then(function (res) {
+        console.log(res);
+        if (res.ok) {
+            return res.text();
+        }
+        throw new Error(res.status);
+    }).then(function (text) {
+        if (success) {
+            success(text);
+        }
+        console.log(text)
+    }).catch(function (error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+    });
+}
 
 //模态确认框
 class Modal {
@@ -156,6 +173,7 @@ class Modal {
             modal.className = "modal";
             modal.innerHTML = `
             <div class="modal-dialog">
+            <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title">${title}</h5>
             <button type="button" class="close" data-type="close">
@@ -168,8 +186,7 @@ class Modal {
             <div class="modal-footer">
             <button type="button" class="btn ${btnPrimaryCss}">${btnPrimaryText}</button>
             <button type="button" class="btn ${btnCancleCss}" data-type="close">${btnCancleText}</button>
-            </div>
-            </div>`;
+            </div></div></div>`;
 
             this.modal = modal;
             document.body.appendChild(modal);
@@ -217,6 +234,7 @@ class Modal {
     }
 }
 
+//用户卡片
 const UserCard = {
     card: null,
     tmpl: `
@@ -304,6 +322,110 @@ const UserCard = {
     }
 };
 
+//toast提示加载
+//let toast = new Loading(timeout);
+//toast.show();
+class Loading {
+    constructor(timeout = 5) {
+        this.timeout = timeout;
+        this.tmpl = `<div class="toast fade-in">
+            <i class="loading"></i>
+            <p class="toast-content">加载中...</p>
+            </div>`
+    }
+
+    show() {
+        let toast = document.querySelector("#loadingToast");
+        if (toast == null) {
+            toast = document.createElement("div");
+            toast.id = "loadingToast";
+            toast.innerHTML = this.tmpl;
+            document.body.appendChild(toast)
+        }
+
+        toast.style = "";
+        setTimeout(Loading.dismiss, this.timeout * 1000);
+
+        return this;
+    }
+
+    static dismiss() {
+        let toast = document.querySelector("#loadingToast");
+        if (toast) {
+            toast.style.display = "none";
+        }
+    }
+}
+
+//下拉框
+class DropDown {
+    constructor() {
+        let drops = document.querySelectorAll(".dropdown");
+        [...drops].forEach((v, k) => {
+            const toggle = v.querySelector(".dropdown-toggle");
+            const dropContent = v.querySelector(".dropdown-menu");
+            toggle.addEventListener('click', () => {
+                if (dropContent.className.includes("show")) {
+                    dropContent.className = "dropdown-menu";
+                } else {
+                    dropContent.className = "dropdown-menu show";
+                }
+            });
+
+            [...v.querySelectorAll('.dropdown-item')].forEach((v, k) => {
+                v.addEventListener('click', () => {
+                    dropContent.className = "dropdown-menu";
+                })
+            });
+        });
+    }
+}
+
+
+//可切换的tab
+class TabBox {
+    constructor(id, callback) { //callback 点击后的回掉 值index
+        this.callback = callback;
+        this.box = document.getElementById(id);
+        if (this.box === null) return;
+        this.tabs = this.box.querySelectorAll('.nav-link');
+        this.panels = this.box.querySelectorAll('.tab-content');
+        for (let i = 0; i < this.tabs.length; i++) {
+            const tab = this.tabs[i];
+            this.setTabHandler(tab, i);
+        }
+
+        this.tabs[0].className = 'nav-link active';
+        this.panels[0].className = 'tab-content active';
+    }
+
+    setTabHandler(tab, tabPos) {
+        let that = this;
+        tab.onclick = function () {
+            if (that.tabs[tabPos].className.includes("active")) {
+                return
+            }
+            for (let i = 0; i < that.tabs.length; i++) {
+                if (i !== tabPos) {
+                    that.tabs[i].className = 'nav-link';
+                }
+            }
+
+            tab.className = 'nav-link active';
+
+            for (let i = 0; i < that.panels.length; i++) {
+                if (i !== tabPos) {
+                    that.panels[i].className = 'tab-content';
+                }
+            }
+
+            that.panels[tabPos].className = 'tab-content active';
+            if (that.callback) {
+                that.callback(tabPos);
+            }
+        }
+    }
+}
 
 /*
  //利用对话框返回的值 （true 或者 false）
@@ -320,21 +442,32 @@ const UserCard = {
  {alert("欢迎您："+ name)}
  */
 
-/*
- usage
- getJSON("/posts.json").then(function (json) {
- console.log('Contents: ' + json);
- }, function (error) {
- console.error('出错了', error);
- });
- */
 
-//api
-//function checkEmail(email, success, fail) {
-//    new Ajax('/register').get({mod: '', email: email}, success, fail)
-//}
+//========API================//
+const Api = {
+    version: '1.0'
+};
 
-/*
- fetch api
- https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
- */
+Api.checkEmail = function (email, result) {
+    console.log("check email:", email);
+    new Ajax('/register').get(
+        {mod: 'checkEmail', email},
+        function (status, res) {
+            result(true, res)
+        },
+        function (status, res) {
+            result(false, res)
+        })
+};
+
+Api.checkUsername = function (username, result) {
+    console.log("check username:", username);
+    new Ajax('/register').get(
+        {mod: 'checkUsername', username},
+        function (status, res) {
+            result(true, res)
+        },
+        function (status, res) {
+            result(false, res)
+        })
+};

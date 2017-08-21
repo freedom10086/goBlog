@@ -22,12 +22,12 @@
 
 <div class="card">
     <div class="card-header">
-        <ul class="nav nav-tabs card-header-tabs">
-            <li class="nav-item">
+        <ul class="nav card-header-tabs">
+            <li class="tab-item">
                 <a class="nav-link active" href="#">密码登录</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">扫码登录</a>
+            <li class="tab-item">
+                <a class="nav-link"  href="#">扫码登录</a>
             </li>
         </ul>
     </div>
@@ -78,9 +78,11 @@
     let currentPos = 0;
     let contents = [];
     const cardBody = document.querySelector(".card-body");
+    let size = Math.min(cardBody.offsetWidth, cardBody.offsetHeight) * 0.7;
     contents[0] = cardBody.innerHTML;
-    contents[1] = "<canvas id='qrcode' width='256' height='256'></canvas>" +
-        "<div class='alert alert-secondary mt-3' role='alert'>二维码加载中...</div>";
+    contents[1] = `
+            <canvas id="qrcode" width="${size}" height="${size}"></canvas>
+            <div class="alert alert-secondary mt-3" role="alert">二维码加载中...</div>`;
     const width = cardBody.offsetWidth + "px";
     const height = cardBody.offsetHeight + "px";
     const btn1 = document.querySelectorAll(".nav-link")[0];
@@ -107,6 +109,7 @@
     });
 
     let eventSource;
+
     function startQrLogin() {
         //EventSource 文档
         //https://developer.mozilla.org/zh-CN/docs/Server-sent_events/Using_server-sent_events

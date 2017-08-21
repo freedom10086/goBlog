@@ -109,41 +109,10 @@
         <span class="float-right"><a href="#" onclick="backTop();" title="返回顶部">返回顶部</a></span>
     </div>
 </footer>
+<script src="js/base.js"></script>
 <script src="js/highlight.pack.js"></script>
 <script src="js/marked.min.js"></script>
 <script>
-    function backTop(acceleration, time) {
-        acceleration = acceleration || 0.1;
-        time = time || 13;
-        let x1 = 0;
-        let y1 = 0;
-        let x2 = 0;
-        let y2 = 0;
-
-        if (document.documentElement) {
-            x1 = document.documentElement.scrollLeft || 0;
-            y1 = document.documentElement.scrollTop || 0;
-        }
-        if (document.body) {
-            x2 = document.body.scrollLeft || 0;
-            y2 = document.body.scrollTop || 0;
-        }
-        let x3 = window.scrollX || 0;
-        let y3 = window.scrollY || 0;
-
-        // 滚动条到页面顶部的水平距离
-        const x = Math.max(x1, Math.max(x2, x3));
-        // 滚动条到页面顶部的垂直距离
-        const y = Math.max(y1, Math.max(y2, y3));
-        const speed = 1 + acceleration;
-        window.scrollTo(Math.floor(x / speed), Math.floor(y / speed));
-
-        if (x > 0 || y > 0) {
-            const invokeFunction = "goTop(" + acceleration + ", " + time + ")";
-            window.setTimeout(invokeFunction, time);
-        }
-    }
-
     let preview;
     //窗口载入完成
     window.onload = function () {
@@ -166,23 +135,13 @@
             }
         });
 
-        const client = new XMLHttpRequest();
-        client.onload = handler;
-        client.open("GET", "../README.md");
-        client.send();
-    };
-
-    function handler() {
-        console.log("status", this.status);
-        if (this.status === 200) {
-            marked(this.responseText, function (err, content) {
+        fetchText("../README.md", function (text) {
+            marked(text, function (err, content) {
                 if (err) throw err;
                 preview.innerHTML = content;
             });
-        } else {
-
-        }
-    }
+        });
+    };
 </script>
 </body>
 </html>
