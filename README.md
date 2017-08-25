@@ -1,6 +1,5 @@
-# GO博客系统
-> a simple golang blog system
-
+#GO博客系统
+> 一个简单的go语言博客,依赖仅有postgresql数据库
 ## 配置psql
 1. 设置并启动psql
     1. windows

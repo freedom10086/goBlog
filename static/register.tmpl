@@ -1,74 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>注册</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="styles/bootstrap.css">
-    <style>
-        html {
-            height: 100%;
-        }
-
-        body {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <div class="card-header">注册</div>
-    <form class="card-body" method="post" onsubmit="return validInput();">
-        <div class="form-group">
-            <label for="username">用户名</label>
-            <input type="text" name="username" required id="username" placeholder="用户名" minlength="3"
-                   maxlength="20" class="form-control"
-                   autocomplete="name">
-            <small class="form-text text-muted">最短3个字符,最长不超过20个字符</small>
-        </div>
-
-        <div class="form-group">
-            <label for="email">邮箱</label>
-            <input type="email" name="email" required id="email" placeholder="邮箱"
-                   autocomplete="email" maxlength="25" list="email-hint" class="form-control">
-            <datalist id="email-hint">
-            </datalist>
-            <small class="form-text text-muted">Example help text that remains unchanged.</small>
-        </div>
-
-        <div class="form-group">
-            <label for="valid">验证码</label>
-            <div class="flex-row" style="display: flex">
-                <input id="valid" placeholder="验证码" required style="flex-grow: 2;flex-basis: 100px" type="text"
-                       pattern="[a-zA-Z\d]{4}" maxlength="4" class="form-control">
-                <canvas id="validcanvas" width="100" height="28"
-                        style="border: 1px solid #ddd;margin-left: 12px;flex-grow: 1">
-                    你的浏览器不支持canvas请使用chrome或者firefox浏览器
-                </canvas>
+{{define "content"}}
+<main class="container" style="height: 100%;display: flex;align-items: center;justify-content: center;">
+    <div class="card mt-4">
+        <div class="card-header">注册</div>
+        <form class="card-body" method="post" onsubmit="return validInput();">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" name="username" required id="username" placeholder="用户名" minlength="3"
+                       maxlength="20" class="form-control"
+                       autocomplete="name">
+                <small class="form-text text-muted">最短3个字符,最长不超过20个字符</small>
             </div>
-        </div>
 
-        <div class="form-check">
-            <label class="custom-control custom-checkbox">
-                <input type="checkbox" id="checkbox" class="custom-control-input">
-                <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">同意协议</span>
-            </label>
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <input type="email" name="email" required id="email" placeholder="邮箱"
+                       autocomplete="email" maxlength="25" list="email-hint" class="form-control">
+                <datalist id="email-hint">
+                </datalist>
+                <small class="form-text text-muted">Example help text that remains unchanged.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="valid">验证码</label>
+                <div class="flex-row" style="display: flex">
+                    <input id="valid" placeholder="验证码" required style="flex-grow: 2;flex-basis: 100px" type="text"
+                           pattern="[a-zA-Z\d]{4}" maxlength="4" class="form-control">
+                    <canvas id="validcanvas" width="100" height="28"
+                            style="border: 1px solid #ddd;margin-left: 12px;flex-grow: 1">
+                        你的浏览器不支持canvas请使用chrome或者firefox浏览器
+                    </canvas>
+                </div>
+            </div>
+
+            <div class="form-check">
+                <label class="custom-control custom-checkbox">
+                    <input type="checkbox" id="checkbox" class="custom-control-input">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">同意协议</span>
+                </label>
+            </div>
+            <button id="button" type="submit" class="btn btn-primary">注册</button>
+        </form>
+        <div class="card-footer">
+            <a href="login" class="small">已有账号去登陆</a>
         </div>
-        <button id="button" type="submit" class="btn btn-primary">注册</button>
-    </form>
-    <div class="card-footer">
-        <a href="login" class="small">已有账号去登陆</a>
     </div>
-</div>
-
-<script src="js/base.js" defer></script>
-<script src="js/particles.js" defer></script>
+</main>
 <script>
     const usernameInput = document.querySelector("#username");
     const emailInput = document.querySelector("#email");
@@ -85,6 +62,14 @@
 
     window.addEventListener("load", function () {
         createYZM(yzmCanvas)
+    });
+
+    validCodeInput.addEventListener("keyup", function () {
+        checkValid()
+    });
+
+    checkBox.addEventListener("change", function () {
+        button.disabled = !checkBox.checked;
     });
 
     function validInput() {
@@ -112,13 +97,6 @@
         return true;
     }
 
-    validCodeInput.addEventListener("keyup", function () {
-        checkValid()
-    });
-
-    checkBox.addEventListener("change", function () {
-        button.disabled = !checkBox.checked;
-    });
 
     usernameInput.addEventListener("keyup", function () {
         usernameState = false;
@@ -267,5 +245,4 @@
         }
     }
 </script>
-</body>
-</html>
+{{end}}

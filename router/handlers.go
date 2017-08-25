@@ -20,6 +20,8 @@ var config *conf.Config
 //静态文件&模板目录
 var staticDir = "static/"
 
+const baseTmpl = "page.tmpl"
+
 func init() {
 	config = conf.Conf
 	if config.DirStatic != "" {
@@ -86,7 +88,7 @@ func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 	httpPush(w, data)
 	var ts []string
 	for _, v := range tmpls {
-		ts = append(ts, staticDir+v+".html")
+		ts = append(ts, staticDir+v)
 	}
 
 	t, err := template.ParseFiles(ts...)
@@ -100,6 +102,7 @@ func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 		Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
 
 //static html
 //静态的html 如登陆注册等页面

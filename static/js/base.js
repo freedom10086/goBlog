@@ -381,7 +381,6 @@ class DropDown {
     }
 }
 
-
 //可切换的tab
 class TabBox {
     constructor(id, callback) { //callback 点击后的回掉 值index
@@ -470,4 +469,30 @@ Api.checkUsername = function (username, result) {
         function (status, res) {
             result(false, res)
         })
+};
+
+window.onload = function () {
+    console.log("======init js====");
+
+    new DropDown();
+
+    //let toast = new Loading();
+    //toast.show();
+
+    UserCard.init(document.querySelectorAll("a[href^=users]"));
+    //setTimeout(toast.dismiss, 5000)
+
+    document.querySelector(".navbar-toggler").addEventListener('click', function () {
+        let content = document.querySelector(".navbar-collapse");
+        //collapse navbar-collapse
+        if (content.className.includes("collapse ")) {
+            content.className = "navbar-collapse";
+        } else {
+            content.className = 'collapse navbar-collapse';
+        }
+    });
+
+    if (typeof initPage !== 'undefined') {
+        initPage()
+    }
 };

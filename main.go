@@ -23,6 +23,7 @@ func init() {
 
 	routers = map[string]router.Handler{
 		"/":          &router.HomeHandler{},
+		"/article":      &router.ArticleHandler{},
 		"/categorys": &router.CateHandler{},
 		"/users":     &router.UserHandler{},
 		"/auth":      &router.OauthHandler{},

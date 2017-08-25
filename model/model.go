@@ -15,7 +15,7 @@ import (
 //http://www.cnblogs.com/linecheng/p/5861468.html
 func SendMail(to, subject, content string) error {
 	user := "2351386755@qq.com"
-	password := "StrikeFreedom"
+	password := "qjadozmyfdgpdhhj"
 	host := "smtp.qq.com:587"
 
 	hp := strings.Split(host, ":")

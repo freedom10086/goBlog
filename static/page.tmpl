@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>首页</title>
+    {{range .Css}}
+    <link rel="stylesheet" href="styles/{{.}}">
+    {{end}}
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="images/avater.jpg" width="30" height="30"
+                     class="d-inline-block align-top mr-1" alt="">我的博客</a>
+            <button class="navbar-toggler" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto mt-2 mt-sm-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">分类</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">关于</a>
+                    </li>
+                </ul>
+                <form class="form-inline my-2 my-sm-0">
+                    <input class="form-control mr-sm-2" placeholder="搜索文章">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
+                </form>
+
+                <div class="flex-grow"></div>
+
+                <div class="dropdown show">
+                    <a class="dropdown-toggle" style="display: flex;align-items: center" href="#">
+                        <img src="images/avater.jpg" width="35px" height="35px"
+                             class="rounded-circle mr-2">
+                        Admin</a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="#">设置</a>
+                        <a class="dropdown-item" href="#">发帖</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-danger" href="#">退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+{{template "content"}}
+
+<footer class="footer">
+    <p class="footer-links">
+        <a href="https://github.com/freedom10086/goBlog" target="_blank" class="footer-link">网站源码</a>
+        <a href="javascript:void(0);" class="footer-link">底部链接</a>
+    </p>
+    <p class="footer-text">Copyright © 2016-2017 yluo.me</p>
+</footer>
+{{range .Js}}
+<script src="js/{{.}}"></script>
+{{end}}
+</body>
+</html>

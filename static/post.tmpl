@@ -1,39 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-cn">
-<head>
-    <meta charset="UTF-8">
-    <title>单篇文章</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="styles/bootstrap.css">
-</head>
-<body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-light bg-light">
-        <a class="navbar-brand" href="#">我的博客</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02"
-                aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul class="navbar-nav mr-auto mt-2 mt-sm-0">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">首页</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">分类</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">关于</a>
-                </li>
-            </ul>
-            <form class="form-inline my-2 my-sm-0">
-                <input class="form-control mr-sm-2" placeholder="搜索文章">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
-            </form>
-        </div>
-    </nav>
-</header>
+{{define "content"}}
 <main class="container">
     <section id="header" class="mt-3">
         <nav class="breadcrumb">
@@ -78,9 +43,6 @@
         </aside>
     </div>
 
-    <section id="comments">
-
-    </section>
     <ul class="pagination justify-content-center">
         <li class="page-item disabled">
             <a class="page-link" href="#" aria-label="Previous">
@@ -96,26 +58,67 @@
             </a>
         </li>
     </ul>
-    <section class="row justify-content-end">
-        <textarea placeholder="回复" class="form-control mb-2" style="height: 100px"></textarea>
-        <a href="#" class="btn btn-primary">发表</a>
+    <section>
+        <div class="row">
+            <a href="#" style="">
+                <img src="images/avater.jpg" class="avater">
+            </a>
+            <div class="col">
+                <textarea placeholder="回复" class="form-control mb-2" style="height: 5em"></textarea>
+                <a href="#" class="btn btn-primary">发表</a>
+                <a href="#" class="btn btn-info ml-2">表情</a>
+            </div>
+        </div>
+    </section>
+    <h3 class="border-bottom p-2">评论</h3>
+    <section id="comments">
+        <ul class="list-unstyled">
+            <li class="row mb-2">
+                <a target="_blank" href="#" class="face mr-3"><img
+                        src="images/avater.jpg" class="avater"></a>
+                <div class="mt-1">
+                    <a href="#">悬崖边缘的猫</a>
+                    <span class="badge badge-info">男</span>
+                    <span class="badge badge-success">13</span>
+                    <div class="text-muted small">2017-08-19 18:18:19</div>
+                    <p class="mt-2">
+                        评论的内容
+                    </p>
+                </div>
+            </li>
+            <li class="row mb-2">
+                <a target="_blank" href="#" class="face mr-3"><img
+                        src="images/avater.jpg" class="avater"></a>
+                <div class="mt-1">
+                    <a href="#">悬崖边缘的猫</a>
+                    <span class="badge badge-info">男</span>
+                    <span class="badge badge-success">13</span>
+                    <div class="text-muted small">2017-08-19 18:18:19</div>
+                    <p class="mt-2">
+                        评论的内容
+                    </p>
+                </div>
+            </li>
+            <li class="row mb-2">
+                <a target="_blank" href="#" class="face mr-3"><img
+                        src="images/avater.jpg" class="avater"></a>
+                <div class="mt-1">
+                    <a href="#">悬崖边缘的猫</a>
+                    <span class="badge badge-info">男</span>
+                    <span class="badge badge-success">13</span>
+                    <div class="text-muted small">2017-08-19 18:18:19</div>
+                    <p class="mt-2">
+                        评论的内容
+                    </p>
+                </div>
+            </li>
+        </ul>
     </section>
 </main>
-<footer class="footer">
-    <div class="container">
-        <a href="https://github.com/freedom10086/goBlog" target="_blank">网站源码</a>
-        <span>|</span>
-        <a href="http://golang.org/">© 2017 YangLuo, Inc.</a>
-        <span class="float-right"><a href="#" onclick="backTop();" title="返回顶部">返回顶部</a></span>
-    </div>
-</footer>
-<script src="js/base.js"></script>
-<script src="js/highlight.pack.js"></script>
-<script src="js/marked.min.js"></script>
 <script>
     let preview;
     //窗口载入完成
-    window.onload = function () {
+    function initPage() {
         preview = document.querySelector("article");
         marked.setOptions({
             highlight: function (code, lang) {
@@ -141,7 +144,6 @@
                 preview.innerHTML = content;
             });
         });
-    };
+    }
 </script>
-</body>
-</html>
+{{end}}

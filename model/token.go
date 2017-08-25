@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ErrTokenInvalid = errors.New("token is invalid!")
+	ErrTokenInvalid  = errors.New("token is invalid!")
 	ErrTokenExperied = errors.New("token is experied!")
 )
 
@@ -45,8 +45,11 @@ func DecodeToken(token, secretKey string) ([]byte, error) {
 		return nil, err
 	} else {
 		totallen := len(decode_token)
-		payload := decode_token[:totallen - 32]
-		signature := decode_token[totallen - 32:]
+		if totallen < 32 {
+			return nil, errors.New("token error")
+		}
+		payload := decode_token[:totallen-32]
+		signature := decode_token[totallen-32:]
 
 		mac := hmac.New(sha256.New, []byte(secretKey))
 		mac.Write([]byte(payload))
@@ -66,15 +69,14 @@ func GenToken(username, password string, authority int, secretKey string, durati
 		return "", err
 	} else {
 		data := &Token{
-			Uid:     u.Uid,
+			Uid:       u.Uid,
 			Authority: authority,
-			Salt:    Krand(10),
-			Expires: time.Now().Add(duration),
+			Salt:      Krand(10),
+			Expires:   time.Now().Add(duration),
 		}
 		return EncodeToken(data, secretKey), nil
 	}
 }
-
 
 //valid token 返回Token
 func ValidToken(token, secretKey string) (*Token, error) {
@@ -91,7 +93,6 @@ func ValidToken(token, secretKey string) (*Token, error) {
 		}
 	}
 }
-
 
 //产生注册token
 //包含 username,email,过期时间,产生token发送到邮箱

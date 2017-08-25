@@ -31,21 +31,21 @@ type CompeteRegData struct {
 func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	mode := r.FormValue("mod")
 	switch mode {
-	case "competeRegiest":
+	case "done":
 		token := r.FormValue("token")
 		if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
 			//返回完善信息页面,完善成功后
 			//post /users 插入数据库完成注册
 			Template(w, &TemplateData{
 				Css: []string{"style.css"},
-				Js:  []string{"base.js"},
+				Js:  []string{"base.js", "particles.js"},
 				Data: &CompeteRegData{
 					PostUrl:  "/users",
 					Token:    token,
 					Email:    t.Email,
 					Username: t.Username},
 			},
-				"register_compete")
+				"register-done.tmpl")
 		} else {
 			Unauthorized(w, r)
 		}
@@ -66,7 +66,10 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		Template(w,
-			&TemplateData{Css: []string{"style.css"}, Js: []string{"base.js"}, }, "register")
+			&TemplateData{Css: []string{"style.css"},
+				Js: []string{"base.js", "particles.js"},
+			},
+			"page.tmpl", "register.tmpl")
 	}
 }
 
@@ -95,7 +98,7 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		content := fmt.Sprintf("欢迎你注册%s,请点击以下链接来验证你的邮箱,请在%d分钟内完成验证\r\n <a href=\"%s\">点击这儿</a>",
 			config.SiteName,
 			30,
-			"https://"+config.SiteIpAddr+config.SitePortSSL+"/regiest?mod=competeRegiest&token="+token,
+			"https://"+config.SiteIpAddr+config.SitePortSSL+"/regiest?mod=done&token="+token,
 		)
 		model.SendMail(email, "验证你的注册邮件", content)
 	}()

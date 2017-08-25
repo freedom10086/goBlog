@@ -1,55 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-cn">
-<head>
-    <meta charset="UTF-8">
-    <title>我的博客</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="styles/bootstrap.css">
-</head>
-<body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="images/avater.jpg" width="30" height="30"
-                     class="d-inline-block align-top mr-1" alt="">我的博客</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02"
-                    aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav mr-auto mt-2 mt-sm-0">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="#">首页</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">分类</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">关于</a>
-                    </li>
-                </ul>
-
-                <div class="dropdown show mr-sm-2">
-                    <a class="dropdown-toggle" href="#">Admin</a>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item" href="#">设置</a>
-                        <a class="dropdown-item" href="#">发帖</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item text-danger" href="#">退出登录</a>
-                    </div>
-                </div>
-
-                <form class="form-inline my-2 my-sm-0">
-                    <input class="form-control mr-sm-2" placeholder="搜索文章">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
-                </form>
-
-            </div>
-        </div>
-    </nav>
-</header>
+{{define "content"}}
 <main class="container">
     <ul class="list-unstyled">
         <li class="mt-2 mt-sm-4">
@@ -126,24 +75,4 @@
         </li>
     </ul>
 </main>
-<footer class="footer">
-    <p class="-footer-links">
-        <a href="https://github.com/freedom10086/goBlog" target="_blank" class="footer-link">网站源码</a>
-        <a href="javascript:void(0);" class="footer-link">底部链接</a>
-    </p>
-    <p class="footer-text">Copyright © 2016-2017 yluo.me</p>
-</footer>
-<script src="js/base.js"></script>
-<script>
-
-    new DropDown();
-
-    let toast = new Loading();
-    toast.show();
-
-    UserCard.init(document.querySelectorAll("a[href^=users]"))
-    //setTimeout(toast.dismiss, 5000)
-
-</script>
-</body>
-</html>
+{{end}}
