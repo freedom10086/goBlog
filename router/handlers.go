@@ -39,9 +39,10 @@ type ApiData struct {
 //基本模板data返回类型基类
 //返回类型要继承
 type TemplateData struct {
-	Data interface{}
-	Css  []string
-	Js   []string
+	Data  interface{}
+	Title string
+	Css   []string
+	Js    []string
 }
 
 //常用auth
@@ -102,7 +103,6 @@ func Template(w http.ResponseWriter, data *TemplateData, tmpls ...string) {
 		Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
 
 //static html
 //静态的html 如登陆注册等页面

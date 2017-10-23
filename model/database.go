@@ -2,18 +2,13 @@ package model
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"log"
 )
 
 var (
-	db          *sql.DB
-	ErrNoRecord error = errors.New("没有查询到记录")
-	ErrNoAffect error = errors.New("没有改变")
-	ErrNoAuth error = errors.New("没有权限")
-	ErrParama error = errors.New("参数错误")
+	db *sql.DB
 )
 
 //todo 要不要缓存一些 *sql.Stmt 避免不断的创建销毁
@@ -31,7 +26,7 @@ func InitDB(dbname, dbuser, dbpass string) {
 
 	if d != nil {
 		db = d
-		log.Println("sql connect success")
+		log.Println("success connected to the database")
 	}
 }
 

@@ -1,6 +1,6 @@
 {{define "content"}}
-<main class="container" style="height: 100%;display: flex;align-items: center;justify-content: center;">
-    <div class="card mt-4">
+<main class="container" style="display: flex;align-items: center;justify-content: center;">
+    <div class="card">
         <div class="card-header">注册</div>
         <form class="card-body" method="post" onsubmit="return validInput();">
             <div class="form-group">
@@ -17,7 +17,7 @@
                        autocomplete="email" maxlength="25" list="email-hint" class="form-control">
                 <datalist id="email-hint">
                 </datalist>
-                <small class="form-text text-muted">Example help text that remains unchanged.</small>
+                <small class="form-text text-muted">请认真填写邮箱，邮箱用于激活账号.</small>
             </div>
 
             <div class="form-group">

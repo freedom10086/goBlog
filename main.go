@@ -4,6 +4,7 @@ import (
 	"goBlog/conf"
 	"goBlog/model"
 	"goBlog/router"
+	"goBlog/logger"
 	"log"
 	"net/http"
 	"time"
@@ -17,13 +18,14 @@ var routers map[string]router.Handler
 
 func init() {
 	config = conf.Conf
+
 	//todo
-	//model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
-	log.Printf("==%s started==", config.SiteName)
+	model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
+	logger.I("==%s started==", config.SiteName)
 
 	routers = map[string]router.Handler{
 		"/":          &router.HomeHandler{},
-		"/article":      &router.ArticleHandler{},
+		"/article":   &router.ArticleHandler{},
 		"/categorys": &router.CateHandler{},
 		"/users":     &router.UserHandler{},
 		"/auth":      &router.OauthHandler{},

@@ -161,12 +161,22 @@ function fetchText(url, success) {
 
 //模态确认框
 class Modal {
-    constructor(title, content, callback, btnPrimary, btnCancle) {
-        let modal = document.querySelector(`.modal[title=${title}]`);
+    bindConfirm(btn) {
+        if (!this.modal || !btn) return;
+        btn.addEventListener('click', () => {
+            this.confirm();
+        })
+    }
+
+    //inputs 是否有输入框{"type"输入类型,"hint","value"默认值}
+    static create(title, content, btnPrimary, btnCancle, callback, input) {
+        let modal = document.querySelector(`.modal[title]`);
         let btnPrimaryText = btnPrimary && btnPrimary["text"] || "确认";
         let btnPrimaryCss = btnPrimary && btnPrimary["css"] || "btn-primary";
         let btnCancleText = btnCancle && btnCancle["text"] || "关闭";
         let btnCancleCss = btnCancle && btnCancle["css"] || "btn-info";
+        let inputContent = typeof(input) !== "undefined" ? `<input type="${input.type || "text"}" 
+        class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>` : "";
         if (!modal) {
             modal = document.createElement("div");
             modal.title = title;
@@ -182,55 +192,96 @@ class Modal {
             </div>
             <div class="modal-body">
                 <p data-type="content">${content}</p>
+                <div data-type="input" style="display: ${inputContent === "" ? "none" : "block"}">${inputContent}</div>
             </div>
             <div class="modal-footer">
-            <button type="button" class="btn ${btnPrimaryCss}">${btnPrimaryText}</button>
+            <button type="button" data-type="confirm" class="btn ${btnPrimaryCss}">${btnPrimaryText}</button>
             <button type="button" class="btn ${btnCancleCss}" data-type="close">${btnCancleText}</button>
             </div></div></div>`;
-
             this.modal = modal;
             document.body.appendChild(modal);
-
             [...modal.querySelectorAll("[data-type=close]")].forEach((v, k) => {
                 v.addEventListener('click', () => {
                     modal.style.display = "none";
-                    modal.querySelector(".modal-dialog").className = "modal-dialog";
                 });
             });
+            modal.querySelector("[data-type=confirm]").addEventListener('click', () => {
+                let canHide = true;
+                let content = "";
+                if (inputContent !== "") {//有输入内容
+                    content = modal.querySelector("[data-type=input]").value;
+                    if (typeof(content) === "undefined" || content.length === 0) {
+                        canHide = false;
+                    }
+                }
+
+                if (canHide) {
+                    modal.style.display = "none";
+                    if (typeof(callback) !== "undefined" && callback !== null) {
+                        callback(content);
+                    }
+                }
+            })
         } else {
-            modal.querySelector("p[data-type=content]").innerHTML = contents;
+            modal.querySelector("p[data-type=content]").innerHTML = content;
             modal.querySelector(".modal-title").innerHTML = title;
-        }
-    }
-
-    bind() {
-        if (!this.modal) return;
-        btn.addEventListener('click', () => {
-            this.show();
-        })
-    }
-
-    //参数可选
-    show(title, content) {
-        if (this.modal && this.modal.style.display !== "block") {
-            if (title) {
-                this.modal.querySelector(".modal-title").innerHTML = title;
+            if (inputContent !== "") {
+                let input = modal.querySelector("[data-type=input]");
+                input.style.display = "block";
+                input.innerHTML = inputContent;
             }
+        }
+        return modal;
+    }
 
-            if (content) {
-                this.modal.querySelector("p[data-type=content]").innerHTML = content;
-            }
+    //确认对话框
+    static confirm(title, content, btnPrimary, btnCancle, callback) {
+        let modal = document.querySelector(`.modal[title]`);
+        if (!modal) {
+            modal = Modal.create(title || "提示", content || "", btnPrimary, btnCancle, callback);
+        } else {
+            modal.querySelector(".modal-title").innerHTML = title || "提示";
+            modal.querySelector("p[data-type=content]").innerHTML = content || "";
+        }
 
-            this.modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
-            this.modal.style.display = "block";
+        if (modal && modal.style.display !== "block") {
+            modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
+            modal.style.display = "block";
         }
     }
 
-    hide() {
-        if (this.modal && this.modal.style.display !== "none") {
-            this.modal.querySelector(".modal-dialog").className = "modal-dialog";
-            this.modal.style.display = "none";
+    //填写对话框
+    static promote(title, callback, input) {
+        input = input || {type: "text"};
+        let modal = document.querySelector(`.modal[title]`);
+
+        if (!modal) {
+            modal = Modal.create(title || "提示", "", "提交", "取消", callback, input);
+        } else {
+            modal.querySelector(".modal-title").innerHTML = title || "提示";
+            modal.querySelector("p[data-type=content]").innerHTML = "";
+            modal.querySelector("[data-type=input]").innerHTML = `<input type="${input.type || "text"}" 
+                 class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>`;
         }
+
+        if (modal && modal.style.display !== "block") {
+            modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
+            modal.style.display = "block";
+        }
+    }
+
+    static hide() {
+        let modal = document.querySelector(`.modal[title]`);
+        if (modal && modal.style.display !== "none") {
+            modal.style.display = "none";
+        }
+    }
+
+    static hideAll() {
+        let modal = document.querySelectorAll(`.modal[title]`);
+        [...modal].forEach((v, k) => {
+            v.style.display = "none";
+        });
     }
 }
 
@@ -473,15 +524,11 @@ Api.checkUsername = function (username, result) {
 
 window.onload = function () {
     console.log("======init js====");
-
     new DropDown();
-
     //let toast = new Loading();
     //toast.show();
-
     UserCard.init(document.querySelectorAll("a[href^=users]"));
     //setTimeout(toast.dismiss, 5000)
-
     document.querySelector(".navbar-toggler").addEventListener('click', function () {
         let content = document.querySelector(".navbar-collapse");
         //collapse navbar-collapse
@@ -491,7 +538,6 @@ window.onload = function () {
             content.className = 'collapse navbar-collapse';
         }
     });
-
     if (typeof initPage !== 'undefined') {
         initPage()
     }

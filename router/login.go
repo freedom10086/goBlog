@@ -34,8 +34,9 @@ func (h *LoginHandler) DoAuth(method int, r *http.Request) error {
 //登陆页面 ->dopost -> 发邮件 -> 点击连接 -> user.doPost 插入数据库
 func (h *LoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	Template(w, &TemplateData{
-		Css: []string{"style.css"},
-		Js:  []string{"base.js", "particles.js", "qrcode.js"},},
+		Title: "登陆",
+		Css:   []string{"style.css"},
+		Js:    []string{"base.js", "particles.js", "qrcode.js"},},
 		"page.tmpl", "login.tmpl",
 	)
 }
@@ -89,7 +90,7 @@ func (h *QrLoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	//发送uuid到客户端
 	str := "event: uuid\n"
 	str = str + "data: " + uuid + "\n\n"
-	str = str + "retry:" + "1200" + "\n\n"
+	str = str + "retry:" + "1500" + "\n\n"
 	w.Write([]byte(str))
 	if f, ok := w.(http.Flusher); ok {
 		f.Flush()

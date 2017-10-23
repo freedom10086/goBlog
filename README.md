@@ -1,11 +1,11 @@
-#GO博客系统
+# GO博客系统
 > 一个简单的go语言博客,依赖仅有postgresql数据库
 ## 配置psql
 1. 设置并启动psql
     1. windows
     ```
-    .\initdb.exe -D C:\app\pgsql-9.6.2\data -E UTF8
-    .\pg_ctl -D "C:\app\pgsql-9.6.2\data" -l logfile start
+    .\initdb.exe -D C:\app\pgsql-10.0.1\data -E UTF8
+    .\pg_ctl -D "C:\app\pgsql-10.0.1\data" -l logfile start
     ```
     2. linux
     ```
@@ -63,11 +63,9 @@ CREATE TABLE users (
   regtime     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX i_user_name
-  ON users (username);
+CREATE INDEX i_user_name ON users (username);
 
-CREATE INDEX i_user_email
-  ON users (email);
+CREATE INDEX i_user_email ON users (email);
 
 -- 分类表
 DROP TABLE cate;
@@ -80,8 +78,7 @@ CREATE TABLE cate (
   created     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX i_cate_name
-  ON cate (name);
+CREATE INDEX i_cate_name ON cate (name);
 
 -- 帖子表
 DROP TABLE post;

@@ -5,16 +5,18 @@
     <title>404-Page Not Found</title>
 </head>
 <body>
-<h1>404-Not Found</h1>
+<h1>404-Page Not Found</h1>
 <hr>
-<h4 id="description">此页面不存在</h4>
+<h4>此页面不存在</h4>
+<p id="description"></p>
+<p id="suggest"></p>
 <script>
     const u = window.location.href;
     const url = (u.includes("?") ? u.substr(0, u.indexOf("?")) : u);
     document.querySelector("#description").innerHTML =
-        `<a href="${url}">${url}</a><br>此页面不存在<br><br>
-        <a href="#" onclick="back();">返回上一页</a> <a href="/">返回首页</a>`;
-
+        `<a href="${url}">${url}</a>`;
+    document.querySelector("#suggest").innerHTML =
+        `<a href="#" onclick="back();">返回上一页</a> <a href="/">返回首页</a>`;
     function back() {
         window.history.back();
     }

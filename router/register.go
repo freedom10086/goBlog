@@ -37,6 +37,7 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 			//返回完善信息页面,完善成功后
 			//post /users 插入数据库完成注册
 			Template(w, &TemplateData{
+				Title:"注册",
 				Css: []string{"style.css"},
 				Js:  []string{"base.js", "particles.js"},
 				Data: &CompeteRegData{

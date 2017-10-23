@@ -23,6 +23,11 @@ body {
     line-height: 1.5;
     color: #212529;
     background-color: #fff;
+    height: 100%;
+}
+
+main {
+    height: calc(100% - 130px);
 }
 
 [tabindex="-1"]:focus {

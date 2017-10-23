@@ -1,6 +1,6 @@
 {{define "content"}}
-<main class="container" style="height: 100%;display: flex;align-items: center;justify-content: center;">
-    <div class="card mt-4">
+<main class="container" style="display: flex;align-items: center;justify-content: center;">
+    <div class="card">
         <div class="card-header">
             <ul class="nav card-header-tabs">
                 <li class="tab-item">
@@ -44,13 +44,14 @@
             <button type="submit" class="btn btn-primary">登录</button>
         </form>
         <div class="card-footer">
-            <a class="small" href="reset_password">忘记了密码?</a>
+            <a class="small" onClick="return forgetPassword()" href="#">忘记了密码?</a>
             <a href="register" class="small ml-2">还没有账号去注册</a>
         </div>
     </div>
 </main>
 <script>
     let eventSource;
+    let timeoutTimmer = null;
 
     function initPage() {
         let currentPos = 0;
@@ -58,9 +59,7 @@
         const cardBody = document.querySelector(".card-body");
         let size = Math.min(cardBody.offsetWidth, cardBody.offsetHeight) * 0.7;
         contents[0] = cardBody.innerHTML;
-        contents[1] = `
-            <canvas id="qrcode" width="${size}" height="${size}"></canvas>
-            <div class="alert alert-secondary mt-3" role="alert">二维码加载中...</div>`;
+        contents[1] = `<canvas id="qrcode" width="${size}" height="${size}"></canvas><div class="alert alert-secondary mt-3" role="alert">二维码加载中...</div>`;
         const width = cardBody.offsetWidth + "px";
         const height = cardBody.offsetHeight + "px";
         const btn1 = document.querySelectorAll(".card .nav-link")[0];
@@ -90,6 +89,7 @@
     function startQrLogin() {
         //EventSource 文档
         //https://developer.mozilla.org/zh-CN/docs/Server-sent_events/Using_server-sent_events
+        timeoutTimmer = setTimeout(qrLoginTimeOut, 60000); //60s超时
         const alert = document.querySelector(".alert");
         if (typeof(EventSource) !== "undefined") {
             eventSource = new EventSource("qrlogin");
@@ -118,10 +118,7 @@
             });
 
             eventSource.addEventListener("timeout", function () {
-                console.log("timeout");
-                alert.className = "alert alert-warning mt-3";
-                alert.innerHTML = "二维码已过期,请刷新重试";
-                eventSource.close();
+                qrLoginTimeOut();
             });
 
             eventSource.onerror = function (e) {
@@ -130,7 +127,7 @@
             }
         } else {
             alert.className = "alert alert-danger mt-3";
-            alert.innerHTML = "浏览器不支持,请更换chrome浏览器"
+            alert.innerHTML = "浏览器不支持EventSource,请更换chrome浏览器"
         }
     }
 
@@ -138,6 +135,30 @@
         if (eventSource !== null) {
             eventSource.close();
         }
+
+        if (timeoutTimmer !== null) {
+            clearTimeout(timeoutTimmer);
+            timeoutTimmer = null;
+        }
     }
+
+    function qrLoginTimeOut() {
+        const alert = document.querySelector(".alert");
+        console.log("timeout");
+        alert.className = "alert alert-warning mt-3";
+        alert.innerHTML = "二维码已过期,请刷新重试";
+        if (timeoutTimmer !== null) {
+            clearTimeout(timeoutTimmer);
+            timeoutTimmer = null;
+        }
+        eventSource.close();
+    }
+
+    function forgetPassword() {
+        Modal.promote("重设密码,请输入你注册的邮箱", function (text) {
+            //todo API
+        }, {type: "password", hint: "邮箱"})
+    }
+
 </script>
 {{end}}

@@ -1,11 +1,11 @@
 -- ----------based on postgres sql-------------------
 -- ----------------数据表定义--------------------------
--- -------------------v3.0----------------------------
+-- -------------------v3.0---------------------------
 
 -- LEFT(in_content, 50) 截断字符串
 
 -- 用户表
-DROP TABLE users;
+DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   uid         SERIAL PRIMARY KEY,
   username    VARCHAR(32) NOT NULL UNIQUE,
@@ -26,14 +26,11 @@ CREATE TABLE users (
   regtime     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX i_user_name
-  ON users (username);
-
-CREATE INDEX i_user_email
-  ON users (email);
+CREATE INDEX i_user_name ON users (username);
+CREATE INDEX i_user_email ON users (email);
 
 -- 分类表
-DROP TABLE cate;
+DROP TABLE IF EXISTS cate;
 CREATE TABLE cate (
   cid         SERIAL PRIMARY KEY,
   name        VARCHAR(32) NOT NULL UNIQUE, -- 版块名字
@@ -47,7 +44,7 @@ CREATE INDEX i_cate_name
   ON cate (name);
 
 -- 帖子表
-DROP TABLE post;
+DROP TABLE IF EXISTS post;
 CREATE TABLE post (
   tid       SERIAL PRIMARY KEY,
   cid       SMALLINT    NOT NULL,
@@ -73,14 +70,12 @@ CREATE TABLE post (
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_post_user
-  ON post (uid);
+CREATE INDEX i_post_user ON post (uid);
 
-CREATE INDEX i_post_last
-  ON post (cid, lastreply);
+CREATE INDEX i_post_last ON post (cid, lastreply);
 
 -- 评论表
-DROP TABLE comment;
+DROP TABLE IF EXISTS comment;
 CREATE TABLE comment (
   id      SERIAL PRIMARY KEY,
   tid     INT       NOT NULL, -- 帖子id
@@ -100,13 +95,11 @@ CREATE TABLE comment (
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_comment_tid
-  ON comment (tid);
-CREATE INDEX i_comment_user
-  ON comment (uid);
+CREATE INDEX i_comment_tid  ON comment (tid);
+CREATE INDEX i_comment_user  ON comment (uid);
 
 -- 收藏表
-DROP TABLE star;
+DROP TABLE IF EXISTS star;
 CREATE TABLE star (
   id      SERIAL PRIMARY KEY,
   uid     INT       NOT NULL,
@@ -117,13 +110,11 @@ CREATE TABLE star (
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_star_user
-  ON star (uid);
-CREATE UNIQUE INDEX i_star_unique
-  ON star (uid, tid);
+CREATE INDEX i_star_user  ON star (uid);
+CREATE UNIQUE INDEX i_star_unique  ON star (uid, tid);
 
 -- 关注表
-DROP TABLE follow;
+DROP TABLE IF EXISTS follow;
 CREATE TABLE follow (
   id      SERIAL PRIMARY KEY,
   uid     INT       NOT NULL,
@@ -138,15 +129,12 @@ CREATE TABLE follow (
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_follow_me
-  ON follow (uid);
-CREATE INDEX i_follow_other
-  ON follow (tuid);
-CREATE UNIQUE INDEX i_follow_unique
-  ON follow (uid, tuid);
+CREATE INDEX i_follow_me  ON follow (uid);
+CREATE INDEX i_follow_other  ON follow (tuid);
+CREATE UNIQUE INDEX i_follow_unique  ON follow (uid, tuid);
 
 -- 聊天表
-DROP TABLE chat;
+DROP TABLE IF EXISTS chat;
 CREATE TABLE chat (
   id      SERIAL PRIMARY KEY,
   uid     INT       NOT NULL, -- 我的uid 发送方
@@ -162,10 +150,8 @@ CREATE TABLE chat (
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_chat_me
-  ON chat (uid);
-CREATE INDEX i_chat_other
-  ON chat (tuid);
+CREATE INDEX i_chat_me  ON chat (uid);
+CREATE INDEX i_chat_other  ON chat (tuid);
 
 -- ------------------触发器定义------------------------
 -- ---------------只更新计数和经验值--------------------
@@ -284,11 +270,10 @@ END IF;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER t_chat_add;
+
 CREATE TRIGGER t_chat_add
 AFTER INSERT ON chat
-FOR EACH ROW
-  EXECUTE PROCEDURE func_chat_add();
+FOR EACH ROW EXECUTE PROCEDURE func_chat_add();
 
 -- 删除聊天触发器
 CREATE OR REPLACE FUNCTION func_chat_del() RETURNS TRIGGER AS $$
@@ -314,7 +299,6 @@ WHERE uid = new.tuid;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS t_follow_add;
 CREATE TRIGGER t_follow_add
 AFTER INSERT ON follow
 FOR EACH ROW
