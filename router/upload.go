@@ -17,7 +17,7 @@ func (*UploadHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	mod := r.FormValue("type")
 
 	if mod != "file" && mod != "image" {
-		BadParameter(w, r)
+		BadParameter(w, r,"需要上传的文件")
 	}
 
 	r.ParseMultipartForm(32 << 20)

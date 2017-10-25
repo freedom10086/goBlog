@@ -66,19 +66,52 @@ func Error(w http.ResponseWriter, error string, code int) {
 	fmt.Fprintln(w, error)
 }
 
-func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
-	res := &ApiData{
-		Data:    data,
-		Code:    http.StatusOK,
-		Message: "",
-	}
+func InternalError(w http.ResponseWriter, r *http.Request, err error) {
+	Error(w, "500 Internal Server Error:"+err.Error(), http.StatusInternalServerError)
+}
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+func Unauthorized(w http.ResponseWriter, r *http.Request, msg string) {
+	Error(w, "401 Unauthorized "+msg, http.StatusUnauthorized)
+}
+
+func Forbidden(w http.ResponseWriter, r *http.Request, msg string) {
+	Error(w, "403 Forbidden "+msg, http.StatusForbidden)
+}
+
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	Error(w, "404 page not found", http.StatusNotFound)
+}
+
+func NotAllowed(w http.ResponseWriter, r *http.Request) {
+	Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+}
+
+func BadParameter(w http.ResponseWriter, r *http.Request, msg string) {
+	Error(w, "400 Bad Request "+msg, http.StatusBadRequest)
+}
+
+func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
+	//todo 有了http状态码 还需要status? 可以不需要包装了，直接发送完整的数据
+	var res *ApiData
+	if data == nil {
+		res = &ApiData{
+			Data:    nil,
+			Code:    http.StatusNoContent,
+			Message: "",
+		}
+	} else {
+		res = &ApiData{
+			Data:    data,
+			Code:    http.StatusOK,
+			Message: "",
+		}
+	}
 
 	if b, err := json.Marshal(res); err != nil {
 		InternalError(w, r, err)
 		return
 	} else {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Write(b)
 	}
 }
@@ -157,30 +190,6 @@ func httpPush(w http.ResponseWriter, data *TemplateData) {
 			}
 		}
 	}
-}
-
-func InternalError(w http.ResponseWriter, r *http.Request, err error) {
-	Error(w, "500 Internal Server Error:"+err.Error(), http.StatusInternalServerError)
-}
-
-func Unauthorized(w http.ResponseWriter, r *http.Request) {
-	Error(w, "401 Unauthorized", http.StatusUnauthorized)
-}
-
-func Forbidden(w http.ResponseWriter, r *http.Request) {
-	Error(w, "403 Forbidden", http.StatusForbidden)
-}
-
-func NotFound(w http.ResponseWriter, r *http.Request) {
-	Error(w, "404 page not found", http.StatusNotFound)
-}
-
-func NotAllowed(w http.ResponseWriter, r *http.Request) {
-	Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
-}
-
-func BadParameter(w http.ResponseWriter, r *http.Request) {
-	Error(w, "400 Bad Request", http.StatusBadRequest)
 }
 
 //path 要转到的url

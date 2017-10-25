@@ -33,22 +33,23 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	switch mode {
 	case "done":
 		token := r.FormValue("token")
-		if t, ok := model.ValidRegToken(token, config.SecretKey); ok {
+		if t, err := model.ValidRegToken(token, config.SecretKey); err == nil {
 			//返回完善信息页面,完善成功后
 			//post /users 插入数据库完成注册
+			fmt.Println(t)
 			Template(w, &TemplateData{
-				Title:"注册",
-				Css: []string{"style.css"},
-				Js:  []string{"base.js", "particles.js"},
+				Title: "完成注册",
+				Css:   []string{"style.css"},
+				Js:    []string{"base.js", "particles.js"},
 				Data: &CompeteRegData{
 					PostUrl:  "/users",
 					Token:    token,
 					Email:    t.Email,
 					Username: t.Username},
 			},
-				"register-done.tmpl")
+				"page.tmpl", "register-done.tmpl")
 		} else {
-			Unauthorized(w, r)
+			Unauthorized(w, r, err.Error())
 		}
 		return
 	case "checkUsername":
@@ -66,10 +67,8 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	default:
-		Template(w,
-			&TemplateData{Css: []string{"style.css"},
-				Js: []string{"base.js", "particles.js"},
-			},
+		Template(w, &TemplateData{Css: []string{"style.css"},
+			Js: []string{"base.js", "particles.js"},},
 			"page.tmpl", "register.tmpl")
 	}
 }
@@ -80,7 +79,7 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	username := r.PostFormValue("username")
 	email := r.PostFormValue("email")
 	if username == "" || email == "" {
-		BadParameter(w, r)
+		BadParameter(w, r, "用户名或者邮箱不能为空")
 		return
 	}
 
@@ -96,13 +95,16 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 
 	token := model.GenRegToken(username, email, config.SecretKey, time.Minute*30)
 	go func() {
-		content := fmt.Sprintf("欢迎你注册%s,请点击以下链接来验证你的邮箱,请在%d分钟内完成验证\r\n <a href=\"%s\">点击这儿</a>",
+		content := fmt.Sprintf("你好：%s!<br><b>请点击以下链接激活你的%s账号</b>"+
+			"<br>验证邮箱:<a href=\"%s\">%s</a><br><b>注意请在%d分钟内完成操作</b>",
+			username,
 			config.SiteName,
+			"https://"+config.SiteIpAddr+config.SitePortSSL+"/register?mod=done&token="+token,
+			email,
 			30,
-			"https://"+config.SiteIpAddr+config.SitePortSSL+"/regiest?mod=done&token="+token,
 		)
-		model.SendMail(email, "验证你的注册邮件", content)
+		model.SendMail(email, "验证你的注册邮件-"+config.SiteName, content)
 	}()
-	s := fmt.Sprintf("注册确认链接已经发送到你的邮箱:%s,请在30分钟内完成验证", email)
+	s := fmt.Sprintf("注册确认链接已经发送到你的邮箱:%s,请在%d分钟内完成验证", email, 30)
 	io.WriteString(w, s)
 }

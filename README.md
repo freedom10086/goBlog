@@ -348,7 +348,6 @@ WHERE uid = new.tuid;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS t_follow_add;
 CREATE TRIGGER t_follow_add
 AFTER INSERT ON follow
 FOR EACH ROW

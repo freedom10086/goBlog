@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"time"
+	"errors"
 )
 
 type User struct {
@@ -14,9 +15,9 @@ type User struct {
 	Sex         int
 	Exp         int
 	Birthday    time.Time
-	Phone       string
+	Phone       string `json:",omitempty"`
 	Description string `json:",omitempty"`
-	Site        string
+	Site        string `json:",omitempty"`
 	Posts       int
 	Replys      int
 	Regtime     time.Time
@@ -97,16 +98,28 @@ func GetUserByEmail(email string) (u *User, err error) {
 
 //username 可能为邮件/用户名
 //Status //0-正常 1-禁止访问
-func GetUserByNameEmail(username, password string) (u *User, err error) {
+func UserLogin(username, password string) (u *User, err error) {
 	password = Md5_encode(password)
-	u = &User{Password: password}
-	s := `SELECT uid,username,email,status,sex,exp,birthday,
+	u = &User{/*Password: password*/ }
+	s := `SELECT uid,username,password,email,status,sex,exp,birthday,
 	phone,description,site,posts,replys,regtime FROM users
-		WHERE (email = $1 OR username = $1) AND password = $2`
-	err = db.QueryRow(s, username, password).Scan(
-		&u.Uid, &u.Username, &u.Email, &u.Status, &u.Sex,
+		WHERE (email = $1 OR username = $1)` //AND password = $2
+	err = db.QueryRow(s, username).Scan(
+		&u.Uid, &u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
 		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+
+	if err == nil {
+		if password != u.Password {
+			err = errors.New("密码错误")
+			return
+		}
+
+		if u.Status == 0 {
+			err = errors.New("你已经被封禁，请联系管理员解封")
+			return
+		}
+	}
 	return
 }
 

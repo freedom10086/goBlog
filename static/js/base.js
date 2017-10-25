@@ -1,46 +1,3 @@
-class Ajax {
-    constructor(url, async = true) {
-        this.url = url;
-        this.async = async;
-    }
-
-    send(method = 'GET', data, success, fail) {
-        const x = new XMLHttpRequest();
-        x.open(method, this.url, this.async);
-        x.onreadystatechange = function () {
-            if (x.readyState === 4) {
-                let status = x.status;
-                if (status >= 200 && status < 300) {
-                    success && success(status, x.responseText)
-                } else {
-                    fail && fail(status, x.responseText);
-                }
-            }
-        };
-        if (method === 'POST') {
-            x.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        }
-        x.send(data)
-    }
-
-    get(data, success, fail) {
-        let query = [];
-        for (let key in data) {
-            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-        }
-        this.url = this.url + (query.length ? '?' + query.join('&') : '');
-        this.send('GET', null, success, fail)
-    }
-
-    post(data, success, fail) {
-        let query = [];
-        for (let key in data) {
-            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-        }
-        this.send('POST', query.join('&'), success, fail)
-    }
-}
-
 //返回顶部
 function backTop(acceleration, time) {
     acceleration = acceleration || 0.1;
@@ -159,6 +116,89 @@ function fetchText(url, success) {
     });
 }
 
+//验证么创造/验证类
+class Yzm {
+    constructor() {
+        this.code = [];
+    }
+
+    //创建验证码
+    createYZM(canvas) {
+        let code = this.code;
+        let _this = this;
+        let i;
+        code.length = 0;
+        const context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        const random = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        const colors = ["red", "green", "brown", "blue", "orange", "purple", "black"];
+        for (i = 0; i < 4; i++) {
+            const index = Math.floor(Math.random() * 36);
+            code.push(random[index]);
+        }
+        context.beginPath();
+        // Sprinkle in some random dots
+        for (i = 0; i < 10; i++) {
+            let px = Math.floor(Math.random() * canvas.width);
+            let py = Math.floor(Math.random() * canvas.height);
+            context.moveTo(px, py);
+            context.lineTo(px + 1, py + 1);
+            context.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+            context.lineWidth = Math.floor(Math.random() * 2);
+            context.stroke();
+        }
+
+        for (i = 0; i < 2; i++) {
+            //随机线条
+            context.moveTo(0, Math.floor(Math.random() * canvas.height));//随机线的起点x坐标是画布x坐标0位置，y坐标是画布高度的随机数
+            context.lineTo(canvas.width, Math.floor(Math.random() * canvas.height));//随机线的终点x坐标是画布宽度，y坐标是画布高度的随机数
+            context.lineWidth = 0.3;//随机线宽
+            context.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+            context.stroke();//描边，即起点描到终点
+        }
+
+        let deg, cos, sin, dg;
+        context.font = "20px Arial";
+        let cx = (canvas.width - 30) / 3;
+        for (i = 0; i < 4; i++) {
+            context.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+            //产生一个正负30度以内的角度值以及一个用于变形的dg值
+            dg = Math.random() * 4.5 / 10;
+            deg = Math.floor(Math.random() * 60);
+            deg = deg > 30 ? (30 - deg) : deg;
+            cos = Math.cos(deg * Math.PI / 180);
+            sin = Math.sin(deg * Math.PI / 180);
+
+            context.save();
+            context.setTransform(cos, sin + dg, -sin + dg, cos, cx * (i + 1) - 12, 18);
+            context.fillText(code[i], 0, 0);
+            context.restore();
+        }
+
+        canvas.onclick = function () {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            _this.createYZM(canvas);
+        }
+    }
+
+    //验证验证码
+    checkValid(valid) {
+        console.log(valid, this.code);
+        if (!valid || valid.length !== 4) return false;
+        for (let i = 0; i < 4; i++) {
+            if (valid[i].toUpperCase() !== this.code[i]) {
+                break;
+            }
+
+            if (i === 3) {
+                return true
+            }
+        }
+        return false;
+    }
+}
+
 //模态确认框
 class Modal {
     bindConfirm(btn) {
@@ -175,8 +215,8 @@ class Modal {
         let btnPrimaryCss = btnPrimary && btnPrimary["css"] || "btn-primary";
         let btnCancleText = btnCancle && btnCancle["text"] || "关闭";
         let btnCancleCss = btnCancle && btnCancle["css"] || "btn-info";
-        let inputContent = typeof(input) !== "undefined" ? `<input type="${input.type || "text"}" 
-        class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>` : "";
+        let inputContent = typeof(input) !== "undefined" ? (`<input type="${input.type || "text"}" 
+        class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>`) : "";
         if (!modal) {
             modal = document.createElement("div");
             modal.title = title;
@@ -208,8 +248,9 @@ class Modal {
             modal.querySelector("[data-type=confirm]").addEventListener('click', () => {
                 let canHide = true;
                 let content = "";
-                if (inputContent !== "") {//有输入内容
-                    content = modal.querySelector("[data-type=input]").value;
+                //有输入内容
+                if (modal.querySelector("[data-type=input]").style.display !== 'none') {
+                    content = modal.querySelector("[data-type=input] input").value;
                     if (typeof(content) === "undefined" || content.length === 0) {
                         canHide = false;
                     }
@@ -240,10 +281,12 @@ class Modal {
         if (!modal) {
             modal = Modal.create(title || "提示", content || "", btnPrimary, btnCancle, callback);
         } else {
+            modal.title = title;
             modal.querySelector(".modal-title").innerHTML = title || "提示";
             modal.querySelector("p[data-type=content]").innerHTML = content || "";
         }
 
+        modal.querySelector("[data-type=input]").style.display = 'none';
         if (modal && modal.style.display !== "block") {
             modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
             modal.style.display = "block";
@@ -258,12 +301,14 @@ class Modal {
         if (!modal) {
             modal = Modal.create(title || "提示", "", "提交", "取消", callback, input);
         } else {
+            modal.title = title;
             modal.querySelector(".modal-title").innerHTML = title || "提示";
             modal.querySelector("p[data-type=content]").innerHTML = "";
             modal.querySelector("[data-type=input]").innerHTML = `<input type="${input.type || "text"}" 
                  class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>`;
         }
 
+        modal.querySelector("[data-type=input]").style.display = 'block';
         if (modal && modal.style.display !== "block") {
             modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
             modal.style.display = "block";
@@ -376,27 +421,42 @@ const UserCard = {
 //toast提示加载
 //let toast = new Loading(timeout);
 //toast.show();
-class Loading {
-    constructor(timeout = 5) {
-        this.timeout = timeout;
-        this.tmpl = `<div class="toast fade-in">
-            <i class="loading"></i>
-            <p class="toast-content">加载中...</p>
-            </div>`
-    }
 
-    show() {
-        let toast = document.querySelector("#loadingToast");
-        if (toast == null) {
+class Toast {
+    static show(text, timeout = 1.5) {
+        let toast = document.querySelector("#messageToast");
+        if (toast === null) {
             toast = document.createElement("div");
-            toast.id = "loadingToast";
-            toast.innerHTML = this.tmpl;
+            toast.id = "messageToast";
+            toast.innerHTML = `<div class="toast fade-in">${text || "加载中..."}</div>`;
             document.body.appendChild(toast)
         }
 
         toast.style = "";
-        setTimeout(Loading.dismiss, this.timeout * 1000);
+        setTimeout(Loading.dismiss, (timeout || 1.5) * 1000);
+        return this;
+    }
 
+    static dismiss() {
+        let toast = document.querySelector("#messageToast");
+        if (toast) {
+            toast.style.display = "none";
+        }
+    }
+}
+
+class Loading {
+    static show(timeout, text) {
+        let toast = document.querySelector("#loadingToast");
+        if (toast === null) {
+            toast = document.createElement("div");
+            toast.id = "loadingToast";
+            toast.innerHTML = `<div class="loading-toast fade-in"><i class="loading"></i><p class="toast-content">${text || "加载中..."}</p></div>`;
+            document.body.appendChild(toast)
+        }
+
+        toast.style = "";
+        setTimeout(Loading.dismiss, (timeout || 8) * 1000);
         return this;
     }
 
@@ -492,35 +552,110 @@ class TabBox {
  {alert("欢迎您："+ name)}
  */
 
+class Ajax {
+    static send(url, method = 'GET', data, success, fail) {
+        const x = new XMLHttpRequest();
+        x.open(method, url, /*async*/ true);
+        x.onreadystatechange = function () {
+            if (x.readyState === 4) {
+                let status = x.status;
+                if (status >= 200 && status < 300) {
+                    success && success(status, x.responseText)
+                } else {
+                    fail && fail(status, x.responseText);
+                }
+            }
+        };
+        if (method === 'POST') {
+            x.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        }
+        x.send(data)
+    }
+
+    static get(url, data, success, fail) {
+        let query = [];
+        for (let key in data) {
+            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+        }
+        url = url + (query.length ? '?' + query.join('&') : '');
+        Ajax.send(url, 'GET', null, success, fail)
+    }
+
+    static post(url, data, success, fail) {
+        let query = [];
+        for (let key in data) {
+            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+        }
+        Ajax.send(url, 'POST', query.join('&'), success, fail)
+    }
+
+    static delete(url, data, success, fail) {
+        let query = [];
+        for (let key in data) {
+            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+        }
+        Ajax.send(url, 'DELETE', query.join('&'), success, fail)
+    }
+}
 
 //========API================//
-const Api = {
-    version: '1.0'
-};
+class ApiClass {
+    constructor() {
+        this.version = 1;
+    }
 
-Api.checkEmail = function (email, result) {
-    console.log("check email:", email);
-    new Ajax('/register').get(
-        {mod: 'checkEmail', email},
-        function (status, res) {
-            result(true, res)
-        },
-        function (status, res) {
-            result(false, res)
-        })
-};
+    checkEmail(email, result) {
+        console.log("check email:", email);
+        Ajax.get('/register', {mod: 'checkEmail', email},
+            (status, res) => {
+                result(true, res, status)
+            },
+            (status, res) => {
+                result(false, res, status)
+            });
+    }
 
-Api.checkUsername = function (username, result) {
-    console.log("check username:", username);
-    new Ajax('/register').get(
-        {mod: 'checkUsername', username},
-        function (status, res) {
-            result(true, res)
-        },
-        function (status, res) {
-            result(false, res)
+    checkUsername(username, result) {
+        console.log("check username:", username);
+        Ajax.get('/register', {mod: 'checkUsername', username},
+            function (status, res) {
+                result(true, res, status)
+            },
+            function (status, res) {
+                result(false, res, status)
+            });
+    }
+
+    login(username, password, result) {
+        console.log("login:", username);
+        Ajax.post("/login", {username, password}, (status, res) => {
+            result(true, res, status);
+        }, (status, res) => {
+            result(false, res, status);
         })
-};
+    }
+
+    regist(username, email, result) {
+        console.log("register:", username);
+        Ajax.post("/register", {username, email}, (status, res) => {
+            result(true, res, status);
+        }, (status, res) => {
+            result(false, res, status);
+        })
+    }
+
+    registDone(token, password, sex, result) {
+        console.log("register2:", token);
+        Ajax.post("/users", {token, password, sex}, (status, res) => {
+            result(true, res, status);
+        }, (status, res) => {
+            result(false, res, status);
+        })
+    }
+}
+
+let Api = new ApiClass();
+
 
 window.onload = function () {
     console.log("======init js====");

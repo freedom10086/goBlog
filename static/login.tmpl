@@ -11,16 +11,15 @@
                 </li>
             </ul>
         </div>
-        <form class="card-body" method="post" onsubmit="return validInput();">
+        <form class="card-body" method="post" onsubmit="return startSubmit();">
             <div class="form-group">
                 <label for="username">用户名</label>
-                <input type="email" class="form-control" minlength="3"
-                       maxlength="20" autocomplete="name" required id="username" placeholder="用户名">
+                <input type="text" class="form-control" minlength="3" maxlength="20" autocomplete="name" required
+                       id="username" placeholder="用户名">
             </div>
             <div class="form-group">
                 <label for="password">密码</label>
-                <input type="password" class="form-control" required id="password" autocomplete="password"
-                       minlength="6"
+                <input type="password" class="form-control" required id="password" autocomplete="password" minlength="6"
                        maxlength="25" placeholder="密码">
             </div>
             <div class="form-group">
@@ -41,17 +40,23 @@
                     <span class="custom-control-description">自动登录</span>
                 </label>
             </div>
-            <button type="submit" class="btn btn-primary">登录</button>
+            <button id="btn-login" type="submit" class="btn btn-primary">登录</button>
         </form>
         <div class="card-footer">
             <a class="small" onClick="return forgetPassword()" href="#">忘记了密码?</a>
-            <a href="register" class="small ml-2">还没有账号去注册</a>
+            <a href="register" class="small ml-2">还没有账号?去注册</a>
         </div>
     </div>
 </main>
 <script>
     let eventSource;
     let timeoutTimmer = null;
+    let yzm;
+
+    const usernameInput = document.querySelector("#username");
+    const passwordInput = document.querySelector("#password");
+    const validCodeInput = document.querySelector("#valid");
+    const loginBtn = document.querySelector("#btn-login");
 
     function initPage() {
         let currentPos = 0;
@@ -64,7 +69,6 @@
         const height = cardBody.offsetHeight + "px";
         const btn1 = document.querySelectorAll(".card .nav-link")[0];
         const btn2 = document.querySelectorAll(".card .nav-link")[1];
-
         [btn1, btn2].forEach((v, k) => {
             v.addEventListener("click", function () {
                 if (k !== currentPos) {
@@ -84,6 +88,97 @@
                 }
             })
         });
+        yzm = new Yzm();
+        yzm.createYZM(document.querySelector("#validcanvas"));
+        validCodeInput.addEventListener("keyup", function () {
+            if (validCodeInput.value.length !== 4) {
+                validCodeInput.className = "form-control is-invalid";
+                validCodeInput.title = "验证码不正确";
+            } else if (validCodeInput.value.length === 4 &&
+                !yzm.checkValid(validCodeInput.value)) {
+                validCodeInput.className = "form-control is-invalid";
+                validCodeInput.setCustomValidity("验证码不正确");
+                validCodeInput.title = "验证码不正确";
+            } else {
+                validCodeInput.className = "form-control is-valid";
+                validCodeInput.title = "";
+                validCodeInput.setCustomValidity("");
+            }
+        });
+
+        usernameInput.addEventListener("change", function () {
+            if (usernameInput.value.length >= 3 && usernameInput.value.length < 20) {
+                if (usernameInput.className !== "form-control") {
+                    usernameInput.className = "form-control";
+                }
+                if (passwordInput.className !== "form-control") {
+                    passwordInput.className = "form-control";
+                }
+            } else {
+                usernameInput.className = "form-control is-invalid";
+            }
+        });
+
+        passwordInput.addEventListener("change", function () {
+            if (passwordInput.value.length >= 6 && passwordInput.value.length < 20) {
+                if (passwordInput.className !== "form-control") {
+                    passwordInput.className = "form-control";
+                }
+            } else {
+                passwordInput.className = "form-control is-invalid";
+            }
+        });
+    }
+
+    function startSubmit() {
+        if (!usernameInput.checkValidity()) {
+            usernameInput.className = "form-control is-invalid";
+            return false
+        } else {
+            usernameInput.className = "form-control";
+        }
+
+        if (!passwordInput.checkValidity()) {
+            passwordInput.className = "form-control is-invalid";
+            return false
+        } else {
+            passwordInput.className = "form-control";
+        }
+
+        if (!validCodeInput.checkValidity()) return false;
+        if (!yzm.checkValid(validCodeInput.value)) {
+            validCodeInput.setCustomValidity("验证码不正确");
+            return false;
+        } else {
+            validCodeInput.setCustomValidity("");
+        }
+
+        loginBtn.disabled = true;
+        usernameInput.disabled = true;
+        passwordInput.disabled = true;
+        validCodeInput.disabled = true;
+
+        Loading.show(10, "提交中...");
+        Api.login(usernameInput.value, passwordInput.value, (ok, res, status) => {
+            loginBtn.disabled = false;
+            usernameInput.disabled = false;
+            passwordInput.disabled = false;
+            validCodeInput.disabled = false;
+            Loading.dismiss();
+
+            if (!ok) {
+                usernameInput.className = "form-control is-invalid";
+                passwordInput.className = "form-control is-invalid";
+                Modal.confirm("错误:" + status, res);
+            } else {
+                Toast.show(`登陆成功！即将转到首页`);
+                setTimeout(function () {
+                    window.location.href = "/"
+                }, 1500);
+            }
+        });
+
+        return false;
     }
 
     function startQrLogin() {
@@ -142,6 +237,7 @@
         }
     }
 
+    //60s超时不再和服务器连接
     function qrLoginTimeOut() {
         const alert = document.querySelector(".alert");
         console.log("timeout");
@@ -159,6 +255,5 @@
             //todo API
         }, {type: "password", hint: "邮箱"})
     }
-
 </script>
 {{end}}

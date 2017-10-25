@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+//个人账号页面
 type AccountHandler struct {
 	BaseHandler
 }

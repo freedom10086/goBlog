@@ -25,7 +25,7 @@ func (*CateHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	des := r.PostFormValue("description")
 
 	if name == "" || des == "" {
-		BadParameter(w, r)
+		BadParameter(w, r, "参数不足")
 		return
 	}
 
@@ -42,7 +42,7 @@ func (*CateHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 func (*CateHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 	cid := r.PostFormValue("cid")
 	if cidInt, err := strconv.Atoi(cid); err != nil {
-		BadParameter(w, r)
+		BadParameter(w, r, err.Error())
 	} else {
 		if i, err := model.DelCate(cidInt); err != nil {
 			InternalError(w, r, err)

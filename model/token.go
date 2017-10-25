@@ -64,18 +64,14 @@ func DecodeToken(token, secretKey string) ([]byte, error) {
 }
 
 //生成TOKEN base64(data+hmac(data,SecretKey))
-func GenToken(username, password string, authority int, secretKey string, duration time.Duration) (string, error) {
-	if u, err := GetUserByNameEmail(username, password); err != nil {
-		return "", err
-	} else {
-		data := &Token{
-			Uid:       u.Uid,
-			Authority: authority,
-			Salt:      Krand(10),
-			Expires:   time.Now().Add(duration),
-		}
-		return EncodeToken(data, secretKey), nil
+func GenToken(user *User, authority int, secretKey string, duration time.Duration) (string, error) {
+	data := &Token{
+		Uid:       user.Uid,
+		Authority: authority,
+		Salt:      Krand(10),
+		Expires:   time.Now().Add(duration),
 	}
+	return EncodeToken(data, secretKey), nil
 }
 
 //valid token 返回Token
@@ -108,20 +104,20 @@ func GenRegToken(username, email string, secretKey string, duration time.Duratio
 }
 
 //返回用户名和邮箱以便于检查可用性
-func ValidRegToken(token, secretKey string) (*RegToken, bool) {
+func ValidRegToken(token, secretKey string) (*RegToken, error) {
 	if s, err := DecodeToken(token, secretKey); err != nil {
 		log.Println(err)
-		return nil, false
+		return nil, err
 	} else {
 		data := &RegToken{}
 		if err = json.Unmarshal(s, &data); err != nil {
-			return nil, false
+			return nil, err
 		} else if data.Expires.After(time.Now()) {
-			return data, true
+			return data, nil
+		} else {
+			return nil, errors.New("token已过期")
 		}
 	}
-
-	return nil, false
 }
 
 // 随机字符串

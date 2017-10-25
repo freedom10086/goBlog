@@ -82,7 +82,7 @@ func (mux *MyRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h := mux.handle(p); h != nil {
 		err := h.DoAuth(m, r)
 		if err != nil {
-			Unauthorized(w, r)
+			Unauthorized(w, r, err.Error())
 			return
 		}
 		if m == MethodGet {

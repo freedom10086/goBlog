@@ -6,11 +6,14 @@ import (
 	"goBlog/model"
 	"fmt"
 	"strconv"
+	"database/sql"
+	"errors"
 )
 
+// todo 线程不安全 use sync.Map
 var uuids = make(map[string]client, 500)
 
-const timeout = time.Second * 60;
+const timeout = time.Second * 60
 
 type client struct {
 	ch   chan string //往这个里面写入uid表示扫码成功
@@ -24,6 +27,12 @@ type LoginHandler struct {
 //二维码登录
 type QrLoginHandler struct {
 	BaseHandler
+}
+
+//登陆返回结果
+type LoginResult struct {
+	model.User
+	token string
 }
 
 func (h *LoginHandler) DoAuth(method int, r *http.Request) error {
@@ -41,10 +50,33 @@ func (h *LoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-//填好用户名 邮箱假注册
-//真注册链接在邮件
+//登陆
 func (h *LoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
+	username := r.PostFormValue("username")
+	password := r.PostFormValue("password")
+	if username == "" {
+		BadParameter(w, r, "用户名密码不能为空")
+		return
+	}
 
+	user, err := model.UserLogin(username, password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = errors.New("此用户不存在")
+		}
+		Unauthorized(w, r, err.Error())
+		return
+	}
+
+	if token, err := model.GenToken(user, 1, config.SecretKey, time.Hour*24*7); err != nil {
+		Unauthorized(w, r, err.Error())
+		return
+	} else {
+		Result(w, r, &LoginResult{
+			*user,
+			token,
+		})
+	}
 }
 
 func (h *QrLoginHandler) DoAuth(method int, r *http.Request) error {
@@ -158,14 +190,14 @@ func (h *QrLoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	uuid := r.FormValue("uuid")
 	mod := r.FormValue("mod")
 	if uuid == "" {
-		BadParameter(w, r)
+		BadParameter(w, r, "需要uuid参数")
 		return
 	}
 
 	if mod == "" {
 		mod = "normal" //扫码 confirm //确认
 	} else if mod != "confirm" && mod != "normal" {
-		BadParameter(w, r)
+		BadParameter(w, r, "非法的请求参数")
 		return
 	}
 
@@ -180,9 +212,9 @@ func (h *QrLoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		var uid int64 = 123;
 		if mod == "confirm" {
 			//扫码确认成功
-			v.ch <- "1:" + strconv.FormatInt(uid, 10);
+			v.ch <- "1:" + strconv.FormatInt(uid, 10)
 		} else { ////0--扫码成功
-			v.ch <- "0:" + strconv.FormatInt(uid, 10);
+			v.ch <- "0:" + strconv.FormatInt(uid, 10)
 			v.time = time.Now() //重新计时
 			fmt.Println("write 0")
 		}

@@ -25,27 +25,33 @@ func (h *OauthHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		var err error
 		if decodeAuth, err = base64.URLEncoding.DecodeString(auth[6:]); err != nil {
 			log.Println(err)
-			BadParameter(w, r)
+			BadParameter(w, r, err.Error())
 			return
 		}
 
 		if index := bytes.IndexByte(decodeAuth, ':'); index <= 0 {
 			log.Println(decodeAuth)
-			Unauthorized(w, r)
+			Unauthorized(w, r, "")
 			return
 		} else {
 			userName := string(decodeAuth[:index])
 			passWord := string(decodeAuth[index+1:])
 			log.Printf("username is %s password is %s", userName, passWord)
-			if t, err := model.GenToken(userName, passWord, 1, config.SecretKey, time.Hour*24*30); err != nil {
-				Unauthorized(w, r)
+
+			if u, err := model.UserLogin(userName, passWord); err != nil {
+				Unauthorized(w, r, err.Error())
 				return
 			} else {
-				Result(w, r, t)
-				return
+				if t, err := model.GenToken(u, 1, config.SecretKey, time.Hour*24*7); err != nil {
+					Unauthorized(w, r, err.Error())
+					return
+				} else {
+					Result(w, r, t)
+					return
+				}
 			}
 		}
 	}
 
-	Unauthorized(w, r)
+	Unauthorized(w, r, "")
 }

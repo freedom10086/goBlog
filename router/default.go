@@ -84,7 +84,7 @@ func (h *DefaultHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		}
 		const modeType = os.ModeDir | os.ModeSymlink | os.ModeNamedPipe | os.ModeSocket | os.ModeDevice
 		if (fi.Mode()&modeType != 0) || os.IsPermission(err) {
-			Forbidden(w, r)
+			Forbidden(w, r, "")
 			return
 		}
 		InternalError(w, r, err)
@@ -92,7 +92,7 @@ func (h *DefaultHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	}
 	f, err := os.Open(filename)
 	if err != nil {
-		Forbidden(w, r)
+		Forbidden(w, r, err.Error())
 		return
 	}
 	defer f.Close()

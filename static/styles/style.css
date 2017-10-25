@@ -17,7 +17,8 @@ html {
 
 body {
     margin: 0;
-    font-family: Helvetica Neue, Helvetica, Microsoft YaHei, -apple-system, PingFang SC, Hiragino Sans GB, Noto Sans CJK SC, WenQuanYi Micro Hei, Arial, sans-serif;
+    font-family: Helvetica Neue, Helvetica, Microsoft YaHei, -apple-system, PingFang SC, Hiragino Sans GB,
+    Noto Sans CJK SC, WenQuanYi Micro Hei, Arial, sans-serif;
     font-size: 1rem;
     font-weight: normal;
     line-height: 1.5;
@@ -237,6 +238,10 @@ html [type="button"],
 [type="reset"],
 [type="submit"] {
     -webkit-appearance: button;
+}
+
+button[disabled] {
+    cursor: not-allowed;
 }
 
 button::-moz-focus-inner,
@@ -645,53 +650,6 @@ pre code::after {
     max-width: 100%;
 }
 
-.order-1 {
-    order: 1;
-}
-
-.order-2 {
-    order: 2;
-}
-
-.order-3 {
-    order: 3;
-}
-
-.order-4 {
-    order: 4;
-}
-
-.order-5 {
-    order: 5;
-}
-
-.order-6 {
-    order: 6;
-}
-
-.order-7 {
-    order: 7;
-}
-
-.order-8 {
-    order: 8;
-}
-
-.order-9 {
-    order: 9;
-}
-
-.order-10 {
-    order: 10;
-}
-
-.order-11 {
-    order: 11;
-}
-
-.order-12 {
-    order: 12;
-}
 
 @media (min-width: 720px) {
 
@@ -765,54 +723,6 @@ pre code::after {
     .col-sm-12 {
         flex: 0 0 100%;
         max-width: 100%;
-    }
-
-    .order-sm-1 {
-        order: 1;
-    }
-
-    .order-sm-2 {
-        order: 2;
-    }
-
-    .order-sm-3 {
-        order: 3;
-    }
-
-    .order-sm-4 {
-        order: 4;
-    }
-
-    .order-sm-5 {
-        order: 5;
-    }
-
-    .order-sm-6 {
-        order: 6;
-    }
-
-    .order-sm-7 {
-        order: 7;
-    }
-
-    .order-sm-8 {
-        order: 8;
-    }
-
-    .order-sm-9 {
-        order: 9;
-    }
-
-    .order-sm-10 {
-        order: 10;
-    }
-
-    .order-sm-11 {
-        order: 11;
-    }
-
-    .order-sm-12 {
-        order: 12;
     }
 }
 
@@ -5052,8 +4962,21 @@ article h6 {
     font-size: 0.8rem;
 }
 
-/*=============toast=============*/
+/*普通气泡toast*/
 .toast {
+    position: fixed;
+    z-index: 5000;
+    top: 60%;
+    left: 50%;
+    background: rgba(17, 17, 17, 0.7);
+    text-align: center;
+    border-radius: 5px;
+    color: #FFFFFF;
+    padding: 12px 15px;
+}
+
+/*加载中的toast*/
+.loading-toast {
     position: fixed;
     z-index: 5000;
     width: 7em;
