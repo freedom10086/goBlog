@@ -7,20 +7,20 @@ import (
 )
 
 type User struct {
-	Uid         int64
-	Username    string
-	Password    string `json:"-"`
-	Email       string
-	Status      int
-	Sex         int
-	Exp         int
-	Birthday    time.Time
-	Phone       string `json:",omitempty"`
-	Description string `json:",omitempty"`
-	Site        string `json:",omitempty"`
-	Posts       int
-	Replys      int
-	Regtime     time.Time
+	Uid         int64      `json:"uid"`
+	Username    string     `json:"username"`
+	Password    string     `json:"-"`
+	Email       string     `json:"email"`
+	Status      int        `json:"status"`
+	Sex         int        `json:"sex"`
+	Exp         int        `json:"exp"`
+	Birthday    NullTime   `json:"birthday,omitempty"`
+	Phone       NullString `json:"phone,omitempty"`
+	Description NullString `json:"description,omitempty"`
+	Site        NullString `json:"site,omitempty"`
+	Posts       int        `json:"posts"`
+	Replys      int        `json:"replys"`
+	Regtime     time.Time  `json:"regtime"`
 }
 
 //添加用户
@@ -104,6 +104,7 @@ func UserLogin(username, password string) (u *User, err error) {
 	s := `SELECT uid,username,password,email,status,sex,exp,birthday,
 	phone,description,site,posts,replys,regtime FROM users
 		WHERE (email = $1 OR username = $1)` //AND password = $2
+
 	err = db.QueryRow(s, username).Scan(
 		&u.Uid, &u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
@@ -115,11 +116,12 @@ func UserLogin(username, password string) (u *User, err error) {
 			return
 		}
 
-		if u.Status == 0 {
+		if u.Status < 0 {
 			err = errors.New("你已经被封禁，请联系管理员解封")
 			return
 		}
 	}
+
 	return
 }
 

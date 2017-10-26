@@ -169,11 +169,15 @@
             if (!ok) {
                 usernameInput.className = "form-control is-invalid";
                 passwordInput.className = "form-control is-invalid";
-                Modal.confirm("错误:" + status, res);
+                Modal.confirm({"title": "错误:" + status, "content": res});
             } else {
+                localStorage.setItem("token", res.data.token);
+                localStorage.setItem("profile", JSON.stringify(res.data.user));
+
                 Toast.show(`登陆成功！即将转到首页`);
                 setTimeout(function () {
-                    window.location.href = "/"
+                    location.replace('/'); //不加入历史
+                    //window.location.href = "/" //此方法会退回历史
                 }, 1500);
             }
         });
@@ -251,9 +255,9 @@
     }
 
     function forgetPassword() {
-        Modal.promote("重设密码,请输入你注册的邮箱", function (text) {
+        Modal.promote({"title": "重设密码,请输入你注册的邮箱", "input": {"type": "email", "hint": "注册邮箱"}}, function (text) {
             //todo API
-        }, {type: "password", hint: "邮箱"})
+        })
     }
 </script>
 {{end}}

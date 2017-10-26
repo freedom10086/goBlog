@@ -3,29 +3,32 @@
 <head>
     <meta charset="utf-8"/>
     <title>发表新帖</title>
+    <link rel="stylesheet" href="styles/style.css">
     <link rel="stylesheet" href="styles/editor.css">
     <link rel="stylesheet" href="styles/font-md.css">
-    <link rel="stylesheet" href="styles/style.css">
 </head>
 <body class="container">
 <h1>发表新帖</h1>
 <div class="form-inline my-2">
 
-    <label class="sr-only" for="type">type</label>
-    <select class="custom-select mr-sm-2 mb-sm-0 mb-2" id="type">
-        <option value="1" selected>分区XXX</option>
-        <option value="2">分区2</option>
-        <option value="3">分区3</option>
-        <option value="3">分区4</option>
-    </select>
 
-    <label class="sr-only" for="input2">input</label>
+    <label class="d-none" for="type">分区</label>
+    <div class="input-group mb-2 mb-sm-0 mr-sm-2">
+        <div class="input-group-addon">分区</div>
+        <select class="form-control" id="type">
+            <option value="1" selected>分区XXX</option>
+            <option value="2">分区2</option>
+            <option value="3">分区3</option>
+            <option value="3">分区4</option>
+        </select>
+    </div>
+
+    <label class="d-none" for="input2">input</label>
     <div class="input-group mb-2 mb-sm-0 mr-sm-2">
         <div class="input-group-addon">标题</div>
         <input type="text" class="form-control" id="input2" placeholder="标题...">
     </div>
-
-    <label class="sr-only" for="tags">标签</label>
+    <label class="d-none" for="tags">标签</label>
     <div class="input-group mb-2 mb-sm-0 mr-sm-2">
         <div class="input-group-addon">标签</div>
         <input type="text" class="form-control" id="tags" placeholder="标签,多个标签以','隔开...">
@@ -56,9 +59,9 @@
     </div>
 </div>
 
-<script src="js/marked.js"></script>
-<script src="js/highlight.js"></script>
-<script src="js/smiley.js"></script>
+<script src="js/base.js"></script>
+<script src="js/marked.min.js"></script>
+<script src="js/highlight.pack.js"></script>
 <script src="js/editor.js"></script>
 <script>
     const draftBox = document.querySelector("#draft");

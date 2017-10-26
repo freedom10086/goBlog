@@ -31,9 +31,9 @@ func init() {
 
 //基本api返回data
 type ApiData struct {
-	Data    interface{}
-	Code    int
-	Message string
+	Data    interface{} `json:"data"`
+	Code    int `json:"code"`
+	Message string `json:"message"`
 }
 
 //基本模板data返回类型基类
@@ -113,6 +113,7 @@ func Result(w http.ResponseWriter, r *http.Request, data interface{}) {
 	} else {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Write(b)
+		fmt.Println(string(b))
 	}
 }
 

@@ -7,6 +7,10 @@
     {{range .Css}}
     <link rel="stylesheet" href="styles/{{.}}">
     {{end}}
+    <script>
+        let profile; //用户个人信息 user json
+        let token;
+    </script>
 </head>
 <body>
 <header>
@@ -37,25 +41,23 @@
 
                 <div class="flex-grow"></div>
 
-                <div class="dropdown show">
+                <div id="nav-login-view" style="display: none"><a href="login">登陆</a> <a href="register">注册</a></div>
+                <div id="nav-profile-view" class="dropdown show" style="display: none">
                     <a class="dropdown-toggle" style="display: flex;align-items: center" href="#">
-                        <img src="images/avater.jpg" width="35px" height="35px"
-                             class="rounded-circle mr-2">
-                        Admin</a>
+                        <img src="images/avater.jpg" width="35px" height="35px" class="rounded-circle mr-2"><span
+                            id="nav-profile-username">username</span></a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                         <a class="dropdown-item" href="#">设置</a>
                         <a class="dropdown-item" href="#">发帖</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item text-danger" href="#">退出登录</a>
+                        <a class="dropdown-item text-danger" href="#" onclick="return exitLogin();">退出登录</a>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 </header>
-
 {{template "content" .Data}}
-
 <footer class="footer">
     <p class="footer-links">
         <a href="https://github.com/freedom10086/goBlog" target="_blank" class="footer-link">网站源码</a>

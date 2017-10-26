@@ -1,3 +1,7 @@
+-- storage
+token 用于存储用户的token  [l]
+profile 用于存储用户信息   [l]
+
+--变量
+profile 用户个人信息
 token 用于存储用户的token
-username 用户存放用户吗
-uid 用于存放用户id

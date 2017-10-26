@@ -31,8 +31,8 @@ type QrLoginHandler struct {
 
 //登陆返回结果
 type LoginResult struct {
-	model.User
-	token string
+	model.User   `json:"user"`
+	Token string `json:"token"`
 }
 
 func (h *LoginHandler) DoAuth(method int, r *http.Request) error {

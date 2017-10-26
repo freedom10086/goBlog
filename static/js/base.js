@@ -31,6 +31,36 @@ function backTop(acceleration, time) {
     }
 }
 
+//设置用户信息登陆以及未登陆状态
+function setProfileView() {
+    if (window.location.pathname === "/login" || window.location.pathname === "/register") return;
+    const loginView = document.querySelector("#nav-login-view");
+    const profileView = document.querySelector("#nav-profile-view");
+    if (token !== null && profile !== null) {
+        if (loginView) loginView.style.display = "none";
+        if (profileView) {
+            profileView.querySelector("#nav-profile-username").innerHTML = profile.username;
+            profileView.style.display = "block";
+        }
+    } else {
+        profile = null;
+        if (loginView) loginView.style.display = "block";
+        if (profileView) profileView.style.display = "none";
+    }
+}
+
+//退出登陆
+function exitLogin() {
+    Modal.confirm({
+        "title": "退出登陆", "content": "你要确认退出登陆吗?", "btnPrimary": {"css": "btn-danger"},
+        "btnCancle": {"text": "取消"}
+    }, () => {
+        localStorage.clear();
+        location.reload();
+        Toast.show("退出登陆成功");
+    });
+}
+
 //promise 版本getJSON
 function getJSON(url) {
     return new Promise(function (resolve, reject) {
@@ -201,25 +231,26 @@ class Yzm {
 
 //模态确认框
 class Modal {
-    bindConfirm(btn) {
-        if (!this.modal || !btn) return;
+    bindConfirm(btn, options) {
+        if (!btn) return;
         btn.addEventListener('click', () => {
-            this.confirm();
+            Modal.confirm(options);
         })
     }
 
     //inputs 是否有输入框{"type"输入类型,"hint","value"默认值}
     static create(title, content, btnPrimary, btnCancle, callback, input) {
-        let modal = document.querySelector(`.modal[title]`);
-        let btnPrimaryText = btnPrimary && btnPrimary["text"] || "确认";
-        let btnPrimaryCss = btnPrimary && btnPrimary["css"] || "btn-primary";
-        let btnCancleText = btnCancle && btnCancle["text"] || "关闭";
-        let btnCancleCss = btnCancle && btnCancle["css"] || "btn-info";
+        btnPrimary = btnPrimary || {};
+        btnCancle = btnCancle || {};
+        let modal = document.querySelector(`.modal`);
+        let btnPrimaryText = btnPrimary && btnPrimary.text || "确认";
+        let btnPrimaryCss = btnPrimary && btnPrimary.css || "btn-primary";
+        let btnCancleText = btnCancle && btnCancle.text || "关闭";
+        let btnCancleCss = btnCancle && btnCancle.css || "btn-info";
         let inputContent = typeof(input) !== "undefined" ? (`<input type="${input.type || "text"}" 
         class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>`) : "";
         if (!modal) {
             modal = document.createElement("div");
-            modal.title = title;
             modal.className = "modal";
             modal.innerHTML = `
             <div class="modal-dialog">
@@ -275,15 +306,17 @@ class Modal {
         return modal;
     }
 
-    //确认对话框
-    static confirm(title, content, btnPrimary, btnCancle, callback) {
-        let modal = document.querySelector(`.modal[title]`);
+    //确认对话框 title, content, btnPrimary, btnCancle, callback
+    static confirm(options, callback) {
+        options = options || {};
+        let modal = document.querySelector(`.modal`);
+        let title = options.title || "提示";
         if (!modal) {
-            modal = Modal.create(title || "提示", content || "", btnPrimary, btnCancle, callback);
+            modal = Modal.create(title, options.content || "", options.btnPrimary || {"text": "确认"},
+                options.btnCancle || {"text": "关闭"}, callback);
         } else {
-            modal.title = title;
-            modal.querySelector(".modal-title").innerHTML = title || "提示";
-            modal.querySelector("p[data-type=content]").innerHTML = content || "";
+            modal.querySelector(".modal-title").innerHTML = title;
+            modal.querySelector("p[data-type=content]").innerHTML = options.content || "";
         }
 
         modal.querySelector("[data-type=input]").style.display = 'none';
@@ -293,21 +326,21 @@ class Modal {
         }
     }
 
-    //填写对话框
-    static promote(title, callback, input) {
-        input = input || {type: "text"};
-        let modal = document.querySelector(`.modal[title]`);
-
+    //填写对话框 //{title, callback, input{type,value,hint}}
+    static promote(options, callback) {
+        options = options || {};
+        let title = options.title || "提示";
+        let input = options.input || {type: "text"};
+        let modal = document.querySelector(`.modal`);
         if (!modal) {
-            modal = Modal.create(title || "提示", "", "提交", "取消", callback, input);
+            modal = Modal.create(title, "", options.btnPrimary || {"text": "提交"},
+                options.btnCancle || {"text": "取消"}, callback, options.input);
         } else {
-            modal.title = title;
-            modal.querySelector(".modal-title").innerHTML = title || "提示";
+            modal.querySelector(".modal-title").innerHTML = title;
             modal.querySelector("p[data-type=content]").innerHTML = "";
             modal.querySelector("[data-type=input]").innerHTML = `<input type="${input.type || "text"}" 
                  class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>`;
         }
-
         modal.querySelector("[data-type=input]").style.display = 'block';
         if (modal && modal.style.display !== "block") {
             modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
@@ -316,17 +349,10 @@ class Modal {
     }
 
     static hide() {
-        let modal = document.querySelector(`.modal[title]`);
+        let modal = document.querySelector(`.modal`);
         if (modal && modal.style.display !== "none") {
             modal.style.display = "none";
         }
-    }
-
-    static hideAll() {
-        let modal = document.querySelectorAll(`.modal[title]`);
-        [...modal].forEach((v, k) => {
-            v.style.display = "none";
-        });
     }
 }
 
@@ -560,7 +586,7 @@ class Ajax {
             if (x.readyState === 4) {
                 let status = x.status;
                 if (status >= 200 && status < 300) {
-                    success && success(status, x.responseText)
+                    success && success(status, JSON.parse(x.responseText))
                 } else {
                     fail && fail(status, x.responseText);
                 }
@@ -659,11 +685,15 @@ let Api = new ApiClass();
 
 window.onload = function () {
     console.log("======init js====");
+    //读取变量
+    profile = JSON.parse(localStorage.getItem("profile"));
+    token = localStorage.getItem("token");
+    console.log(token, profile);
+    //设置状页
+    setProfileView();
+
     new DropDown();
-    //let toast = new Loading();
-    //toast.show();
     UserCard.init(document.querySelectorAll("a[href^=users]"));
-    //setTimeout(toast.dismiss, 5000)
     document.querySelector(".navbar-toggler").addEventListener('click', function () {
         let content = document.querySelector(".navbar-collapse");
         //collapse navbar-collapse
