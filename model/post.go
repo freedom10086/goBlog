@@ -8,8 +8,8 @@ import (
 //单一post
 type Post struct {
 	Tid       int //id
-	Cid       int
-	Uid       int
+	Cid       int //category id
+	Uid       int //user id
 	Username  string
 	Title     string
 	Content   string

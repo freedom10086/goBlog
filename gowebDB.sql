@@ -5,9 +5,9 @@
 -- LEFT(in_content, 50) 截断字符串
 
 -- 用户表
-DROP TABLE IF EXISTS users;
-CREATE TABLE users (
-  uid         SERIAL PRIMARY KEY,
+DROP TABLE IF EXISTS "user";
+CREATE TABLE "user" (
+  id          SERIAL PRIMARY KEY,
   username    VARCHAR(32) NOT NULL UNIQUE,
   password    VARCHAR(64) NOT NULL,
   email       VARCHAR(32) NOT NULL UNIQUE,
@@ -16,63 +16,59 @@ CREATE TABLE users (
   exp         INT         NOT NULL DEFAULT 0, -- 经验值
   birthday    DATE,
   phone       TEXT,
-  description TEXT,
+  description TEXT, -- 个人简介
   site        TEXT, -- 个人网站
   posts       INT         NOT NULL DEFAULT 0, -- 发帖数
   replys      INT         NOT NULL DEFAULT 0, -- 回复数
-  newreplys   INT         NOT NULL DEFAULT 0, -- 新回复数
-  newfollows  INT         NOT NULL DEFAULT 0, -- 新粉丝数
-  newchats    INT         NOT NULL DEFAULT 0, -- 新私信数
   regtime     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX i_user_name ON users (username);
-CREATE INDEX i_user_email ON users (email);
+-- 用户认证表
+DROP TABLE IF EXISTS auth;
+CREATE TABLE auth (
+  id         SERIAL PRIMARY KEY,
+  uid        INT          NOT NULL REFERENCES "user" (id)
+    ON DELETE CASCADE,
+  type       SMALLINT     NOT NULL, -- 认证类型 1-账号 2-qq 3-微信 4-微博 5-github
+  identifier VARCHAR(64)  NOT NULL, -- 自己应用可以不存,第三方应用的唯一标识,微信用户名，GitHub用户名
+  credential VARCHAR(128) NOT NULL UNIQUE, -- 密码凭证 token或者第三方token 更改密码过后更改token
+  created    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP -- 时间
+);
 
 -- 分类表
-DROP TABLE IF EXISTS cate;
-CREATE TABLE cate (
-  cid         SERIAL PRIMARY KEY,
-  name        VARCHAR(32) NOT NULL UNIQUE, -- 版块名字
+DROP TABLE IF EXISTS category;
+CREATE TABLE category (
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(64) NOT NULL UNIQUE, -- 版块名字
   description TEXT,
   sticks      INT [], -- 置顶 tid...
   posts       INT         NOT NULL DEFAULT 0, -- 版块帖子计数
   created     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX i_cate_name
-  ON cate (name);
-
 -- 帖子表
 DROP TABLE IF EXISTS post;
 CREATE TABLE post (
-  tid       SERIAL PRIMARY KEY,
-  cid       SMALLINT    NOT NULL,
-  uid       INT         NOT NULL,
-  username  VARCHAR(32) NOT NULL, -- 牺牲这个加快查找速度
-  title     VARCHAR(64) NOT NULL,
-  content   TEXT        NOT NULL,
+  id        SERIAL PRIMARY KEY,
+  cid       SMALLINT     NOT NULL REFERENCES category (id)
+    ON DELETE CASCADE, -- 板块id
+  uid       INT          NOT NULL REFERENCES "user" (id)
+    ON DELETE CASCADE, -- 用户id
+  username  VARCHAR(32)  NOT NULL, -- 牺牲这个加快查找速度
+  title     VARCHAR(128) NOT NULL, -- 标题
+  content   TEXT         NOT NULL, -- 内容
   tags      TEXT [], -- 标签?-- xx?--
-  type      SMALLINT    NOT NULL DEFAULT 0, -- 0-一般，1-管理员加精华
-  status    SMALLINT    NOT NULL DEFAULT 0, -- 0-正常，1-不可回复2不可查看
-  views     INT         NOT NULL DEFAULT 0,
-  replys    INT         NOT NULL DEFAULT 0,
-  created   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated   TIMESTAMP,
-  lastreply TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 最后回复时间
-
-  CONSTRAINT f_post_cate FOREIGN KEY (cid)
-  REFERENCES cate (cid)
-    ON DELETE CASCADE,
-
-  CONSTRAINT f_post_user FOREIGN KEY (uid)
-  REFERENCES users (uid)
-    ON DELETE CASCADE
+  type      SMALLINT     NOT NULL DEFAULT 0, -- 0-一般 1-管理员加精华
+  status    SMALLINT     NOT NULL DEFAULT 0, -- 0-正常 1-不可回复 2-不可查看
+  views     INT          NOT NULL DEFAULT 0, -- 点击数
+  replys    INT          NOT NULL DEFAULT 0, -- 回复数
+  created   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 发表时间
+  updated   TIMESTAMP, -- 编辑时间
+  lastreply TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP -- 最后回复时间 用于排序
 );
 
-CREATE INDEX i_post_user ON post (uid);
 
-CREATE INDEX i_post_last ON post (cid, lastreply);
+CREATE INDEX i_post_last ON post (lastreply);
 
 -- 评论表
 DROP TABLE IF EXISTS comment;
@@ -91,12 +87,14 @@ CREATE TABLE comment (
   REFERENCES post (tid)
     ON DELETE CASCADE,
   CONSTRAINT f_comment_user FOREIGN KEY (uid)
-  REFERENCES users (uid)
+  REFERENCES user (id)
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_comment_tid  ON comment (tid);
-CREATE INDEX i_comment_user  ON comment (uid);
+CREATE INDEX i_comment_tid
+  ON comment (tid);
+CREATE INDEX i_comment_user
+  ON comment (uid);
 
 -- 收藏表
 DROP TABLE IF EXISTS star;
@@ -106,12 +104,14 @@ CREATE TABLE star (
   tid     INT       NOT NULL,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT f_star_user FOREIGN KEY (uid)
-  REFERENCES users (uid)
+  REFERENCES user (id)
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_star_user  ON star (uid);
-CREATE UNIQUE INDEX i_star_unique  ON star (uid, tid);
+CREATE INDEX i_star_user
+  ON star (uid);
+CREATE UNIQUE INDEX i_star_unique
+  ON star (uid, tid);
 
 -- 关注表
 DROP TABLE IF EXISTS follow;
@@ -122,16 +122,19 @@ CREATE TABLE follow (
   note    TEXT, -- 备注名
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT f_follow_user FOREIGN KEY (uid)
-  REFERENCES users (uid)
+  REFERENCES user (id)
     ON DELETE CASCADE,
   CONSTRAINT f_follow_tuser FOREIGN KEY (tuid)
-  REFERENCES users (uid)
+  REFERENCES user (id)
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_follow_me  ON follow (uid);
-CREATE INDEX i_follow_other  ON follow (tuid);
-CREATE UNIQUE INDEX i_follow_unique  ON follow (uid, tuid);
+CREATE INDEX i_follow_me
+  ON follow (uid);
+CREATE INDEX i_follow_other
+  ON follow (tuid);
+CREATE UNIQUE INDEX i_follow_unique
+  ON follow (uid, tuid);
 
 -- 聊天表
 DROP TABLE IF EXISTS chat;
@@ -143,15 +146,17 @@ CREATE TABLE chat (
   isread  BOOLEAN   NOT NULL DEFAULT FALSE,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT f_chat_user FOREIGN KEY (uid)
-  REFERENCES users (uid)
+  REFERENCES user (id)
     ON DELETE CASCADE,
   CONSTRAINT f_chat_tuser FOREIGN KEY (tuid)
-  REFERENCES users (uid)
+  REFERENCES user (id)
     ON DELETE CASCADE
 );
 
-CREATE INDEX i_chat_me  ON chat (uid);
-CREATE INDEX i_chat_other  ON chat (tuid);
+CREATE INDEX i_chat_me
+  ON chat (uid);
+CREATE INDEX i_chat_other
+  ON chat (tuid);
 
 -- ------------------触发器定义------------------------
 -- ---------------只更新计数和经验值--------------------
@@ -159,45 +164,47 @@ CREATE INDEX i_chat_other  ON chat (tuid);
 -- 发表帖子触发器
 CREATE OR REPLACE FUNCTION func_post_add() RETURNS TRIGGER AS $$
 BEGIN
-UPDATE users
+UPDATE user
 SET exp = exp + 3, posts = posts + 1
-WHERE uid = new.uid;
+WHERE id = new.uid;
 
-UPDATE cate
+UPDATE category
 SET posts = posts + 1
-WHERE cid = new.cid;
+WHERE id = new.cid;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER t_post_add
-AFTER INSERT ON post
-FOR EACH ROW
+  AFTER INSERT
+  ON post
+  FOR EACH ROW
   EXECUTE PROCEDURE func_post_add();
 
 -- 删除帖子触发器
 CREATE OR REPLACE FUNCTION func_post_del() RETURNS TRIGGER AS $$
 BEGIN
-UPDATE users
+UPDATE user
 SET exp = exp - 3, posts = posts - 1
-WHERE uid = old.uid;
+WHERE id = old.id;
 
-UPDATE cate
+UPDATE category
 SET posts = posts - 1
-WHERE cid = old.cid;
+WHERE id = old.id;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER t_post_del
-AFTER DELETE ON post
-FOR EACH ROW
+  AFTER DELETE
+  ON post
+  FOR EACH ROW
   EXECUTE PROCEDURE func_post_del();
 
 -- 增加评论触发器
 CREATE OR REPLACE FUNCTION func_comment_add() RETURNS TRIGGER AS $$
 BEGIN
-UPDATE users
-SET exp = exp + 1, replys = users.replys + 1
-WHERE uid = new.uid;
+UPDATE user
+SET exp = exp + 1, replys = user.replys + 1
+WHERE id = new.id;
 
 UPDATE post
 SET replys = replys + 1, lastreply = new.created
@@ -208,35 +215,22 @@ THEN
 UPDATE comment
 SET replys = replys + 1
 WHERE id = new.pid;
-
--- 楼中楼 通知楼主
-UPDATE users
-SET newreplys = newreplys + 1
-WHERE uid <> new.tuid AND uid = (SELECT uid
-                                 FROM post
-                                 WHERE tid = new.tid);
-END IF;
--- 通知
-IF new.uid <> new.tuid
-THEN
-UPDATE users
-SET newreplys = newreplys + 1
-WHERE uid = new.tuid;
-END IF;
+-- TODO 通知
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER t_comment_add
-AFTER INSERT ON comment
-FOR EACH ROW
+  AFTER INSERT
+  ON comment
+  FOR EACH ROW
   EXECUTE PROCEDURE func_comment_add();
 
 -- 删除评论触发器
 CREATE OR REPLACE FUNCTION func_comment_del() RETURNS TRIGGER AS $$
 BEGIN
-UPDATE users
+UPDATE user
 SET exp = exp - 1, replys = replys - 1
-WHERE uid = old.uid;
+WHERE id = old.uid;
 
 UPDATE post
 SET replys = replys - 1
@@ -254,54 +248,24 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER t_comment_del
-AFTER DELETE ON comment
-FOR EACH ROW
+  AFTER DELETE
+  ON comment
+  FOR EACH ROW
   EXECUTE PROCEDURE func_comment_del();
-
--- 增加聊天触发器
-CREATE OR REPLACE FUNCTION func_chat_add() RETURNS TRIGGER AS $$
-BEGIN
-IF new.uid <> new.tuid
-THEN
-UPDATE users
-SET newchats = newchats + 1
-WHERE uid = new.tuid;
-END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE TRIGGER t_chat_add
-AFTER INSERT ON chat
-FOR EACH ROW EXECUTE PROCEDURE func_chat_add();
-
--- 删除聊天触发器
-CREATE OR REPLACE FUNCTION func_chat_del() RETURNS TRIGGER AS $$
-BEGIN
-UPDATE users
-SET newchats = newchats - 1
-WHERE uid = old.tuid AND newchats > 0;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER t_chat_del
-AFTER DELETE ON chat
-FOR EACH ROW
-WHEN (old.isread = FALSE )
-EXECUTE PROCEDURE func_chat_del();
 
 -- 增加关注触发器
 CREATE OR REPLACE FUNCTION func_follow_del() RETURNS TRIGGER AS $$
 BEGIN
-UPDATE users
+UPDATE user
 SET newfollows = newfollows + 1
-WHERE uid = new.tuid;
+WHERE id = new.tuid;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER t_follow_add
-AFTER INSERT ON follow
-FOR EACH ROW
+  AFTER INSERT
+  ON follow
+  FOR EACH ROW
 WHEN (new.uid <> new.tuid)
 EXECUTE PROCEDURE func_follow_del();
 

@@ -7,7 +7,7 @@
   "SecretKey": "jA8/}~-)n?'z#!`+",
   "DbUsername": "yang",
   "DbPassword": "justice",
-  "DbName": "goblog",
+  "DbName": "blog",
   "DirUpload": "upload/",
   "DirStatic": "static/"
 }

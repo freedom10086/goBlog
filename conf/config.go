@@ -18,12 +18,12 @@ type Config struct {
 	DbUsername    string `json:"DbUsername"`
 	DbPassword    string `json:"DbPassword"`
 	DbName        string `json:"DbName"`
-	DirUpload   string `json:"DirUpload"`
+	DirUpload     string `json:"DirUpload"`
 	DirStatic     string `json:"DirStatic"`
 }
 
 const (
-	dir_config = "./conf/config.json"
+	configFile = "./conf/config.json"
 )
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 }
 
 func readConfig() *Config {
-	file, err := os.Open(dir_config)
+	file, err := os.Open(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}

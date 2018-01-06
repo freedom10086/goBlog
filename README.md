@@ -28,10 +28,10 @@
 `\q`
 
 4. 创建数据库 指定所有权yang
-`createdb -O yang -p 5432 goblog`
+`createdb -O yang -p 5432 blog`
 
 5. 登陆数据库
-`psql -U yang -d goblog -h 127.0.0.1 -p 5432`
+`psql -U yang -d blog -h 127.0.0.1 -p 5432`
 
 > -U 用户
 > -d 数据库
