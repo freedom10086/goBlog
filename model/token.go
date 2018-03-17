@@ -66,7 +66,7 @@ func DecodeToken(token, secretKey string) ([]byte, error) {
 //生成TOKEN base64(data+hmac(data,SecretKey))
 func GenToken(user *User, authority int, secretKey string, duration time.Duration) (string, error) {
 	data := &Token{
-		Uid:       user.Uid,
+		Uid:       user.Id,
 		Authority: authority,
 		Salt:      Krand(10),
 		Expires:   time.Now().Add(duration),

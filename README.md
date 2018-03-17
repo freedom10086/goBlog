@@ -11,7 +11,7 @@
     ```
     sudo apt-get install postgresql-client
     sudo apt-get install postgresql
-    su postgress //切换到postgress用户
+    su postgres //切换到postgress用户
     psql//使用psql命令登录PostgreSQL控制台，以postgress用户
     \password postgres //更改密码
     ```
@@ -38,13 +38,28 @@
 > -h host
 > -p 端口
 
+6. 远程访问
+```
+$ find \ -name "postgresql.conf"
+/var/lib/pgsql/9.4/data/postgresql.conf
+
+change 
+listen_addresses = 'localhost'
+to
+listen_addresses = '*'
+
+修改pg_hba.conf 添加
+host    all             all              0.0.0.0/0                       md5
+host    all             all              ::/0                            md5
+```
+
 ## 数据表定义
 
 ```sql
 -- 用户表
 DROP TABLE users;
 CREATE TABLE users (
-  uid         SERIAL PRIMARY KEY,
+  id         SERIAL PRIMARY KEY,
   username    VARCHAR(32) NOT NULL UNIQUE,
   password    VARCHAR(64) NOT NULL,
   email       VARCHAR(32) NOT NULL UNIQUE,

@@ -15,11 +15,19 @@ type Config struct {
 	SitePortSSL   string `json:"SitePortSSL"`
 	SiteStaticDir string `json:"SiteStaticDir"`
 	SecretKey     string `json:"SecretKey"`
-	DbUsername    string `json:"DbUsername"`
-	DbPassword    string `json:"DbPassword"`
-	DbName        string `json:"DbName"`
-	DirUpload     string `json:"DirUpload"`
-	DirStatic     string `json:"DirStatic"`
+
+	DbHost     string `json:"DbHost"`
+	DbPort     int    `json:"DbPort"`
+	DbUsername string `json:"DbUsername"`
+	DbPassword string `json:"DbPassword"`
+	DbName     string `json:"DbName"`
+
+	DirUpload string `json:"DirUpload"`
+	DirStatic string `json:"DirStatic"`
+
+	QQConnectAppId    string `json:"QQConnectAppId"`
+	QQConnectSecret   string `json:"QQConnectSecret"`
+	QQConnectRedirect string `json:"QQConnectRedirect"`
 }
 
 const (

@@ -13,8 +13,8 @@ var (
 
 //todo 要不要缓存一些 *sql.Stmt 避免不断的创建销毁
 
-func InitDB(dbname, dbuser, dbpass string) {
-	url := fmt.Sprintf("postgres://%s:%s@localhost/%s?sslmode=disable", dbuser, dbpass, dbname)
+func InitDB(dbHost string, dbPort int, dbname, dbuser, dbpass string) {
+	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbuser, dbpass, dbHost, dbname)
 	d, err := sql.Open("postgres", url)
 	if err != nil {
 		log.Fatal(err)

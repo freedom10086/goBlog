@@ -20,7 +20,7 @@ func init() {
 	config = conf.Conf
 
 	//todo
-	model.InitDB(config.DbName, config.DbUsername, config.DbPassword)
+	model.InitDB(config.DbHost, config.DbPort, config.DbName, config.DbUsername, config.DbPassword)
 	logger.I("==%s started==", config.SiteName)
 
 	routers = map[string]router.Handler{
@@ -28,7 +28,7 @@ func init() {
 		"/article":   &router.ArticleHandler{},
 		"/categorys": &router.CateHandler{},
 		"/users":     &router.UserHandler{},
-		"/auth":      &router.OauthHandler{},
+		"/oauth":     &router.OauthHandler{},
 		"/login":     &router.LoginHandler{},
 		"/qrlogin":   &router.QrLoginHandler{},
 		"/register":  &router.RegisterHandler{},
