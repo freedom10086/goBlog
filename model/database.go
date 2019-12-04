@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"goBlog/logger"
 	"log"
 )
 
@@ -14,19 +15,22 @@ var (
 //todo 要不要缓存一些 *sql.Stmt 避免不断的创建销毁
 
 func InitDB(dbHost string, dbPort int, dbname, dbuser, dbpass string) {
-	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", dbuser, dbpass, dbHost, dbname)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", dbuser, dbpass, dbHost, dbPort, dbname)
+	logger.I("connecting to %s", url)
 	d, err := sql.Open("postgres", url)
 	if err != nil {
+		logger.E("error open db %s", url)
 		log.Fatal(err)
 	}
 
 	if err = d.Ping(); err != nil {
+		logger.E("error connect to db %s", url)
 		log.Fatal(err)
 	}
 
 	if d != nil {
 		db = d
-		log.Println("success connected to the database")
+		logger.I("success connected to the database %s", url)
 	}
 }
 

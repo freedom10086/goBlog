@@ -11,12 +11,12 @@
     ```
     sudo apt-get install postgresql-client
     sudo apt-get install postgresql
-    su postgres //切换到postgress用户
+    sudo -i -u postgres //切换到postgress用户
     psql//使用psql命令登录PostgreSQL控制台，以postgress用户
     \password postgres //更改密码
     ```
 2. 创建用户 超级用户要谨慎
-`createuser [--superuser] yang`
+`createuser [--superuser] yang` or `createuser --interactive`
 
 3. 设置密码 用postgres超级管理员登陆
 > 为刚刚创建的用户设置密码
@@ -38,9 +38,13 @@
 > -h host
 > -p 端口
 
+`\q`
+
+`exit`
+
 6. 远程访问
 ```
-$ find \ -name "postgresql.conf"
+$ find / -name "postgresql.conf"
 /var/lib/pgsql/9.4/data/postgresql.conf
 
 change 
@@ -49,8 +53,8 @@ to
 listen_addresses = '*'
 
 修改pg_hba.conf 添加
-host    all             all              0.0.0.0/0                       md5
-host    all             all              ::/0                            md5
+host    all(或者blog)     all(或者 yang)        0.0.0.0/0     md5(或者scram-sha-256)
+host    all(或者blog)     all(或者 yang)        ::/0          md5(或者scram-sha-256)
 ```
 
 ## 数据表定义

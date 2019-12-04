@@ -24,19 +24,19 @@ func init() {
 }
 
 func D(format string, v ...interface{}) {
-	log.Printf(format, v)
+	log.Printf(format, v...)
 	fileLogger.SetPrefix("[D] ")
-	fileLogger.Printf(format, v)
+	fileLogger.Printf(format, v...)
 }
 
 func I(format string, v ...interface{}) {
-	log.Printf(format, v)
+	log.Printf(format, v...)
 	fileLogger.SetPrefix("[I] ")
-	fileLogger.Printf(format, v)
+	fileLogger.Printf(format, v...)
 }
 
 func E(format string, v ...interface{}) {
-	log.Printf(format, v)
+	log.Printf(format, v...)
 	fileLogger.SetPrefix("[E] ")
-	fileLogger.Printf(format, v)
+	fileLogger.Printf(format, v...)
 }
