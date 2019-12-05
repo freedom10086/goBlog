@@ -28,6 +28,10 @@ type Config struct {
 	QQConnectAppId    string `json:"QQConnectAppId"`
 	QQConnectSecret   string `json:"QQConnectSecret"`
 	QQConnectRedirect string `json:"QQConnectRedirect"`
+
+	MailUsername string `json:"MailUsername"`
+	MailPassword string `json:"MailPassword"`
+	MailHost     string `json:"MailHost"`
 }
 
 const (

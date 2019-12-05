@@ -19,6 +19,6 @@ func (*HomeHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 			Title: "首页-" + config.SiteName,
 			Css:   []string{"style.css"},
 			Js:    []string{"base.js"},
-			Data:  nil,},
-		"page.tmpl", "index.tmpl")
+			Data:  nil},
+		"page.gohtml", "index.gohtml")
 }

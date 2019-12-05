@@ -47,7 +47,7 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 					Email:    t.Email,
 					Username: t.Username},
 			},
-				"page.tmpl", "register-done.tmpl")
+				"page.gohtml", "register-done.gohtml")
 		} else {
 			Unauthorized(w, r, err.Error())
 		}
@@ -68,8 +68,8 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		Template(w, &TemplateData{Css: []string{"style.css"},
-			Js: []string{"base.js", "particles.js"},},
-			"page.tmpl", "register.tmpl")
+			Js: []string{"base.js", "particles.js"}},
+			"page.gohtml", "register.gohtml")
 	}
 }
 

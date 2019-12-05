@@ -97,3 +97,7 @@ window.onload = function(){
             inputaera.insertAtCousor(str);
         }
         ,
+
+// 获取链接参数
+1.window.location.search:获取当前URL的'?'号开始的字符串
+2.window.location.hash:获取当前URL的'#'后面的字符串

@@ -28,7 +28,7 @@
 `\q`
 
 4. 创建数据库 指定所有权yang
-`createdb -O yang -p 5432 blog`
+`createdb -O yang -p 5432 blog` or `createdb blog` `grant all privileges on database blog to yang;`
 
 5. 登陆数据库
 `psql -U yang -d blog -h 127.0.0.1 -p 5432`
@@ -57,6 +57,8 @@ host    all(或者blog)     all(或者 yang)        0.0.0.0/0     md5(或者scra
 host    all(或者blog)     all(或者 yang)        ::/0          md5(或者scram-sha-256)
 ```
 
+7. 更新
+`service postgresql reload` or `pg_ctl reload`
 ## 数据表定义
 
 ```sql

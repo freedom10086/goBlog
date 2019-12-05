@@ -1,13 +1,13 @@
 package router
 
 import (
-	"net/http"
-	"time"
-	"goBlog/model"
-	"fmt"
-	"strconv"
 	"database/sql"
 	"errors"
+	"fmt"
+	"goBlog/model"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 // todo 线程不安全 use sync.Map
@@ -31,8 +31,8 @@ type QrLoginHandler struct {
 
 //登陆返回结果
 type LoginResult struct {
-	model.User   `json:"user"`
-	Token string `json:"token"`
+	model.User `json:"user"`
+	Token      string `json:"token"`
 }
 
 func (h *LoginHandler) DoAuth(method int, r *http.Request) error {
@@ -45,8 +45,8 @@ func (h *LoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	Template(w, &TemplateData{
 		Title: "登陆",
 		Css:   []string{"style.css"},
-		Js:    []string{"base.js", "particles.js", "qrcode.js"},},
-		"page.tmpl", "login.tmpl",
+		Js:    []string{"base.js", "particles.js", "qrcode.js"}},
+		"page.gohtml", "login.gohtml",
 	)
 }
 
@@ -64,7 +64,7 @@ func (h *LoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		if err == sql.ErrNoRows {
 			err = errors.New("此用户不存在")
 		}
-		Unauthorized(w, r, err.Error())
+		InternalError(w, r, err)
 		return
 	}
 
@@ -91,7 +91,7 @@ func (h *QrLoginHandler) DoAuth(method int, r *http.Request) error {
 //利用html5 Server-Sent推送
 func (h *QrLoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Accept") != "text/event-stream" {
-		w.Write([]byte("only support text/event-stream"));
+		w.Write([]byte("only support text/event-stream"))
 		return
 	}
 	w.Header().Set("Content-Type", "text/event-stream;charset=utf-8")
@@ -209,7 +209,7 @@ func (h *QrLoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//todo token 取得
-		var uid int64 = 123;
+		var uid int64 = 123
 		if mod == "confirm" {
 			//扫码确认成功
 			v.ch <- "1:" + strconv.FormatInt(uid, 10)

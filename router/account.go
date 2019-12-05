@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -36,4 +37,11 @@ func (*AccountHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	} else { //个人账户 todo
 		NotFound(w, r)
 	}
+}
+
+func (*AccountHandler) DoPost(w http.ResponseWriter, r *http.Request) {
+	p := r.URL.Path
+
+	index := strings.LastIndex(p, "/")
+	fmt.Println(p, index)
 }

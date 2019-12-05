@@ -6,21 +6,22 @@ import (
 	"fmt"
 	"goBlog/conf"
 	"goBlog/model"
-	"net/http"
-	"strings"
 	"html/template"
-	"log"
-	"os"
-	"time"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 var config *conf.Config
+
 //静态文件&模板目录
 var staticDir = "static/"
 
-const baseTmpl = "page.tmpl"
+const baseTmpl = "page.gohtml"
 
 func init() {
 	config = conf.Conf
@@ -32,8 +33,8 @@ func init() {
 //基本api返回data
 type ApiData struct {
 	Data    interface{} `json:"data"`
-	Code    int `json:"code"`
-	Message string `json:"message"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
 }
 
 //基本模板data返回类型基类
@@ -63,7 +64,8 @@ func Error(w http.ResponseWriter, error string, code int) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
-	fmt.Fprintln(w, error)
+	w.Write([]byte(error))
+	w.Write([]byte("\n"))
 }
 
 func InternalError(w http.ResponseWriter, r *http.Request, err error) {
@@ -197,7 +199,7 @@ func httpPush(w http.ResponseWriter, data *TemplateData) {
 //注意这事是站内redirect
 //最终setheader例子 /index.html
 func Redirect(w http.ResponseWriter, r *http.Request, path string, code int) {
-	oldFullUrl := r.URL.String();
+	oldFullUrl := r.URL.String()
 	if i := strings.Index(oldFullUrl, "?"); i != -1 {
 		path += oldFullUrl[i:] //加上query参数
 	}

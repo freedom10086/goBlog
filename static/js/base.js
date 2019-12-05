@@ -61,91 +61,6 @@ function exitLogin() {
     });
 }
 
-//promise 版本getJSON
-function getJSON(url) {
-    return new Promise(function (resolve, reject) {
-        const client = new XMLHttpRequest();
-        client.open("GET", url);
-        client.onreadystatechange = handler;
-        client.responseType = "json";
-        client.setRequestHeader("Accept", "application/json");
-        client.send();
-
-        function handler() {
-            if (this.readyState !== 4) {
-                return;
-            }
-            if (this.status >= 200 && this.status < 300) {
-                resolve(this.response);
-            } else {
-                reject(new Error(this.statusText));
-            }
-        }
-    });
-}
-
-/*
- fetch api
- https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
- */
-function fetchJSON(url, success) {
-    const myHeaders = new Headers({
-        "Content-Type": "text/plain",
-        "Accept": "application/json",
-    });
-    const myInit = {
-        method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default'
-    };
-
-    const myRequest = new Request(url, myInit);
-    fetch(myRequest).then(function (res) {
-        if (res.ok) {
-            return res.json();
-        }
-        throw new Error(res.status);
-    }).then(function (json) {
-        if (success) {
-            success(json);
-        }
-        console.log(json)
-    }).catch(function (error) {
-        console.log('There has been a problem with your fetch operation: ' + error.message);
-    });
-}
-
-//fetch text
-function fetchText(url, success) {
-    const myHeaders = new Headers({
-        "Content-Type": "text/plain",
-        "Accept": "text/plain",
-    });
-    const myInit = {
-        method: 'GET',
-        headers: myHeaders,
-        mode: 'cors',
-        cache: 'default'
-    };
-
-    const myRequest = new Request(url, myInit);
-    fetch(myRequest).then(function (res) {
-        console.log(res);
-        if (res.ok) {
-            return res.text();
-        }
-        throw new Error(res.status);
-    }).then(function (text) {
-        if (success) {
-            success(text);
-        }
-        console.log(text)
-    }).catch(function (error) {
-        console.log('There has been a problem with your fetch operation: ' + error.message);
-    });
-}
-
 //验证么创造/验证类
 class Yzm {
     constructor() {
@@ -238,16 +153,17 @@ class Modal {
         })
     }
 
-    //inputs 是否有输入框{"type"输入类型,"hint","value"默认值}
-    static create(title, content, btnPrimary, btnCancle, callback, input) {
+    // callback 如果没有返回值(或者返回值为true)，则直接拿关闭,为false取消关闭，为非空字符串，则为错误提示。
+    // inputs 是否有输入框{"type"输入类型,"hint","value"默认值}
+    static create(title, content, btnPrimary, btnCancel, callback, input) {
         btnPrimary = btnPrimary || {};
-        btnCancle = btnCancle || {};
+        btnCancel = btnCancel || {};
         let modal = document.querySelector(`.modal`);
         let btnPrimaryText = btnPrimary && btnPrimary.text || "确认";
         let btnPrimaryCss = btnPrimary && btnPrimary.css || "btn-primary";
-        let btnCancleText = btnCancle && btnCancle.text || "关闭";
-        let btnCancleCss = btnCancle && btnCancle.css || "btn-info";
-        let inputContent = typeof(input) !== "undefined" ? (`<input type="${input.type || "text"}" 
+        let btnCancelText = btnCancel && btnCancel.text || "关闭";
+        let btnCancelCss = btnCancel && btnCancel.css || "btn-info";
+        let inputContent = typeof (input) !== "undefined" ? (`<input type="${input.type || "text"}"
         class="form-control" placeholder="${input.hint || ""}" value="${input.value || ""}"/>`) : "";
         if (!modal) {
             modal = document.createElement("div");
@@ -255,6 +171,7 @@ class Modal {
             modal.innerHTML = `
             <div class="modal-dialog">
             <div class="modal-content">
+            <form>
             <div class="modal-header">
             <h5 class="modal-title">${title}</h5>
             <button type="button" class="close" data-type="close">
@@ -267,8 +184,8 @@ class Modal {
             </div>
             <div class="modal-footer">
             <button type="button" data-type="confirm" class="btn ${btnPrimaryCss}">${btnPrimaryText}</button>
-            <button type="button" class="btn ${btnCancleCss}" data-type="close">${btnCancleText}</button>
-            </div></div></div>`;
+            <button type="button" class="btn ${btnCancelCss}" data-type="close">${btnCancelText}</button>
+            </div></form></div></div>`;
             this.modal = modal;
             document.body.appendChild(modal);
             [...modal.querySelectorAll("[data-type=close]")].forEach((v, k) => {
@@ -276,22 +193,40 @@ class Modal {
                     modal.style.display = "none";
                 });
             });
+
+            let inputBox = modal.querySelector("[data-type=input] input");
+            if (inputBox !== null) {
+                inputBox.addEventListener("change", function () {
+                    if (inputBox.value.length > 0 && inputBox.className.includes("is-invalid")) {
+                        inputBox.classList.remove("is-invalid");
+                        inputBox.setCustomValidity("");
+                    }
+                });
+            }
+
             modal.querySelector("[data-type=confirm]").addEventListener('click', () => {
-                let canHide = true;
                 let content = "";
                 //有输入内容
                 if (modal.querySelector("[data-type=input]").style.display !== 'none') {
-                    content = modal.querySelector("[data-type=input] input").value;
-                    if (typeof(content) === "undefined" || content.length === 0) {
-                        canHide = false;
+                    content = inputBox.value;
+                    if (typeof (content) === "undefined" || content.length === 0) {
+                        if (!inputBox.classList.contains("is-invalid")) {
+                            inputBox.classList.add("is-invalid");
+                            inputBox.checkValidity();
+                        }
+                        return
                     }
-                }
 
-                if (canHide) {
-                    modal.style.display = "none";
-                    if (typeof(callback) !== "undefined" && callback !== null) {
-                        callback(content);
+                    if (typeof (callback) !== "undefined" && callback !== null) {
+                        let res = callback(content);
+                        if (res !== null && res !== true) {
+                            inputBox.classList.add("is-invalid");
+                            inputBox.setCustomValidity(res === false ? "输入不合法" : res);
+                            return;
+                        }
                     }
+
+                    modal.style.display = "none";
                 }
             })
         } else {
@@ -563,21 +498,59 @@ class TabBox {
     }
 }
 
-/*
- //利用对话框返回的值 （true 或者 false）
- if (confirm("确定删除？")) {
- console.log("ok");
- //location.href="http://blog.csdn.net/fengyifei11228/";
- } else {
- }
+const ajaxPromise = param => {
+    return new Promise((resovle, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.open(param.type || "get", param.url, true);
+        xhr.send(param.data || null);
 
+        xhr.onreadystatechange = () => {
+            var DONE = 4; // readyState 4 代表已向服务器发送请求
+            var OK = 200; // status 200 代表服务器返回成功
+            if (xhr.readyState === DONE) {
+                if (xhr.status === OK) {
+                    resovle(JSON.parse(xhr.responseText));
+                } else {
+                    reject(JSON.parse(xhr.responseText));
+                }
+            }
+        }
+    })
+}
 
- var name=prompt("请输入您的名字","");//将输入的内容赋给变量 name ，
- //这里需要注意的是，prompt有两个参数，前面是提示的话，后面是当对话框出来后，在对话框里的默认值
- if(name)//如果返回的有内容
- {alert("欢迎您："+ name)}
- */
+// fetch api 返回promise对象
+// https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+// fetch text
+function fetchText(url, success) {
+    const myHeaders = new Headers({
+        "Content-Type": "text/plain",
+        "Accept": "text/plain",
+    });
+    const myInit = {
+        method: 'GET',
+        headers: myHeaders,
+        mode: 'cors',
+        cache: 'default'
+    };
 
+    const myRequest = new Request(url, myInit);
+    fetch(myRequest).then(function (res) {
+        console.log(res);
+        if (res.ok) {
+            return res.text();
+        }
+        throw new Error(res.status);
+    }).then(function (text) {
+        if (success) {
+            success(text);
+        }
+        console.log(text)
+    }).catch(function (error) {
+        console.log('There has been a problem with your fetch operation: ' + error.message);
+    });
+}
+
+//========Ajax================//
 class Ajax {
     static send(url, method = 'GET', data, success, fail) {
         const x = new XMLHttpRequest();
@@ -586,7 +559,7 @@ class Ajax {
             if (x.readyState === 4) {
                 let status = x.status;
                 if (status >= 200 && status < 300) {
-                    success && success(status, JSON.parse(x.responseText))
+                    success && success(status, x.responseText)
                 } else {
                     fail && fail(status, x.responseText);
                 }
@@ -678,10 +651,65 @@ class ApiClass {
             result(false, res, status);
         })
     }
+
+    forgetPassword(email, result) {
+        console.log("/account/forgetpassword");
+        Ajax.post("/account/forgetpassword", {email}, (status, res) => {
+            result(true, res, status);
+        }, (status, res) => {
+            result(false, res, status);
+        })
+    }
 }
 
 let Api = new ApiClass();
 
+//========Fetch==============//
+class Api2 {
+    constructor() {
+        this.version = 1;
+    }
+
+    async post(url = '', data = {}) {
+        const formData = new URLSearchParams();
+        for (let key in data) {
+            // TODO check if need encodeURIComponent
+            formData.append(encodeURIComponent(key), encodeURIComponent(data[key]));
+        }
+        return fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+                //"Content-Type": "text/plain",
+                'Content-Type': 'application/x-www-form-urlencoded',
+                //'Content-Type': 'application/json',
+                "Accept": "application/json",
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrer: 'no-referrer', // no-referrer, *client
+            body: formData // body data type must match "Content-Type" header
+            // if Content-Type -> JSON.stringify(data), if
+        });
+    }
+
+    async login(username, password) {
+        console.log("/login:", username);
+        const response = await this.post("/login", {username, password});
+        if (!response.ok) {
+            throw Error(response.status + ":" + response.statusText);
+        }
+        return response.json();
+    }
+
+    async forgetPassword(email) {
+        console.log("/account/forgetpassword");
+        return await this.post("/account/forgetpassword", {email});
+    }
+}
+
+let api2 = new Api2();
 
 window.onload = function () {
     console.log("======init js====");

@@ -2,9 +2,9 @@ package main
 
 import (
 	"goBlog/conf"
+	"goBlog/logger"
 	"goBlog/model"
 	"goBlog/router"
-	"goBlog/logger"
 	"log"
 	"net/http"
 	"time"
@@ -46,7 +46,10 @@ func main() {
 			path := "https://127.0.0.1" + config.SitePortSSL + r.URL.Path
 			router.Redirect(w, r, path, http.StatusMovedPermanently)
 		})
-		http.ListenAndServe(config.SitePort, nil)
+		err := http.ListenAndServe(config.SitePort, nil)
+		if err != nil {
+			log.Fatal("start server error!", err)
+		}
 	}()
 
 	r := router.NewRouter()

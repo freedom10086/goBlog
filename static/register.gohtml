@@ -1,0 +1,198 @@
+{{define "content"}}
+    <main class="container" style="display: flex;align-items: center;justify-content: center;">
+        <div class="card">
+            <div class="card-header">注册</div>
+            <form class="card-body" method="post" onsubmit="return startSubmit();">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" name="username" required id="username" placeholder="用户名" minlength="3"
+                           maxlength="20"
+                           class="form-control"
+                           autocomplete="name">
+                    <small class="text-muted">最短3个字符,最长不超过20个字符</small>
+                </div>
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" name="email" required id="email" placeholder="邮箱"
+                           autocomplete="email" maxlength="25" list="email-hint" class="form-control">
+                    <datalist id="email-hint">
+                    </datalist>
+                    <small class="text-muted">请认真填写邮箱，邮箱用于激活账号.</small>
+                </div>
+                <div class="form-group">
+                    <label for="valid">验证码</label>
+                    <div class="flex-row" style="display: flex">
+                        <input id="valid" placeholder="验证码" required style="flex-grow: 2;flex-basis: 100px" type="text"
+                               pattern="[a-zA-Z\d]{4}" maxlength="4" class="form-control">
+                        <canvas id="validcanvas" width="100" height="28"
+                                style="border: 1px solid #ddd;margin-left: 12px;flex-grow: 1">
+                            你的浏览器不支持canvas请使用chrome或者firefox浏览器
+                        </canvas>
+                    </div>
+                </div>
+                <div class="form-check">
+                    <label class="custom-control custom-checkbox">
+                        <input type="checkbox" id="checkbox" class="custom-control-input">
+                        <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description">同意协议</span>
+                    </label>
+                </div>
+                <button id="reg-btn" type="submit" class="btn btn-primary">注册</button>
+            </form>
+            <div class="card-footer">
+                <a href="login" class="small">已有账号?去登陆</a>
+            </div>
+        </div>
+    </main>
+    <script>
+        let yzm;
+        const usernameInput = document.querySelector("#username");
+        const emailInput = document.querySelector("#email");
+        const validCodeInput = document.querySelector("#valid");
+        const checkBox = document.querySelector("#checkbox");
+        const registerBtn = document.querySelector("#reg-btn");
+        const yzmCanvas = document.querySelector("#validcanvas");
+        const emailHint = document.querySelector("#email-hint");
+
+        const emails = ['@qq.com', '@163.com', '@126.com', '@gmail.com', '@hotmail.com'];
+        let usernameState = false;
+        let emailState = false;
+
+        function initPage() {
+            yzm = new Yzm();
+            yzm.createYZM(yzmCanvas);
+            registerBtn.disabled = true;
+            validCodeInput.addEventListener("keyup", () => {
+                checkValid();
+            });
+
+            validCodeInput.addEventListener("change", () => {
+                checkValid();
+            });
+
+            checkBox.addEventListener("change", () => {
+                registerBtn.disabled = !checkBox.checked;
+            });
+
+            usernameInput.addEventListener("keyup", () => {
+                usernameState = false;
+                if (usernameInput.className !== "form-control") {
+                    setUserNameEmailState(usernameInput, 0);
+                }
+            });
+
+            usernameInput.addEventListener("change", () => {
+                console.log(usernameInput.value);
+                usernameState = false;
+                checkUsername(usernameInput.value);
+            });
+
+            emailInput.addEventListener("keyup", () => {
+                emailState = false;
+                if (emailInput.className !== "form-control") {
+                    setUserNameEmailState(this, 0);
+                }
+                let val = emailInput.value;
+                if (val.length > 2 && val.endsWith('@'))
+                    emailHint.innerHTML = `${emails.map(email => `<option value="${val.substr(0, val.indexOf('@')) + email}"/>`).join('')}`
+            });
+
+            emailInput.addEventListener("change", () => {
+                emailState = false;
+                checkEmail(emailInput.value);
+            });
+        }
+
+        function startSubmit() {
+            if (!usernameState) {
+                usernameInput.setCustomValidity("用户名不可用");
+                return false;
+            } else {
+                usernameInput.setCustomValidity("")
+            }
+            if (!emailState) {
+                emailInput.setCustomValidity("email不可用");
+                return false;
+            } else {
+                emailInput.setCustomValidity("")
+            }
+            if (!checkValid()) {
+                validCodeInput.setCustomValidity("验证码不正确");
+                return false;
+            } else {
+                validCodeInput.setCustomValidity("");
+            }
+
+            registerBtn.disabled = true;
+            usernameInput.disabled = true;
+            emailInput.disabled = true;
+            validCodeInput.disabled = true;
+
+            Loading.show(10, "提交中...");
+            Api.regist(usernameInput.value, emailInput.value, (ok, res, status) => {
+                Loading.dismiss();
+                registerBtn.disabled = !checkBox.checked;
+                usernameInput.disabled = false;
+                emailInput.disabled = false;
+                validCodeInput.disabled = false;
+                if (!ok) {
+                    Modal.confirm("错误:" + status, res);
+                } else {
+                    Modal.confirm({title: "注册成功", content: "激活邮件已经发送到你的邮箱,请检查邮箱，激活你的账号"}, () => {
+                        window.location.href = "/"
+                    });
+                }
+            });
+
+            return false;
+        }
+
+        //0-clear -1-error 1-success
+        function setUserNameEmailState(node, state) {
+            if (state === -1) {
+                node.className = "form-control is-invalid";
+                node.title = "不可用";
+            } else if (state === 1) {
+                node.className = "form-control is-valid";
+                node.title = "可用";
+            } else {
+                node.className = "form-control";
+                node.title = "";
+            }
+        }
+
+        function checkUsername(username) {
+            if (!usernameInput.checkValidity()) {
+                return;
+            }
+            Api.checkUsername(username, function (isok) {
+                usernameState = isok;
+                setUserNameEmailState(usernameInput, isok ? 1 : -1);
+            });
+        }
+
+        function checkEmail(email) {
+            if (!emailInput.checkValidity()) {
+                return
+            }
+            Api.checkEmail(email, function (isok) {
+                emailState = isok;
+                setUserNameEmailState(emailInput, isok ? 1 : -1);
+            });
+        }
+
+        function checkValid() {
+            if (yzm.checkValid(validCodeInput.value)) {
+                validCodeInput.setCustomValidity("");
+                validCodeInput.className = "form-control is-valid";
+                validCodeInput.title = "";
+                return true
+            } else {
+                validCodeInput.className = "form-control is-invalid";
+                validCodeInput.title = "验证码不匹配";
+                validCodeInput.setCustomValidity("验证码不匹配");
+                return false;
+            }
+        }
+    </script>
+{{end}}
