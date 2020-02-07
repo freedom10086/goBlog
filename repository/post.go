@@ -1,7 +1,8 @@
-package model
+package repository
 
 import (
 	"database/sql"
+	"goBlog/logger"
 	"time"
 )
 
@@ -10,7 +11,6 @@ type Post struct {
 	Tid       int //id
 	Cid       int //category id
 	Uid       int //user id
-	Username  string
 	Title     string
 	Content   string
 	Tags      string
@@ -31,8 +31,8 @@ type Article struct {
 
 //发布主题
 func AddPost(cid, uid int, title, content string) (int, error) {
-	s := "insert into post (cid,uid,username,title,content) VALUES " +
-		"($1,$2,(select username from user where uid = $2),$3,$4) RETURNING tid"
+	s := "insert into post (cid,uid,title,content) VALUES " +
+		"($1,$2,$3,$4) RETURNING id"
 	return add(s, cid, uid, title, content)
 }
 
@@ -44,7 +44,7 @@ func DelPost(tid int) (int64, error) {
 
 //编辑文章
 func EditPost(tid int, title, content string) (int64, error) {
-	s := "UPDATE post SET title = $1, content = $2, updated = now(), lastreply = updated WHERE tid = $3"
+	s := "UPDATE post SET title = $1, content = $2, updated = now(), lastreply = updated WHERE id = $3"
 	return update(s, title, content, tid)
 }
 
@@ -53,7 +53,7 @@ func setPostStatus(tid, status int) (int64, error) {
 	if tid <= 0 || status < 0 || status > 2 {
 		return -1, ErrParama
 	}
-	s := " UPDATE post SET status = $1 WHERE tid = $2"
+	s := " UPDATE post SET status = $1 WHERE id = $2"
 	return update(s, status, tid)
 }
 
@@ -66,11 +66,11 @@ func getPostStatus(tid int) (int, error) {
 
 //根据tid获取单篇文章
 func GetPost(tid int) (*Post, error) {
-	s := "SELECT cid,uid,username,title,content,tags,type,status," +
+	s := "SELECT cid,uid,title,content,tags,type,status," +
 		"views,replys,created,updated,lastreply FROM post WHERE tid = $1"
 
 	p := &Post{Tid: tid}
-	err := db.QueryRow(s, tid).Scan(&p.Cid, &p.Uid, &p.Username, &p.Title, &p.Content, &p.Tags, &p.Type, &p.Status,
+	err := db.QueryRow(s, tid).Scan(&p.Cid, &p.Uid, &p.Title, &p.Content, &p.Tags, &p.Type, &p.Status,
 		&p.Views, &p.Replys, &p.Created, &p.Updated, &p.Lastreply)
 	return p, err
 }
@@ -105,7 +105,7 @@ func GetArticle(tid int) (a *Article, err error) {
 //如果cid<0 则表示不分区
 //只获取文章前一部分(120)
 //created hot3 hot7 其余是按照最后回复排序
-func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err error) {
+func getPostsList(cid, page, pagesize int, order string) (posts []*Post, err error) {
 	//查询数据
 	var where string
 	switch order {
@@ -126,27 +126,21 @@ func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err err
 
 	var whereCid string
 	if cid < 0 {
-		whereCid = "whrer 1 "
+		whereCid = "where $1 = $1 "
 	} else {
-		whereCid = "whrew cid = $1 "
+		whereCid = "where cid = $1 "
 	}
 
-	s := "SELECT tid,uid,username,title, left(content,120)," +
-		"tags,type,status, views," +
-		"replys, created,updated,lastreply" +
+	s := "SELECT id,uid,title,left(content,120)," +
+		"tags,type,status,views," +
+		"replys,created,updated,lastreply" +
 		" FROM post " + whereCid + where + " LIMIT $2 OFFSET $3"
 
 	var rows *sql.Rows
-	if cid < 0 {
-		if rows, err = db.Query(s, pagesize, offset); err != nil {
-			return nil, err
-		}
-	} else {
-		if rows, err = db.Query(s, cid, pagesize, offset); err != nil {
-			return nil, err
-		}
+	logger.D("get posts sql: %s", s)
+	if rows, err = db.Query(s, -1, pagesize, offset); err != nil {
+		return nil, err
 	}
-
 	defer rows.Close()
 
 	posts = make([]*Post, 0, pagesize)
@@ -154,7 +148,7 @@ func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err err
 	for rows.Next() {
 		p := &Post{Cid: cid}
 		if err = rows.Scan(
-			&p.Tid, &p.Uid, &p.Username, &p.Title, &p.Content,
+			&p.Tid, &p.Uid, &p.Title, &p.Content,
 			&p.Tags, &p.Type, &p.Status, &p.Views,
 			&p.Replys, &p.Created, &p.Updated, &p.Lastreply); err != nil {
 			return
@@ -166,21 +160,38 @@ func GetPostsList(cid, page, pagesize int, order string) (posts []*Post, err err
 	return
 }
 
-func GetPostListByCreate(cid, page, pagesize int) ([]*Post, error) {
-	return GetPostsList(cid, page, pagesize, "created")
+// 按发帖时间排序
+func GetPostListOrderCreated(page, pagesize int) ([]*Post, error) {
+	return getPostsList(-1, page, pagesize, "created")
+}
+
+func GetPostListByCidOrderCreated(cid, page, pagesize int) ([]*Post, error) {
+	return getPostsList(cid, page, pagesize, "created")
 }
 
 //最近3天热贴
-func GetPostListByHot3(cid, page, pagesize int) ([]*Post, error) {
-	return GetPostsList(cid, page, pagesize, "hot3")
+func GetPostListHot3(page, pagesize int) ([]*Post, error) {
+	return getPostsList(-1, page, pagesize, "hot3")
+}
+
+func GetPostListByCidHot3(cid, page, pagesize int) ([]*Post, error) {
+	return getPostsList(cid, page, pagesize, "hot3")
 }
 
 //最近7天热贴
-func GetPostListByHot7(cid, page, pagesize int) ([]*Post, error) {
-	return GetPostsList(cid, page, pagesize, "hot7")
+func GetPostListHot7(page, pagesize int) ([]*Post, error) {
+	return getPostsList(-1, page, pagesize, "hot7")
+}
+
+func GetPostListByCidHot7(cid, page, pagesize int) ([]*Post, error) {
+	return getPostsList(cid, page, pagesize, "hot7")
 }
 
 //最后回复
-func GetPostListByLastReply(cid, page, pagesize int) ([]*Post, error) {
-	return GetPostsList(cid, page, pagesize, "lastreply")
+func GetPostListOrderLastReply(page, pagesize int) ([]*Post, error) {
+	return getPostsList(-1, page, pagesize, "lastreply")
+}
+
+func GetPostListByCidOrderLastReply(cid, page, pagesize int) ([]*Post, error) {
+	return getPostsList(cid, page, pagesize, "lastreply")
 }

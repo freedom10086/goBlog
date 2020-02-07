@@ -1,8 +1,8 @@
 package router
 
 import (
+	"goBlog/repository"
 	"net/http"
-	"goBlog/model"
 )
 
 //handler接口
@@ -27,7 +27,7 @@ type Handler interface {
 
 //默认的handler
 type BaseHandler struct {
-	Token *model.Token
+	Token *repository.Token
 }
 
 func (h *BaseHandler) DoAuth(method int, r *http.Request) error {

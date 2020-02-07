@@ -1,7 +1,7 @@
 package router
 
 import (
-	"goBlog/model"
+	"goBlog/repository"
 	"log"
 	"net/http"
 )
@@ -11,7 +11,7 @@ type ChatHandler struct {
 }
 
 func (*ChatHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	cs, err := model.GetChats(1, 3, 1, 20)
+	cs, err := repository.GetChats(1, 3, 1, 20)
 	if err != nil {
 		log.Print(err)
 	}

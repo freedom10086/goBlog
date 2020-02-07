@@ -3,7 +3,7 @@ package main
 import (
 	"goBlog/conf"
 	"goBlog/logger"
-	"goBlog/model"
+	"goBlog/repository"
 	"goBlog/router"
 	"log"
 	"net/http"
@@ -20,7 +20,7 @@ func init() {
 	config = conf.Conf
 
 	//todo
-	model.InitDB(config.DbHost, config.DbPort, config.DbName, config.DbUsername, config.DbPassword)
+	repository.InitDB(config.DbHost, config.DbPort, config.DbName, config.DbUsername, config.DbPassword)
 	logger.I("==%s started==", config.SiteName)
 
 	routers = map[string]router.Handler{
@@ -40,7 +40,7 @@ func init() {
 }
 
 func main() {
-	defer model.CloseDB()
+	defer repository.CloseDB()
 	go func() {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			path := "https://127.0.0.1" + config.SitePortSSL + r.URL.Path

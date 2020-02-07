@@ -130,15 +130,20 @@
 
             Loading.show(10, "提交中...");
             Api.regist(usernameInput.value, emailInput.value, (ok, res, status) => {
+                console.log(ok, res);
                 Loading.dismiss();
                 registerBtn.disabled = !checkBox.checked;
                 usernameInput.disabled = false;
                 emailInput.disabled = false;
                 validCodeInput.disabled = false;
                 if (!ok) {
-                    Modal.confirm("错误:" + status, res);
+                    Modal.confirm({title: "错误" + status, content: res || "网络错误", btnCancle: {text: "好的"}});
                 } else {
-                    Modal.confirm({title: "注册成功", content: "激活邮件已经发送到你的邮箱,请检查邮箱，激活你的账号"}, () => {
+                    Modal.confirm({
+                        title: "注册成功",
+                        content: res || "激活邮件已经发送到你的邮箱,请检查邮箱，激活你的账号",
+                        btnPrimary: {text: "好的"}
+                    }, () => {
                         window.location.href = "/"
                     });
                 }

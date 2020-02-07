@@ -1,7 +1,7 @@
 package router
 
 import (
-	"goBlog/model"
+	"goBlog/repository"
 	"io"
 	"log"
 	"net/http"
@@ -13,7 +13,7 @@ type CateHandler struct {
 }
 
 func (*CateHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	if cates, err := model.GetCates(); err != nil {
+	if cates, err := repository.GetCates(); err != nil {
 		InternalError(w, r, err)
 	} else {
 		Result(w, r, cates)
@@ -30,7 +30,7 @@ func (*CateHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("name:%s des:%s", name, des)
-	if i, err := model.AddCate(name, des); err != nil {
+	if i, err := repository.AddCate(name, des); err != nil {
 		InternalError(w, r, err)
 		return
 	} else {
@@ -44,7 +44,7 @@ func (*CateHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 	if cidInt, err := strconv.Atoi(cid); err != nil {
 		BadParameter(w, r, err.Error())
 	} else {
-		if i, err := model.DelCate(cidInt); err != nil {
+		if i, err := repository.DelCate(cidInt); err != nil {
 			InternalError(w, r, err)
 		} else {
 			log.Printf("delete cate %d ok,delete count %d", cidInt, i)

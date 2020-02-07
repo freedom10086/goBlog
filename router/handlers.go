@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"goBlog/conf"
-	"goBlog/model"
+	"goBlog/repository"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -48,15 +48,15 @@ type TemplateData struct {
 
 //常用auth
 //基础用户
-func BaseAuth(method int, r *http.Request) (*model.Token, error) {
+func BaseAuth(method int, r *http.Request) (*repository.Token, error) {
 	var auth string
 	if auth := r.Header.Get("Authorization"); auth == "" {
-		return nil, model.ErrTokenInvalid
+		return nil, repository.ErrTokenInvalid
 	}
 	if decodeToken, err := base64.URLEncoding.DecodeString(auth); err != nil {
-		return nil, model.ErrTokenInvalid
+		return nil, repository.ErrTokenInvalid
 	} else {
-		return model.ValidToken(string(decodeToken), config.SecretKey)
+		return repository.ValidToken(string(decodeToken), config.SecretKey)
 	}
 }
 

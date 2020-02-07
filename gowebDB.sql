@@ -15,12 +15,13 @@ CREATE TABLE "user" (
   sex         SMALLINT    NOT NULL DEFAULT 0, -- 0-unknown 1-man 2-woman
   exp         INT         NOT NULL DEFAULT 0, -- 经验值
   birthday    DATE,
-  phone       TEXT,
-  description TEXT, -- 个人简介
-  site        TEXT, -- 个人网站
+  phone       VARCHAR(64),  -- 手机号
+  description VARCHAR(512), -- 个人简介
+  site        VARCHAR(128), -- 个人网站
   posts       INT         NOT NULL DEFAULT 0, -- 发帖数
   replys      INT         NOT NULL DEFAULT 0, -- 回复数
-  regtime     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 用户认证表
@@ -54,7 +55,6 @@ CREATE TABLE post (
     ON DELETE CASCADE, -- 板块id
   uid       INT          NOT NULL REFERENCES "user" (id)
     ON DELETE CASCADE, -- 用户id
-  username  VARCHAR(32)  NOT NULL, -- 牺牲这个加快查找速度
   title     VARCHAR(128) NOT NULL, -- 标题
   content   TEXT         NOT NULL, -- 内容
   tags      TEXT [], -- 标签?-- xx?--

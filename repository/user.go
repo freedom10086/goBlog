@@ -1,9 +1,9 @@
-package model
+package repository
 
 import (
 	"database/sql"
-	"time"
 	"errors"
+	"time"
 )
 
 type User struct {
@@ -67,7 +67,7 @@ func UpdatePass2(uid int, oldpass, newpass string) (int64, error) {
 func GetUserById(uid int64) (u *User, err error) {
 	u = &User{Id: uid}
 	s := `SELECT username,password,email,status,sex,exp,birthday,phone,description,
-		site,posts,replys,regtime FROM users WHERE id = $1`
+		site,posts,replys,created FROM users WHERE id = $1`
 	err = db.QueryRow(s, uid).Scan(&u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
 		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
@@ -78,7 +78,7 @@ func GetUserById(uid int64) (u *User, err error) {
 func GetUserByName(username string) (u *User, err error) {
 	u = &User{Username: username}
 	s := `SELECT id,password,email,status,sex,exp,birthday,phone,description,
-		site,posts,replys,regtime FROM users WHERE username = $1`
+		site,posts,replys,created FROM users WHERE username = $1`
 	err = db.QueryRow(s, username).Scan(&u.Id, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
 		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
@@ -89,7 +89,7 @@ func GetUserByName(username string) (u *User, err error) {
 func GetUserByEmail(email string) (u *User, err error) {
 	u = &User{Email: email}
 	s := `SELECT id,password,username,status,sex,exp,birthday,phone,description,
-		site,posts,replys,regtime FROM users WHERE email = $1`
+		site,posts,replys,created FROM users WHERE email = $1`
 	err = db.QueryRow(s, email).Scan(&u.Id, &u.Password, &u.Username, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
 		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
@@ -100,9 +100,9 @@ func GetUserByEmail(email string) (u *User, err error) {
 //Status //0-正常 1-禁止访问
 func UserLogin(username, password string) (u *User, err error) {
 	password = Md5_encode(password)
-	u = &User{/*Password: password*/ }
+	u = &User{ /*Password: password*/ }
 	s := `SELECT id,username,password,email,status,sex,exp,birthday,
-	phone,description,site,posts,replys,regtime FROM users
+	phone,description,site,posts,replys,created FROM users
 		WHERE (email = $1 OR username = $1)` //AND password = $2
 
 	err = db.QueryRow(s, username).Scan(
@@ -130,7 +130,7 @@ func GetUsers(page, pagesize int) (us []*User, err error) {
 	var rows *sql.Rows
 	offset := (page - 1) * pagesize
 	s := `SELECT id,username,email, status,sex, exp, birthday, phone,
-		description,site,posts,replys,regtime FROM users
+		description,site,posts,replys,created FROM users
 		ORDER BY id DESC LIMIT $1 OFFSET $2`
 	if rows, err = db.Query(s, pagesize, offset); err != nil {
 		return

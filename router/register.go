@@ -2,9 +2,11 @@ package router
 
 import (
 	"fmt"
-	"goBlog/model"
+	"goBlog/logger"
+	"goBlog/repository"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -33,7 +35,7 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	switch mode {
 	case "done":
 		token := r.FormValue("token")
-		if t, err := model.ValidRegToken(token, config.SecretKey); err == nil {
+		if t, err := repository.ValidRegToken(token, config.SecretKey); err == nil {
 			//返回完善信息页面,完善成功后
 			//post /users 插入数据库完成注册
 			fmt.Println(t)
@@ -53,14 +55,14 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	case "checkUsername":
-		if u := r.FormValue("username"); !model.CheckUsername(u) {
+		if u := r.FormValue("username"); !repository.CheckUsername(u) {
 			Error(w, u+"用户名不可用", 400)
 		} else {
 			io.WriteString(w, "ok")
 		}
 		return
 	case "checkEmail":
-		if e := r.FormValue("email"); !model.CheckEmail(e) {
+		if e := r.FormValue("email"); !repository.CheckEmail(e) {
 			Error(w, e+"邮箱不可用", 400)
 		} else {
 			io.WriteString(w, "ok")
@@ -83,19 +85,22 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !model.CheckUsername(username) {
+	if !repository.CheckUsername(username) {
 		Error(w, username+"用户名不可用", 400)
 		return
 	}
 
-	if !model.CheckEmail(email) {
+	if !repository.CheckEmail(email) {
 		Error(w, email+"邮件不可用", 400)
 		return
 	}
 
-	token := model.GenRegToken(username, email, config.SecretKey, time.Minute*30)
+	token := repository.GenRegToken(username, email, config.SecretKey, time.Minute*30)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
-		content := fmt.Sprintf("你好：%s!<br><b>请点击以下链接激活你的%s账号</b>"+
+		defer wg.Done()
+		content := fmt.Sprintf("你好：%s!<br><b>请点击以下链接激活你的%s账号，完成注册</b>"+
 			"<br>验证邮箱:<a href=\"%s\">%s</a><br><b>注意请在%d分钟内完成操作</b>",
 			username,
 			config.SiteName,
@@ -103,8 +108,13 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 			email,
 			30,
 		)
-		model.SendMail(email, "验证你的注册邮件-"+config.SiteName, content)
+		err := repository.SendMail(email, "验证你的注册邮件-"+config.SiteName, content)
+		if err != nil {
+			logger.E("error send email to %s %v", email, err)
+		}
 	}()
+	wg.Wait()
+	logger.I("register %s %s", username, email)
 	s := fmt.Sprintf("注册确认链接已经发送到你的邮箱:%s,请在%d分钟内完成验证", email, 30)
 	io.WriteString(w, s)
 }

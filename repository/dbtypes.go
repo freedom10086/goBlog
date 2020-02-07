@@ -1,12 +1,12 @@
-package model
+package repository
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"github.com/lib/pq"
 	"time"
-	"database/sql/driver"
 )
 
 type NullString sql.NullString
@@ -70,15 +70,15 @@ func (nt *NullTime) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON for NullTime
 func (nt *NullTime) UnmarshalJSON(b []byte) error {
 	/*
-	s := string(b)
-	x, err := time.Parse(time.RFC3339, s)
-	if err != nil {
-		nt.Valid = false
-		return err
-	}
-	nt.Time = x
-	nt.Valid = true
-	return nil
+		s := string(b)
+		x, err := time.Parse(time.RFC3339, s)
+		if err != nil {
+			nt.Valid = false
+			return err
+		}
+		nt.Time = x
+		nt.Valid = true
+		return nil
 	*/
 
 	err := json.Unmarshal(b, &nt.Time)

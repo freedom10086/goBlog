@@ -1,0 +1,9 @@
+判断值存不存在(空等)
+The empty values are false, 0, any nil pointer or interface value, and any array, slice, map, or string of length zero. Dot is unaffected.
+{{if not .SearchData}} Nothing to show {{end}}
+
+Even your code runs fine if string "0" is replaced by int 0
+
+{{ $length := len .SearchData }} {{ if eq $length 0 }}
+    Sorry. No matching results found
+{{ end }}

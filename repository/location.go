@@ -1,4 +1,4 @@
-package model
+package repository
 
 type Location struct {
 	Code     int
@@ -2300,10 +2300,8 @@ var locations = []Location{
 			{81, "英德市", nil},
 			{82, "连州市", nil},
 		}},
-		{19, "东莞市", []Location{
-		}},
-		{20, "中山市", []Location{
-		}},
+		{19, "东莞市", []Location{}},
+		{20, "中山市", []Location{}},
 		{51, "潮州市", []Location{
 			{2, "湘桥区", nil},
 			{3, "潮安区", nil},
@@ -2478,10 +2476,8 @@ var locations = []Location{
 			{4, "天涯区", nil},
 			{5, "崖州区", nil},
 		}},
-		{3, "三沙市", []Location{
-		}},
-		{4, "儋州市", []Location{
-		}},
+		{3, "三沙市", []Location{}},
+		{4, "儋州市", []Location{}},
 		{90, "省直辖县级行政区划", []Location{
 			{1, "五指山市", nil},
 			{2, "琼海市", nil},
@@ -3272,8 +3268,7 @@ var locations = []Location{
 			{22, "皋兰县", nil},
 			{23, "榆中县", nil},
 		}},
-		{2, "嘉峪关市", []Location{
-		}},
+		{2, "嘉峪关市", []Location{}},
 		{3, "金昌市", []Location{
 			{2, "金川区", nil},
 			{21, "永昌县", nil},
@@ -3605,12 +3600,9 @@ var locations = []Location{
 			{6, "铁门关市", nil},
 		}},
 	}},
-	{71, "台湾省", []Location{
-	}},
-	{81, "香港特别行政区", []Location{
-	}},
-	{82, "澳门特别行政区", []Location{
-	}},
+	{71, "台湾省", []Location{}},
+	{81, "香港特别行政区", []Location{}},
+	{82, "澳门特别行政区", []Location{}},
 }
 
 // 获得所有的省
@@ -3645,7 +3637,7 @@ func GetCitys(province string) []Location {
 func GetDistrics(province string, city string) []Location {
 	for _, v := range locations {
 		if v.Name == province && v.Location != nil {
-			for _,vv := range v.Location {
+			for _, vv := range v.Location {
 				if vv.Name == city && vv.Location != nil {
 					r := make([]Location, 0, len(v.Location))
 					for _, vvv := range vv.Location {

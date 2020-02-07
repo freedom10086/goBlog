@@ -146,18 +146,15 @@ class Yzm {
 
 //模态确认框
 class Modal {
-    bindConfirm(btn, options) {
-        if (!btn) return;
-        btn.addEventListener('click', () => {
-            Modal.confirm(options);
-        })
-    }
-
-    // callback 如果没有返回值(或者返回值为true)，则直接拿关闭,为false取消关闭，为非空字符串，则为错误提示。
+    // callback 如果没有返回值(或者返回值为true)，则直接关闭,为false取消关闭，为非空字符串，则为错误提示。
     // inputs 是否有输入框{"type"输入类型,"hint","value"默认值}
     static create(title, content, btnPrimary, btnCancel, callback, input) {
-        btnPrimary = btnPrimary || {};
-        btnCancel = btnCancel || {};
+        if (btnPrimary === undefined) {
+            btnPrimary = null;
+        }
+        if (btnCancel === undefined) {
+            btnCancel = null;
+        }
         let modal = document.querySelector(`.modal`);
         let btnPrimaryText = btnPrimary && btnPrimary.text || "确认";
         let btnPrimaryCss = btnPrimary && btnPrimary.css || "btn-primary";
@@ -172,20 +169,23 @@ class Modal {
             <div class="modal-dialog">
             <div class="modal-content">
             <form>
-            <div class="modal-header">
-            <h5 class="modal-title">${title}</h5>
-            <button type="button" class="close" data-type="close">
-            <span aria-hidden="true">&times;</span>
-            </button>
+                <div class="modal-header">
+                <h5 class="modal-title">${title}</h5>
+                <button type="button" class="close" data-type="close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <p data-type="content">${content}</p>
+                    <div data-type="input" style="display: ${inputContent === "" ? "none" : "block"}">${inputContent}</div>
+                </div>
+                <div class="modal-footer">
+                    ${btnPrimary !== null ? `<button type="button" data-type="confirm" class="btn ${btnPrimaryCss}">${btnPrimaryText}</button>` : ""}
+                    ${btnCancel !== null ? `<button type="button" class="btn ${btnCancelCss}" data-type="close">${btnCancelText}</button>` : ""}
+                </div>
+            </form>
             </div>
-            <div class="modal-body">
-                <p data-type="content">${content}</p>
-                <div data-type="input" style="display: ${inputContent === "" ? "none" : "block"}">${inputContent}</div>
-            </div>
-            <div class="modal-footer">
-            <button type="button" data-type="confirm" class="btn ${btnPrimaryCss}">${btnPrimaryText}</button>
-            <button type="button" class="btn ${btnCancelCss}" data-type="close">${btnCancelText}</button>
-            </div></form></div></div>`;
+            </div>`;
             this.modal = modal;
             document.body.appendChild(modal);
             [...modal.querySelectorAll("[data-type=close]")].forEach((v, k) => {
@@ -204,31 +204,42 @@ class Modal {
                 });
             }
 
-            modal.querySelector("[data-type=confirm]").addEventListener('click', () => {
-                let content = "";
-                //有输入内容
-                if (modal.querySelector("[data-type=input]").style.display !== 'none') {
-                    content = inputBox.value;
-                    if (typeof (content) === "undefined" || content.length === 0) {
-                        if (!inputBox.classList.contains("is-invalid")) {
-                            inputBox.classList.add("is-invalid");
-                            inputBox.checkValidity();
+            if (btnPrimary !== null) {
+                modal.querySelector("[data-type=confirm]").addEventListener('click', () => {
+                    let content = "";
+                    //有输入内容
+                    if (modal.querySelector("[data-type=input]").style.display !== 'none') {
+                        content = inputBox.value;
+                        if (typeof (content) === "undefined" || content.length === 0) {
+                            if (!inputBox.classList.contains("is-invalid")) {
+                                inputBox.classList.add("is-invalid");
+                                inputBox.checkValidity();
+                            }
+                            return
                         }
-                        return
-                    }
 
-                    if (typeof (callback) !== "undefined" && callback !== null) {
-                        let res = callback(content);
-                        if (res !== null && res !== true) {
-                            inputBox.classList.add("is-invalid");
-                            inputBox.setCustomValidity(res === false ? "输入不合法" : res);
-                            return;
+                        if (typeof (callback) !== "undefined" && callback !== null) {
+                            let res = callback(content);
+                            if (res !== null && res !== true) {
+                                inputBox.classList.add("is-invalid");
+                                inputBox.setCustomValidity(res === false ? "输入不合法" : res);
+                                return;
+                            }
+                        }
+
+                        modal.style.display = "none";
+                    } else {
+                        if (typeof (callback) !== "undefined" && callback !== null) {
+                            let res = callback();
+                            if (res) {
+                                modal.style.display = "none";
+                            }
+                        } else {
+                            modal.style.display = "none";
                         }
                     }
-
-                    modal.style.display = "none";
-                }
-            })
+                })
+            }
         } else {
             modal.querySelector("p[data-type=content]").innerHTML = content;
             modal.querySelector(".modal-title").innerHTML = title;
@@ -241,24 +252,12 @@ class Modal {
         return modal;
     }
 
-    //确认对话框 title, content, btnPrimary, btnCancle, callback
+    //确认对话框 title, content, btnPrimary(可空), btnCancle(可空), callback
     static confirm(options, callback) {
         options = options || {};
-        let modal = document.querySelector(`.modal`);
         let title = options.title || "提示";
-        if (!modal) {
-            modal = Modal.create(title, options.content || "", options.btnPrimary || {"text": "确认"},
-                options.btnCancle || {"text": "关闭"}, callback);
-        } else {
-            modal.querySelector(".modal-title").innerHTML = title;
-            modal.querySelector("p[data-type=content]").innerHTML = options.content || "";
-        }
-
-        modal.querySelector("[data-type=input]").style.display = 'none';
-        if (modal && modal.style.display !== "block") {
-            modal.querySelector(".modal-dialog").className = "modal-dialog slide-down";
-            modal.style.display = "block";
-        }
+        let modal = Modal.create(title, options.content || "", options.btnPrimary, options.btnCancle, callback);
+        modal.style.display = "block";
     }
 
     //填写对话框 //{title, callback, input{type,value,hint}}

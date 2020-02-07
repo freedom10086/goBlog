@@ -1,7 +1,0 @@
-{
-    Title string 标题
-    Css [string] css文件
-    Js [string] js文件
-
-    Data &interface{} 不同页面不一样
-}

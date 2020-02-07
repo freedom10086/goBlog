@@ -1,11 +1,11 @@
 package router
 
 import (
-	"goBlog/model"
+	"errors"
+	"goBlog/repository"
 	"log"
 	"net/http"
 	"strconv"
-	"errors"
 )
 
 type UserHandler struct {
@@ -45,7 +45,7 @@ func (*UserHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("page:%d size:%d", pageInt, sizeInt)
-	if users, err := model.GetUsers(pageInt, sizeInt); err != nil {
+	if users, err := repository.GetUsers(pageInt, sizeInt); err != nil {
 		InternalError(w, r, err)
 		return
 	} else {
@@ -76,9 +76,9 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if t, err := model.ValidRegToken(token, config.SecretKey); err == nil {
+	if t, err := repository.ValidRegToken(token, config.SecretKey); err == nil {
 		log.Println("token is ok")
-		id, err := model.AddUser(t.Username, password, t.Email, sexInt)
+		id, err := repository.AddUser(t.Username, password, t.Email, sexInt)
 		if err != nil {
 			InternalError(w, r, err)
 			return
@@ -98,7 +98,7 @@ func (*UserHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 		BadParameter(w, r, "uid不合法")
 		return
 	} else {
-		if i, err := model.DelUser(uidInt); err != nil {
+		if i, err := repository.DelUser(uidInt); err != nil {
 			InternalError(w, r, err)
 			return
 		} else {

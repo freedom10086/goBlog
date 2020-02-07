@@ -1,4 +1,4 @@
-package model
+package repository
 
 //http://wiki.connect.qq.com/get_user_info
 type QQConnectUserInfoResult struct {

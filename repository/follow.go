@@ -1,4 +1,4 @@
-package model
+package repository
 
 import "time"
 
@@ -35,8 +35,8 @@ func DelStarByUid(uid, tuid int) (int64, error) {
 //获得我关注列表
 func GetFollows(uid, page, pageSize int) (follows []*Follow, err error) {
 	offset := (page - 1) * pageSize
-	s := 
-	`SELECT f.id,f.tuid,u.username,f.note,f.created
+	s :=
+		`SELECT f.id,f.tuid,u.username,f.note,f.created
 	FROM follow as f,user as u
 	WHERE f.uid = $1 AND f.tuid = u.uid
 	ORDER BY f.id desc
@@ -63,8 +63,8 @@ func GetFollows(uid, page, pageSize int) (follows []*Follow, err error) {
 //获得关注我的
 func GetFollowsMe(uid, page, pageSize int) (follows []*Follow, err error) {
 	offset := (page - 1) * pageSize
-	s := 
-	`SELECT f.id,f.uid,u.username,f.created
+	s :=
+		`SELECT f.id,f.uid,u.username,f.created
 	FROM follow as f,user as u
 	WHERE f.tuid = $1 AND f.uid = u.uid
 	ORDER BY f.id desc

@@ -1,14 +1,14 @@
 {
   "SiteName": "goBlog",
-  "SiteIpAddr": "101.132.43.60",
+  "SiteIpAddr": "127.0.0.1",
   "SitePort": ":8080",
   "SitePortSSL": ":10443",
   "SiteStaticDir": "static",
   "SecretKey": "jA8/}~-)n?'z#!`+",
 
-  "DbHost": "101.132.43.60",
+  "DbHost": "118.25.123.248",
   "DbPort": 5432,
-  "DbUsername": "postgres",
+  "DbUsername": "yang",
   "DbPassword": "justice",
   "DbName": "blog",
 
@@ -17,5 +17,9 @@
 
   "QQConnectAppId": "101462035",
   "QQConnectSecret": "f17f756958159967b34157fc30d1f79c",
-  "QQConnectRedirect": "https://xdluoyang.com/oauth"
+  "QQConnectRedirect": "https://xdluoyang.com/oauth",
+
+  "MailUsername" : "2351386755@qq.com",
+  "MailPassword": "xxxxxxxxxxxxxx",
+  "MailHost": "smtp.qq.com:587"
 }

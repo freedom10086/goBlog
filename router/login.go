@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"goBlog/model"
+	"goBlog/repository"
 	"net/http"
 	"strconv"
 	"time"
@@ -31,8 +31,8 @@ type QrLoginHandler struct {
 
 //登陆返回结果
 type LoginResult struct {
-	model.User `json:"user"`
-	Token      string `json:"token"`
+	repository.User `json:"user"`
+	Token           string `json:"token"`
 }
 
 func (h *LoginHandler) DoAuth(method int, r *http.Request) error {
@@ -59,7 +59,7 @@ func (h *LoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := model.UserLogin(username, password)
+	user, err := repository.UserLogin(username, password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = errors.New("此用户不存在")
@@ -68,7 +68,7 @@ func (h *LoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if token, err := model.GenToken(user, 1, config.SecretKey, time.Hour*24*7); err != nil {
+	if token, err := repository.GenToken(user, 1, config.SecretKey, time.Hour*24*7); err != nil {
 		Unauthorized(w, r, err.Error())
 		return
 	} else {
@@ -104,11 +104,11 @@ func (h *QrLoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	//每个字段以\n\n结尾data要换行用\r\n
 
 	//生成不重复的uuid
-	uuid := model.GenGuid()
+	uuid := repository.GenGuid()
 	var ch chan string //0:uid
 	for {
 		if _, ok := uuids[uuid]; ok {
-			uuid = model.GenGuid()
+			uuid = repository.GenGuid()
 		} else {
 			ch = make(chan string, 1)
 			uuids[uuid] = client{

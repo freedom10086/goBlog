@@ -1,14 +1,14 @@
-package model
+package repository
 
 import (
-	"time"
-	"encoding/json"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"log"
 	"math/rand"
+	"time"
 )
 
 var (

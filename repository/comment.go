@@ -1,4 +1,4 @@
-package model
+package repository
 
 import (
 	"database/sql"
@@ -61,7 +61,7 @@ func UpdateComment(id int, content string) (int64, error) {
 //获得评论
 func GetComment(id int) (*Comment, error) {
 	c := &Comment{Id: id}
-	s := "SELECT  tid,pid,uid,tuid,content,replys,created,updated FROM comment WHERE id = $1"
+	s := "SELECT id,pid,uid,tuid,content,replys,created,updated FROM comment WHERE id = $1"
 	err := db.QueryRow(s, id).Scan(&c.Tid, &c.Pid, &c.Uid, &c.Tuid, &c.Content, &c.Replys, &c.Created, &c.Updated)
 	return c, err
 }
@@ -69,7 +69,7 @@ func GetComment(id int) (*Comment, error) {
 //获得某一文章的所有评论
 func GetComments(tid int, page, pagesize int) (cs []*Comment, err error) {
 	s := "SELECT id,pid,uid,tuid,content,replys,created,updated " +
-		"FROM comment WHERE tid = $1 ORDER BY tid ASC LIMIT $2 OFFSET $3"
+		"FROM comment WHERE id = $1 ORDER BY id ASC LIMIT $2 OFFSET $3"
 	offset := (page - 1) * pagesize
 	var rows *sql.Rows
 	if rows, err = db.Query(s, tid, pagesize, offset); err != nil {
@@ -95,8 +95,8 @@ func GetComments(tid int, page, pagesize int) (cs []*Comment, err error) {
 func GetCommentsLzl(tid, id int) (css []*Comment, err error) {
 	var rows *sql.Rows
 	if rows, err = db.Query(
-		"SELECT id,uid,tuid,content,replys,created,updated " +
-			"FROM comment WHERE  tid = $1 AND pid = $2", tid, id); err != nil {
+		"SELECT id,uid,tuid,content,replys,created,updated "+
+			"FROM comment WHERE id = $1 AND pid = $2", tid, id); err != nil {
 		return
 	}
 	defer rows.Close()

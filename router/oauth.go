@@ -3,15 +3,15 @@ package router
 import (
 	"bytes"
 	"encoding/base64"
-	"goBlog/model"
+	"encoding/json"
+	"fmt"
+	"goBlog/repository"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
-	"io/ioutil"
-	"fmt"
-	"regexp"
-	"encoding/json"
 )
 
 type OauthHandler struct {
@@ -22,7 +22,7 @@ func (*OauthHandler) DoAuth(method int, r *http.Request) error {
 	return nil
 }
 
-func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) () {
+func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	if code := r.FormValue("code"); strings.HasPrefix(r.FormValue("state"), "qq_login") { //qq登陆
 		// get access_token
 		url := fmt.Sprintf("https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s",
@@ -89,7 +89,7 @@ func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) () {
 			return
 		}
 
-		data := &model.QQConnectUserInfoResult{}
+		data := &repository.QQConnectUserInfoResult{}
 		err = json.NewDecoder(resp.Body).Decode(data)
 		if err != nil {
 			InternalError(w, r, err)
@@ -128,11 +128,11 @@ func (h *OauthHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 			passWord := string(decodeAuth[index+1:])
 			log.Printf("username is %s password is %s", userName, passWord)
 
-			if u, err := model.UserLogin(userName, passWord); err != nil {
+			if u, err := repository.UserLogin(userName, passWord); err != nil {
 				Unauthorized(w, r, err.Error())
 				return
 			} else {
-				if t, err := model.GenToken(u, 1, config.SecretKey, time.Hour*24*7); err != nil {
+				if t, err := repository.GenToken(u, 1, config.SecretKey, time.Hour*24*7); err != nil {
 					Unauthorized(w, r, err.Error())
 					return
 				} else {
