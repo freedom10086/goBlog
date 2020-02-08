@@ -624,27 +624,9 @@ class ApiClass {
             });
     }
 
-    login(username, password, result) {
-        console.log("login:", username);
-        Ajax.post("/login", {username, password}, (status, res) => {
-            result(true, res, status);
-        }, (status, res) => {
-            result(false, res, status);
-        })
-    }
-
     regist(username, email, result) {
         console.log("register:", username);
         Ajax.post("/register", {username, email}, (status, res) => {
-            result(true, res, status);
-        }, (status, res) => {
-            result(false, res, status);
-        })
-    }
-
-    registDone(token, password, sex, result) {
-        console.log("register2:", token);
-        Ajax.post("/users", {token, password, sex}, (status, res) => {
             result(true, res, status);
         }, (status, res) => {
             result(false, res, status);
@@ -696,6 +678,17 @@ class Api2 {
     async login(username, password) {
         console.log("/login:", username);
         const response = await this.post("/login", {username, password});
+        console.log(response);
+        if (!response.ok) {
+            throw Error(response.status + ":" + response.statusText);
+        }
+        return response.json();
+    }
+
+    async registDone(token, password, sex) {
+        console.log("/registDone:", token, password, sex);
+        const response = await this.post("/users", {token, password, sex});
+        console.log(response);
         if (!response.ok) {
             throw Error(response.status + ":" + response.statusText);
         }

@@ -3,6 +3,7 @@ package repository
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/base64"
 	"fmt"
 	"goBlog/conf"
 	"net/smtp"
@@ -36,7 +37,56 @@ Content-Description:这个是描述
 base64编码的文件                              //文件内容使用base64 编码，单行不超过80字节，需要插入\r\n进行换行
 --THIS_IS_BOUNDARY_JUST_MAKE_YOURS--        //最后结束的标识--boundary--
 */
-func SendMail(to, subject, content string) error {
+
+type MailAttach struct {
+	name        string // eg a.jpg
+	data        []byte
+	contentType string // eg image/jpg
+}
+
+func SendPlainMail(to, subject, content string) error {
+	user := conf.Conf.MailUsername
+	password := conf.Conf.MailPassword
+	host := conf.Conf.MailHost
+
+	hp := strings.Split(host, ":")
+	auth := smtp.PlainAuth("", user, password, hp[0])
+	contentType := "Content-Type: text/plain" + "; charset=utf-8"
+
+	msg := []byte("To: " + to + "\r\n" +
+		"From: " + user + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		contentType + "\r\n" +
+		"Mime-Version:1.0\r\n" +
+		fmt.Sprintf("Date:%s\r\n", time.Now().String()) +
+		"\r\n" + content)
+	tos := strings.Split(to, ";")
+	err := smtp.SendMail(host, auth, user, tos, msg)
+	return err
+}
+
+func SendHtmlMail(to, subject, content string) error {
+	user := conf.Conf.MailUsername
+	password := conf.Conf.MailPassword
+	host := conf.Conf.MailHost
+
+	hp := strings.Split(host, ":")
+	auth := smtp.PlainAuth("", user, password, hp[0])
+	contentType := "Content-Type: text/html" + "; charset=utf-8"
+
+	msg := []byte("To: " + to + "\r\n" +
+		"From: " + user + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		contentType + "\r\n" +
+		"Mime-Version:1.0\r\n" +
+		fmt.Sprintf("Date:%s\r\n", time.Now().String()) +
+		"\r\n" + content)
+	tos := strings.Split(to, ";")
+	err := smtp.SendMail(host, auth, user, tos, msg)
+	return err
+}
+
+func sendMailWithAttach(to, subject, content string, attachs []MailAttach) error {
 	user := conf.Conf.MailUsername
 	password := conf.Conf.MailPassword
 	host := conf.Conf.MailHost
@@ -44,22 +94,43 @@ func SendMail(to, subject, content string) error {
 	hp := strings.Split(host, ":")
 	auth := smtp.PlainAuth("", user, password, hp[0])
 	buffer := bytes.NewBuffer(nil)
-	boudary := "#####"
+
+	boudary := "####"
 	header := fmt.Sprintf("To:%s\r\n"+
 		"From:%s\r\n"+
 		"Subject:%s\r\n"+
-		"Content-Type:Multipart/mixed;Boundary=\"%s\"\r\n"+
+		"Content-Type:multipart/mixed;Boundary=\"%s\"\r\n"+
 		"Mime-Version:1.0\r\n"+
-		"Date:%s\r\n\r\n", to, user, subject, boudary, time.Now().String())
-	body := fmt.Sprintf("--%s\r\nContent-Type:text/html;chart-set=utf-8\r\n%s\r\n",
-		boudary, content) // body 可以循环写入多个
-	tail := fmt.Sprintf("--%s--", boudary)
-
+		"Date:%s\r\n", to, user, subject, boudary, time.Now().String())
 	buffer.WriteString(header)
-	buffer.WriteString(body)
-	buffer.WriteString(tail)
 
-	return smtp.SendMail(host, auth, user, strings.Split(to, ";"), buffer.Bytes())
+	msg := fmt.Sprintf("\r\n\r\n--"+boudary+"\r\n"+
+		"Content-Type:text/html;charset=utf-8\r\n\r\n%s\r\n", content)
+	buffer.WriteString(msg)
+
+	for _, attach := range attachs {
+		gap := fmt.Sprintf(
+			"\r\n--%s\r\n"+
+				"Content-Transfer-Encoding: base64\r\n"+
+				"Content-Disposition: attachment;\r\n"+
+				"Content-Type:%s;name=\"%s\"\r\n", boudary, attach.contentType, attach.name)
+		buffer.WriteString(gap)
+
+		base64Bytes := make([]byte, base64.StdEncoding.EncodedLen(len(attach.data)))
+		base64.StdEncoding.Encode(base64Bytes, attach.data)
+		buffer.WriteString("\r\n")
+		for i, l := 0, len(base64Bytes); i < l; i++ {
+			buffer.WriteByte(base64Bytes[i])
+			if (i+1)%76 == 0 {
+				buffer.WriteString("\r\n")
+			}
+		}
+	}
+
+	buffer.WriteString("\r\n--" + boudary + "--")
+	sendto := strings.Split(to, ";")
+	err := smtp.SendMail(host, auth, user, sendto, buffer.Bytes())
+	return err
 }
 
 //存入数据库 md5(password)

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"database/sql"
 	"fmt"
 	"goBlog/logger"
 	"goBlog/repository"
@@ -36,21 +37,31 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	case "done":
 		token := r.FormValue("token")
 		if t, err := repository.ValidRegToken(token, config.SecretKey); err == nil {
-			//返回完善信息页面,完善成功后
-			//post /users 插入数据库完成注册
-			fmt.Println(t)
-			Template(w, &TemplateData{
-				Title: "完成注册",
-				Css:   []string{"style.css"},
-				Js:    []string{"base.js", "particles.js"},
-				Data: &CompeteRegData{
-					PostUrl:  "/users",
-					Token:    token,
-					Email:    t.Email,
-					Username: t.Username},
-			},
-				"page.gohtml", "register-done.gohtml")
+			// check if already register
+			if user, err := repository.GetUserByEmail(t.Email); err == sql.ErrNoRows {
+				Template(w, &TemplateData{
+					Title: "完成注册",
+					Css:   []string{"style.css"},
+					Js:    []string{"base.js", "particles.js"},
+					Data: &CompeteRegData{
+						PostUrl:  "/users",
+						Token:    token,
+						Email:    t.Email,
+						Username: t.Username},
+				},
+					"page.gohtml", "register-done.gohtml")
+			} else {
+				if err != nil {
+					// error happens
+					InternalError(w, r, err)
+				} else {
+					logger.I("already reg %v %v", user, err)
+					// user already exist
+					io.WriteString(w, fmt.Sprintf("already reg %s %s", user.Username, user.Password))
+				}
+			}
 		} else {
+			logger.E("invalid token failed %s %v", token, err)
 			Unauthorized(w, r, err.Error())
 		}
 		return
@@ -108,7 +119,7 @@ func (h *RegisterHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 			email,
 			30,
 		)
-		err := repository.SendMail(email, "验证你的注册邮件-"+config.SiteName, content)
+		err := repository.SendHtmlMail(email, "验证你的注册邮件-"+config.SiteName, content)
 		if err != nil {
 			logger.E("error send email to %s %v", email, err)
 		}

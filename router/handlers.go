@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"goBlog/conf"
+	"goBlog/logger"
 	"goBlog/repository"
 	"html/template"
 	"io/ioutil"
@@ -61,6 +62,7 @@ func BaseAuth(method int, r *http.Request) (*repository.Token, error) {
 }
 
 func Error(w http.ResponseWriter, error string, code int) {
+	logger.E("error %s code %d", error, code)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)

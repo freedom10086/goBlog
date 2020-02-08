@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"goBlog/logger"
 	"goBlog/repository"
 	"log"
 	"net/http"
@@ -88,6 +89,7 @@ func (h *UserHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 		Result(w, r, id)
 		return
 	} else {
+		logger.E("reg token is invalid %s %v", token, err)
 		Unauthorized(w, r, err.Error())
 	}
 }

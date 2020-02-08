@@ -1,173 +1,181 @@
 {{define "content"}}
-<main class="container" style="display: flex;align-items: center;justify-content: center;">
-    <form class="card border-success" id="form" method="post" onsubmit="return startSubmit()" action="{{.PostUrl}}">
-        <div class="card-header text-success">
-            <strong>Well done!</strong><br>恭喜你验证邮箱成功,请完善以下信息完成注册.
-        </div>
-        <div class="card-body">
-            <div class="form-group">
-                <label for="username">用户名</label>
-                <input type="text" readonly id="username" value="{{.Username}}" class="form-control">
+    <main class="container" style="display: flex;align-items: center;justify-content: center;">
+        <form class="card border-success" id="form" method="post" onsubmit="return startSubmit()">
+            <div class="card-header text-success">
+                <strong>Well done!</strong><br>恭喜你验证邮箱成功,请完善以下信息完成注册.
             </div>
-            <div class="form-group">
-                <label for="email">邮箱</label>
-                <input type="email" readonly id="email" value="{{.Email}}" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="password">设置密码</label>
-                <input id="password" name="password" placeholder="密码" required type="password"
-                       pattern="[a-zA-Z\d_#*]{6,25}" class="form-control">
-                <small class="text-muted">数字,字母,_,*,#且大于6位 <span id="password-strength"></span></small>
-            </div>
-            <div class="form-group">
-                <label for="password2">确认密码</label>
-                <input id="password2" placeholder="确认密码" required type="password"
-                       pattern="[a-zA-Z\d_#*]{6,25}" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>性别</label>
-                <div class="d-flex align-items-center">
-                    <label class="custom-control custom-radio">
-                        <input name="sex" type="radio" checked class="custom-control-input" value="0">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">保密</span>
-                    </label>
-                    <label class="custom-control custom-radio">
-                        <input name="sex" type="radio" class="custom-control-input" value="1">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">男</span>
-                    </label>
-                    <label class="custom-control custom-radio">
-                        <input name="sex" type="radio" class="custom-control-input" value="2">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">女</span>
-                    </label>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" readonly id="username" value="{{.Username}}" class="form-control">
                 </div>
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" readonly id="email" value="{{.Email}}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="password">设置密码</label>
+                    <input id="password" name="password" placeholder="密码" required type="password"
+                           pattern="[a-zA-Z\d_#*]{6,25}" class="form-control">
+                    <small class="text-muted">数字,字母,_,*,#且大于6位 <span id="password-strength"></span></small>
+                </div>
+                <div class="form-group">
+                    <label for="password2">确认密码</label>
+                    <input id="password2" placeholder="确认密码" required type="password"
+                           pattern="[a-zA-Z\d_#*]{6,25}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>性别</label>
+                    <div class="d-flex align-items-center">
+                        <label class="custom-control custom-radio">
+                            <input name="sex" type="radio" checked class="custom-control-input" value="0">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">保密</span>
+                        </label>
+                        <label class="custom-control custom-radio">
+                            <input name="sex" type="radio" class="custom-control-input" value="1">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">男</span>
+                        </label>
+                        <label class="custom-control custom-radio">
+                            <input name="sex" type="radio" class="custom-control-input" value="2">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">女</span>
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" name="token" value="{{.Token}}" required>
+                <button class="btn btn-primary">完成注册</button>
             </div>
-            <input type="hidden" name="token" value="{{.Token}}" required>
-            <button class="btn btn-primary">完成注册</button>
-        </div>
-    </form>
-</main>
-<script type="text/javascript">
-    const passwordInput = document.querySelector("#password");
-    const password2Input = document.querySelector("#password2");
-    const passwordStrengthText = document.querySelector("#password-strength");
-    const token = {{.Token}};
+        </form>
+    </main>
+    <script type="text/javascript">
+        const passwordInput = document.querySelector("#password");
+        const password2Input = document.querySelector("#password2");
+        const passwordStrengthText = document.querySelector("#password-strength");
 
-    function initPage() {
-        passwordInput.addEventListener("keyup", function () {
-            checkPassword();
-            checkPasswordStrength();
-            checkPassword2();
+        // 注册token从邮件链接获取 非认证token
+        let regToken = new URL(window.location.href).searchParams.get("token");
+        if (regToken == null) {
+            confirm("非法请求")
+        }
 
-        });
+        function initPage() {
+            passwordInput.addEventListener("keyup", function () {
+                checkPassword();
+                checkPasswordStrength();
+                checkPassword2();
 
-        passwordInput.addEventListener("change", function () {
-            checkPassword();
-            checkPasswordStrength();
-            checkPassword2();
-        });
+            });
 
-        password2Input.addEventListener("keyup", function () {
-            checkPassword2();
-        });
+            passwordInput.addEventListener("change", function () {
+                checkPassword();
+                checkPasswordStrength();
+                checkPassword2();
+            });
 
-        password2Input.addEventListener("change", function () {
-            checkPassword2();
-        });
-    }
+            password2Input.addEventListener("keyup", function () {
+                checkPassword2();
+            });
 
-    function startSubmit() {
-        passwordInput.setCustomValidity("");
-        if (!checkPassword() || !checkPassword2()) {
+            password2Input.addEventListener("change", function () {
+                checkPassword2();
+            });
+        }
+
+        function startSubmit() {
+            passwordInput.setCustomValidity("");
+            if (!checkPassword() || !checkPassword2()) {
+                return false;
+            }
+
+            const sex = document.querySelector('input[name="sex"]:checked').value;
+            api2.registDone(regToken, passwordInput.value, sex).then(res => {
+                Modal.confirm({title: "完成注册成功", content: "恭喜注册成功", btnPrimary: {text: "好的"}}, () => {
+                    setTimeout(() => {
+                        window.location.href = "/"
+                    }, 3000)
+                })
+            }).catch(e => {
+                console.log(e);
+                Modal.confirm({title: "完成注册失败", content: e || "网络错误", btnCancle: {text: "好的"}})
+            });
             return false;
         }
 
-        const sex = document.querySelector('input[name="sex"]:checked').value;
-        console.log(sex);
-
-        Api.registDone(token, passwordInput.value, sex, (ok, res) => {
-            console.log(res);
-        });
-        return false;
-    }
-
-    function checkPassword() {
-        console.log("1");
-        if (passwordInput.value.length < 6) {
-            passwordInput.className = "form-control is-invalid";
-            passwordInput.setCustomValidity("密码过短");
-            passwordInput.title = "密码过短";
-        } else {
-            passwordInput.setCustomValidity("");
-            if (passwordInput.checkValidity()) {
-                passwordInput.className = "form-control is-valid";
-                passwordInput.title = "";
-                return true;
-            } else {
+        function checkPassword() {
+            if (passwordInput.value.length < 6) {
                 passwordInput.className = "form-control is-invalid";
-                passwordInput.title = passwordInput.validationMessage;
+                passwordInput.setCustomValidity("密码过短");
+                passwordInput.title = "密码过短";
+            } else {
+                passwordInput.setCustomValidity("");
+                if (passwordInput.checkValidity()) {
+                    passwordInput.className = "form-control is-valid";
+                    passwordInput.title = "";
+                    return true;
+                } else {
+                    passwordInput.className = "form-control is-invalid";
+                    passwordInput.title = passwordInput.validationMessage;
+                }
+            }
+            return false;
+        }
+
+        function checkPassword2() {
+            if (passwordInput.value !== password2Input.value) {
+                password2Input.className = "form-control is-invalid";
+                password2Input.title = "密码不匹配";
+                password2Input.setCustomValidity("密码不匹配");
+                return false;
+            } else {
+                password2Input.className = "form-control is-valid";
+                password2Input.title = "";
+                password2Input.setCustomValidity("");
+                return true;
             }
         }
-        return false;
-    }
 
-    function checkPassword2() {
-        console.log("2");
-        if (passwordInput.value !== password2Input.value) {
-            password2Input.className = "form-control is-invalid";
-            password2Input.title = "密码不匹配";
-            password2Input.setCustomValidity("密码不匹配");
-            return false;
-        } else {
-            password2Input.className = "form-control is-valid";
-            password2Input.title = "";
-            password2Input.setCustomValidity("");
-            return true;
-        }
-    }
+        function checkPasswordStrength() {
+            let val = passwordInput.value;
+            let lv = -1;
+            if (val.match(/[a-z]/g)) {
+                lv++;
+            }
+            if (val.match(/[0-9]/g)) {
+                lv++;
+            }
+            if (val.match(/[A-Z]/g)) {
+                lv++;
+            }
+            if (val.match(/(.[^A-Za-z0-9])/g)) {
+                lv++;
+            }
+            if (val.length >= 12) {
+                lv += 2;
+            } else if (val.length >= 10) {
+                lv += 1
+            }
+            if (lv < 0) {
+                lv = 0;
+            } else if (lv > 2) {
+                lv = 2;
+            }
 
-    function checkPasswordStrength() {
-        let val = passwordInput.value;
-        let lv = -1;
-        if (val.match(/[a-z]/g)) {
-            lv++;
+            if (lv === 0) {
+                passwordStrengthText.innerHTML = "密码强度弱";
+                passwordStrengthText.className = "text-danger";
+            } else if (lv === 1) {
+                passwordStrengthText.innerHTML = "密码强度中";
+                passwordStrengthText.className = "text-warning";
+            } else if (lv === 2) {
+                passwordStrengthText.innerHTML = "密码强度强";
+                passwordStrengthText.className = "text-success";
+            } else {
+                passwordStrengthText.innerHTML = "";
+                passwordStrengthText.className = "";
+            }
+            return lv > 0;
         }
-        if (val.match(/[0-9]/g)) {
-            lv++;
-        }
-        if (val.match(/[A-Z]/g)) {
-            lv++;
-        }
-        if (val.match(/(.[^A-Za-z0-9])/g)) {
-            lv++;
-        }
-        if (val.length >= 12) {
-            lv += 2;
-        } else if (val.length >= 10) {
-            lv += 1
-        }
-        if (lv < 0) {
-            lv = 0;
-        } else if (lv > 2) {
-            lv = 2;
-        }
-
-        if (lv === 0) {
-            passwordStrengthText.innerHTML = "密码强度弱";
-            passwordStrengthText.className = "text-danger";
-        } else if (lv === 1) {
-            passwordStrengthText.innerHTML = "密码强度中";
-            passwordStrengthText.className = "text-warning";
-        } else if (lv === 2) {
-            passwordStrengthText.innerHTML = "密码强度强";
-            passwordStrengthText.className = "text-success";
-        } else {
-            passwordStrengthText.innerHTML = "";
-            passwordStrengthText.className = "";
-        }
-        return lv > 0;
-    }
-</script>
+    </script>
 {{end}}
