@@ -109,8 +109,6 @@
                 })
             });
 
-            console.log(window.location.hash);
-            // get http://xxx.xxx#abc -> #abc
             if (window.location.hash === "#qrcode") {
                 showQrLogin();
             } else {
@@ -138,44 +136,49 @@
             });
 
             usernameInput.addEventListener("change", function () {
-                if (usernameInput.value.length >= 3 && usernameInput.value.length < 20) {
-                    if (usernameInput.className !== "form-control") {
-                        usernameInput.className = "form-control";
-                    }
-                    if (passwordInput.className !== "form-control") {
-                        passwordInput.className = "form-control";
-                    }
-                } else {
-                    usernameInput.className = "form-control is-invalid";
-                }
+                checkUserNameAndPassword();
             });
 
             passwordInput.addEventListener("change", function () {
-                if (passwordInput.value.length >= 6 && passwordInput.value.length < 20) {
-                    if (passwordInput.className !== "form-control") {
-                        passwordInput.className = "form-control";
-                    }
-                } else {
-                    passwordInput.className = "form-control is-invalid";
-                }
+                checkUserNameAndPassword();
             });
         }
 
-        function startSubmit() {
+        function checkUserNameAndPassword() {
+            usernameInput.title = "";
             if (!usernameInput.checkValidity()) {
                 usernameInput.className = "form-control is-invalid";
                 return false
+            } else if (usernameInput.value.length >= 3 && usernameInput.value.length < 20) {
+                if (usernameInput.className !== "form-control") {
+                    usernameInput.className = "form-control";
+                }
             } else {
-                usernameInput.className = "form-control";
+                usernameInput.className = "form-control is-invalid";
+                usernameInput.title = "用户名长度在3-20字符之间"
+                return false
             }
 
+            passwordInput.title = "";
             if (!passwordInput.checkValidity()) {
                 passwordInput.className = "form-control is-invalid";
                 return false
+            } else if (passwordInput.value.length >= 6 && passwordInput.value.length < 20) {
+                if (passwordInput.className !== "form-control") {
+                    passwordInput.className = "form-control";
+                }
             } else {
-                passwordInput.className = "form-control";
+                passwordInput.className = "form-control is-invalid";
+                passwordInput.title = "密码长度在6-20字符之间"
+                return false
             }
+            return true
+        }
 
+        function startSubmit() {
+            if (!checkUserNameAndPassword()) {
+                return false
+            }
             if (!validCodeInput.checkValidity()) return false;
             if (!yzm.checkValid(validCodeInput.value)) {
                 validCodeInput.setCustomValidity("验证码不正确");
@@ -191,20 +194,19 @@
 
             Loading.show(10, "提交中...");
             api2.login(usernameInput.value, passwordInput.value).then(res => {
-                if (res.ok) {
-                    let data = res.json();
+                if (res.code === 200) {
+                    let data = res.data;
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("profile", JSON.stringify(data.user));
+                    Cookie.setItem("token", data.token);
+
                     Toast.show(`登陆成功！即将转到首页`);
                     setTimeout(function () {
                         location.replace('/'); //不加入历史
                         window.location.href = "/" //此方法会退回历史
                     }, 1500);
                 } else {
-                    console.log(res.ok);
-                    console.log(res.status);
-                    console.log(res.statusText);
-                    throw Error("账号或者密码错误！ [" + res.status + "]")
+                    throw Error("Error [" + res.message || "账号或者密码错误!" + "]")
                 }
             }).catch(e => {
                 usernameInput.className = "form-control is-invalid";

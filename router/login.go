@@ -1,8 +1,6 @@
 package router
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"goBlog/repository"
 	"net/http"
@@ -61,9 +59,6 @@ func (h *LoginHandler) DoPost(w http.ResponseWriter, r *http.Request) {
 
 	user, err := repository.UserLogin(username, password)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			err = errors.New("此用户不存在")
-		}
 		InternalError(w, r, err)
 		return
 	}

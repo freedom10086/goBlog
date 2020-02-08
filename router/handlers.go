@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -47,18 +48,42 @@ type TemplateData struct {
 	Js    []string
 }
 
-//常用auth
+//常用auth优先级 post form > get form > head Authorization > cookie["token"]
 //基础用户
 func BaseAuth(method int, r *http.Request) (*repository.Token, error) {
 	var auth string
-	if auth := r.Header.Get("Authorization"); auth == "" {
+	if cookie, err := r.Cookie("token"); err == nil && cookie != nil {
+		auth = cookie.Value
+		// may need url decode = => %3D
+		if strings.Contains(cookie.Value, "%") {
+			if t, err := url.QueryUnescape(cookie.Value); err == nil {
+				auth = t
+			}
+		}
+		logger.D("auth cookie token %s", auth)
+	}
+	if a := r.Header.Get("Authorization"); len(a) > 5 && strings.HasPrefix(a, "Base ") {
+		if decodeToken, err := base64.URLEncoding.DecodeString(a[5:]); err != nil {
+			return nil, repository.ErrTokenInvalid
+		} else {
+			auth = string(decodeToken)
+		}
+		logger.D("auth head token %s", auth)
+	}
+	if formToken := r.FormValue("token"); len(formToken) > 0 {
+		logger.D("auth form token %s", formToken)
+		auth = formToken
+	}
+	if postFormToken := r.PostFormValue("token"); len(postFormToken) > 0 {
+		logger.D("auth post form token %s", postFormToken)
+		auth = postFormToken
+	}
+
+	if len(auth) == 0 {
 		return nil, repository.ErrTokenInvalid
 	}
-	if decodeToken, err := base64.URLEncoding.DecodeString(auth); err != nil {
-		return nil, repository.ErrTokenInvalid
-	} else {
-		return repository.ValidToken(string(decodeToken), config.SecretKey)
-	}
+
+	return repository.ValidToken(auth, config.SecretKey)
 }
 
 func Error(w http.ResponseWriter, error string, code int) {

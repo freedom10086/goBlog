@@ -1,3 +1,57 @@
+// cookie
+class Cookie {
+    static getItem(sKey) {
+        return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+    }
+
+    static setItem(sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+        if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) {
+            return false;
+        }
+        var sExpires = "";
+        if (vEnd) {
+            switch (vEnd.constructor) {
+                case Number:
+                    sExpires = vEnd === Infinity ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT" : "; max-age=" + vEnd;
+                    break;
+                case String:
+                    sExpires = "; expires=" + vEnd;
+                    break;
+                case Date:
+                    sExpires = "; expires=" + vEnd.toUTCString();
+                    break;
+            }
+        }
+        document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
+        return true;
+    }
+
+    static removeItem(sKey, sPath, sDomain) {
+        if (!sKey || !this.hasItem(sKey)) {
+            return false;
+        }
+        document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
+        return true;
+    }
+
+    static clear() {
+        document.cookie = "";
+        return true;
+    }
+
+    static hasItem(sKey) {
+        return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+    }
+
+    static keys() {
+        var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+        for (var nIdx = 0; nIdx < aKeys.length; nIdx++) {
+            aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]);
+        }
+        return aKeys;
+    }
+}
+
 //返回顶部
 function backTop(acceleration, time) {
     acceleration = acceleration || 0.1;
@@ -55,7 +109,9 @@ function exitLogin() {
         "title": "退出登陆", "content": "你要确认退出登陆吗?", "btnPrimary": {"css": "btn-danger"},
         "btnCancle": {"text": "取消"}
     }, () => {
+        console.log("clear localstorage and cookie");
         localStorage.clear();
+        Cookie.clear();
         location.reload();
         Toast.show("退出登陆成功");
     });
@@ -149,10 +205,10 @@ class Modal {
     // callback 如果没有返回值(或者返回值为true)，则直接关闭,为false取消关闭，为非空字符串，则为错误提示。
     // inputs 是否有输入框{"type"输入类型,"hint","value"默认值}
     static create(title, content, btnPrimary, btnCancel, callback, input) {
-        if (btnPrimary === undefined) {
+        if (typeof (btnPrimary) === undefined) {
             btnPrimary = null;
         }
-        if (btnCancel === undefined) {
+        if (typeof (btnCancel) === undefined) {
             btnCancel = null;
         }
         let modal = document.querySelector(`.modal`);
@@ -515,7 +571,7 @@ const ajaxPromise = param => {
             }
         }
     })
-}
+};
 
 // fetch api 返回promise对象
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -667,6 +723,7 @@ class Api2 {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 //'Content-Type': 'application/json',
                 "Accept": "application/json",
+                "Authorization": (profile !== null && token !== null) ? ("Base " + btoa(profile.username + ":" + token)) : ""
             },
             redirect: 'follow', // manual, *follow, error
             referrer: 'no-referrer', // no-referrer, *client
@@ -724,6 +781,7 @@ window.onload = function () {
         }
     });
     if (typeof initPage !== 'undefined') {
+        console.log("======init page====");
         initPage()
     }
 };

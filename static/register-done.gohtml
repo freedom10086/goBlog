@@ -92,9 +92,7 @@
             const sex = document.querySelector('input[name="sex"]:checked').value;
             api2.registDone(regToken, passwordInput.value, sex).then(res => {
                 Modal.confirm({title: "完成注册成功", content: "恭喜注册成功", btnPrimary: {text: "好的"}}, () => {
-                    setTimeout(() => {
-                        window.location.href = "/"
-                    }, 3000)
+                    window.location.href = "/"
                 })
             }).catch(e => {
                 console.log(e);

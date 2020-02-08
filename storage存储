@@ -5,3 +5,9 @@ profile 用于存储用户信息   [l]
 --变量
 profile 用户个人信息
 token 用于存储用户的token
+
+
+
+/////////////////////////
+--cookie
+token

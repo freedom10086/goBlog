@@ -1,7 +1,9 @@
 package router
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"mime"
 	"net/http"
 	"os"
@@ -9,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"io"
-	"bufio"
 )
 
 const cacheTime = time.Hour * 24
@@ -72,7 +72,12 @@ func (*DefaultHandler) DoAuth(int, *http.Request) error {
 }
 
 func (h *DefaultHandler) DoGet(w http.ResponseWriter, r *http.Request) {
-	filename := staticDir + r.URL.Path[1:]
+	filename := staticDir + r.URL.Path[1:] //eg r.URL.Path = /newpost
+	if strings.HasSuffix(r.URL.Path, ".gohtml") {
+		Forbidden(w, r, "")
+		return
+	}
+
 	if strings.HasSuffix(r.URL.Path, "/") {
 		filename += "index.html"
 	}

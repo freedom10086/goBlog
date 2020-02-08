@@ -1,3 +1,10 @@
+// base 64
+btoa('china is so nb') // 编码
+atob("Y2hpbmEgaXMgc28gbmI=") // 解码
+
+// Authorization 认证
+https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Authorization
+
 //1 鼠标点击坐标
 div.onclick = function(ev){
 	var oEvent = ev||event;

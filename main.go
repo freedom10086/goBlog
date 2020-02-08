@@ -25,7 +25,7 @@ func init() {
 
 	routers = map[string]router.Handler{
 		"/":          &router.HomeHandler{},
-		"/article":   &router.ArticleHandler{},
+		"/article":   &router.PostHandler{},
 		"/categorys": &router.CateHandler{},
 		"/users":     &router.UserHandler{},
 		"/oauth":     &router.OauthHandler{},
@@ -36,6 +36,7 @@ func init() {
 		"/account/":  &router.AccountHandler{}, //reset_password reg_compete...
 		"/admin/":    &router.AdminHandler{},
 		"/location":  &router.LocationHandler{},
+		"/newpost":   &router.NewPostHandler{},
 	}
 }
 
