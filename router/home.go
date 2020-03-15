@@ -9,6 +9,11 @@ type HomeHandler struct {
 	BaseHandler
 }
 
+type HomeTemplateData struct {
+	BasePageData
+	Posts []*repository.Post
+}
+
 func (h *HomeHandler) DoAuth(method int, r *http.Request) error {
 	return nil
 }
@@ -27,10 +32,9 @@ func (*HomeHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 			Title: "首页-" + config.SiteName,
 			Css:   []string{"style.css"},
 			Js:    []string{"base.js"},
-			Data: struct {
-				Posts []*repository.Post
-			}{
-				Posts: posts,
+			Data: &HomeTemplateData{
+				BasePageData: BasePageData{TabIndex: 0},
+				Posts:        posts,
 			},
 		},
 		"page.gohtml", "index.gohtml")

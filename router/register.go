@@ -23,6 +23,7 @@ func (h *RegisterHandler) DoAuth(method int, r *http.Request) error {
 }
 
 type CompeteRegData struct {
+	BasePageData
 	PostUrl  string
 	Token    string
 	Username string
@@ -44,10 +45,11 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 					Css:   []string{"style.css"},
 					Js:    []string{"base.js", "particles.js"},
 					Data: &CompeteRegData{
-						PostUrl:  "/users",
-						Token:    token,
-						Email:    t.Email,
-						Username: t.Username},
+						BasePageData: BasePageData{0},
+						PostUrl:      "/users",
+						Token:        token,
+						Email:        t.Email,
+						Username:     t.Username},
 				},
 					"page.gohtml", "register-done.gohtml")
 			} else {
@@ -80,9 +82,11 @@ func (h *RegisterHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	default:
-		Template(w, &TemplateData{Css: []string{"style.css"},
-			Js: []string{"base.js", "particles.js"}},
-			"page.gohtml", "register.gohtml")
+		Template(w, &TemplateData{
+			Css:  []string{"style.css"},
+			Js:   []string{"base.js", "particles.js"},
+			Data: &BasePageData{TabIndex: 0},
+		}, "page.gohtml", "register.gohtml")
 	}
 }
 

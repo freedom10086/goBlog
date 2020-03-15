@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{.Title}}</title>
     {{range .Css}}
-    <link rel="stylesheet" href="styles/{{.}}">
+        <link rel="stylesheet" href="styles/{{.}}">
     {{end}}
     <script>
         let profile; //用户个人信息 user json
@@ -24,16 +24,19 @@
             </button>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav mr-auto mt-2 mt-sm-0">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="#">首页</a>
+                    <li class="nav-item {{if or (not .Data.TabIndex) (eq .Data.TabIndex 0)}}active{{end}}">
+                        <a class="nav-link" href="/">首页</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">分类</a>
+                        <a class="nav-link {{if eq .Data.TabIndex 1}}active{{end}}"
+                           href="/category">分类</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">关于</a>
+                        <a class="nav-link {{if eq .Data.TabIndex 2}}active{{end}}"
+                           href="/about">关于</a>
                     </li>
                 </ul>
+
                 <form class="form-inline my-2 my-sm-0">
                     <input class="form-control mr-sm-2" placeholder="搜索文章">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
@@ -45,10 +48,10 @@
                 <div id="nav-profile-view" class="dropdown show" style="display: none">
                     <a class="dropdown-toggle" style="display: flex;align-items: center" href="#">
                         <img src="images/avater.jpg" width="35px" height="35px" class="rounded-circle mr-2"><span
-                            id="nav-profile-username">username</span></a>
+                                id="nav-profile-username">username</span></a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item" href="#">设置</a>
-                        <a class="dropdown-item" href="#">发帖</a>
+                        <a class="dropdown-item" href="/setting">设置</a>
+                        <a class="dropdown-item" href="/newpost">发帖</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item text-danger" href="#" onclick="return exitLogin();">退出登录</a>
                     </div>
@@ -66,7 +69,7 @@
     <p class="footer-text">Copyright © 2016-2017 yluo.me</p>
 </footer>
 {{range .Js}}
-<script src="js/{{.}}"></script>
+    <script src="js/{{.}}"></script>
 {{end}}
 </body>
 </html>

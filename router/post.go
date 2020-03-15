@@ -22,10 +22,15 @@ type NewPostHandler struct {
 	BaseHandler
 }
 
+type NewPostTemplateData struct {
+	BasePageData
+}
+
 func (h *NewPostHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	Template(w, &TemplateData{
-		Css: []string{"style.css", "editor.css", "font-md.css"},
-		Js:  []string{"base.js", "highlight.pack.js", "marked.min.js", "editor.js"}},
+		Css:  []string{"style.css", "editor.css", "font-md.css"},
+		Js:   []string{"base.js", "highlight.pack.js", "marked.min.js", "editor.js"},
+		Data: &NewPostTemplateData{}},
 		"page.gohtml", "newpost.gohtml",
 	)
 }

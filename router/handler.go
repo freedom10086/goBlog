@@ -54,3 +54,7 @@ func (*BaseHandler) DoDelete(w http.ResponseWriter, r *http.Request) {
 func (*BaseHandler) DoUpdate(w http.ResponseWriter, r *http.Request) {
 	NotAllowed(w, r)
 }
+
+type BasePageData struct {
+	TabIndex int
+}

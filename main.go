@@ -24,19 +24,21 @@ func init() {
 	logger.I("==%s started==", config.SiteName)
 
 	routers = map[string]router.Handler{
-		"/":          &router.HomeHandler{},
-		"/article":   &router.PostHandler{},
-		"/categorys": &router.CateHandler{},
-		"/users":     &router.UserHandler{},
-		"/oauth":     &router.OauthHandler{},
-		"/login":     &router.LoginHandler{},
-		"/qrlogin":   &router.QrLoginHandler{},
-		"/register":  &router.RegisterHandler{},
-		"/chats":     &router.ChatHandler{},
-		"/account/":  &router.AccountHandler{}, //reset_password reg_compete...
-		"/admin/":    &router.AdminHandler{},
-		"/location":  &router.LocationHandler{},
-		"/newpost":   &router.NewPostHandler{},
+		"/":             &router.HomeHandler{},
+		"/category":     &router.CategoryHandler{},
+		"/about":        &router.AboutHandler{},
+		"/article":      &router.PostHandler{},
+		"/api/category": &router.CategoryApiHandler{},
+		"/users":        &router.UserHandler{},
+		"/oauth":        &router.OauthHandler{},
+		"/login":        &router.LoginHandler{},
+		"/qrlogin":      &router.QrLoginHandler{},
+		"/register":     &router.RegisterHandler{},
+		"/chats":        &router.ChatHandler{},
+		"/account/":     &router.AccountHandler{}, //reset_password reg_compete...
+		"/admin/":       &router.AdminHandler{},
+		"/location":     &router.LocationHandler{},
+		"/newpost":      &router.NewPostHandler{},
 	}
 }
 

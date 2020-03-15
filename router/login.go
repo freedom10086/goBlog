@@ -33,6 +33,10 @@ type LoginResult struct {
 	Token           string `json:"token"`
 }
 
+type LoginTemplateData struct {
+	BasePageData
+}
+
 func (h *LoginHandler) DoAuth(method int, r *http.Request) error {
 	return nil
 }
@@ -43,9 +47,9 @@ func (h *LoginHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	Template(w, &TemplateData{
 		Title: "登陆",
 		Css:   []string{"style.css"},
-		Js:    []string{"base.js", "particles.js", "qrcode.js"}},
-		"page.gohtml", "login.gohtml",
-	)
+		Js:    []string{"base.js", "particles.js", "qrcode.js"},
+		Data:  &LoginTemplateData{},
+	}, "page.gohtml", "login.gohtml")
 }
 
 //登陆

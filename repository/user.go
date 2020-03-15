@@ -18,8 +18,6 @@ type User struct {
 	Phone       NullString `json:"phone,omitempty"`
 	Description NullString `json:"description,omitempty"`
 	Site        NullString `json:"site,omitempty"`
-	Posts       int        `json:"posts"`
-	Replys      int        `json:"replys"`
 	Regtime     time.Time  `json:"regtime"`
 }
 
@@ -67,10 +65,10 @@ func UpdatePass2(uid int, oldpass, newpass string) (int64, error) {
 func GetUserById(uid int64) (u *User, err error) {
 	u = &User{Id: uid}
 	s := `SELECT username,password,email,status,sex,exp,birthday,phone,description,
-		site,posts,replys,created FROM "user" WHERE id = $1`
+		site,created FROM "user" WHERE id = $1`
 	err = db.QueryRow(s, uid).Scan(&u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
-		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+		&u.Site, &u.Regtime)
 	return
 }
 
@@ -78,10 +76,10 @@ func GetUserById(uid int64) (u *User, err error) {
 func GetUserByName(username string) (u *User, err error) {
 	u = &User{Username: username}
 	s := `SELECT id,password,email,status,sex,exp,birthday,phone,description,
-		site,posts,replys,created FROM "user" WHERE username = $1`
+		site,created FROM "user" WHERE username = $1`
 	err = db.QueryRow(s, username).Scan(&u.Id, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
-		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+		&u.Site, &u.Regtime)
 	return
 }
 
@@ -89,10 +87,10 @@ func GetUserByName(username string) (u *User, err error) {
 func GetUserByEmail(email string) (u *User, err error) {
 	u = &User{Email: email}
 	s := `SELECT id, password, username,status,sex,exp,birthday,phone,description,
-		site,posts,replys,created FROM "user" WHERE email = $1`
+		site,created FROM "user" WHERE email = $1`
 	err = db.QueryRow(s, email).Scan(&u.Id, &u.Password, &u.Username, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
-		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+		&u.Site, &u.Regtime)
 	if err == sql.ErrNoRows {
 		u = nil
 	}
@@ -105,13 +103,13 @@ func UserLogin(username, password string) (u *User, err error) {
 	password = Md5_encode(password)
 	u = &User{ /*Password: password*/ }
 	s := `SELECT id,username,password,email,status,sex,exp,birthday,
-	phone,description,site,posts,replys,created FROM "user"
+	phone,description,site,created FROM "user"
 		WHERE (email = $1 OR username = $1)` //AND password = $2
 
 	err = db.QueryRow(s, username).Scan(
 		&u.Id, &u.Username, &u.Password, &u.Email, &u.Status, &u.Sex,
 		&u.Exp, &u.Birthday, &u.Phone, &u.Description,
-		&u.Site, &u.Posts, &u.Replys, &u.Regtime)
+		&u.Site, &u.Regtime)
 
 	if err == nil {
 		if password != u.Password {
@@ -149,7 +147,7 @@ func GetUsers(page, pagesize int) (us []*User, err error) {
 		err = rows.Scan(
 			&user.Id, &user.Username, &user.Email, &user.Status,
 			&user.Sex, &user.Exp, &user.Birthday, &user.Phone,
-			&user.Description, &user.Site, &user.Posts, &user.Replys, &user.Regtime)
+			&user.Description, &user.Site, &user.Regtime)
 
 		if err != nil {
 			return

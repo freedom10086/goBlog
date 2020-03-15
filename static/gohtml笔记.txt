@@ -7,3 +7,10 @@ Even your code runs fine if string "0" is replaced by int 0
 {{ $length := len .SearchData }} {{ if eq $length 0 }}
     Sorry. No matching results found
 {{ end }}
+
+
+{{ if and .condition1 .condition2 }}
+<!-- SHOW SOMETHING -->
+{{ end }}
+
+{{ if (not (isset .Params "hidepaging")) }}

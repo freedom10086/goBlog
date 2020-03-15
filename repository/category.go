@@ -29,7 +29,7 @@ func DelCate(id int) (int64, error) {
 //获得category
 func GetCate(id int) (*Category, error) {
 	cate := &Category{Id: id}
-	s := "SELECT  title, description,posts,lastpost,created FROM category WHERE id = $1"
+	s := "SELECT name, description, posts ,created FROM category WHERE id = $1"
 	err := db.QueryRow(s, id).Scan(&cate.Name, &cate.Description, &cate.Posts, &cate.Created)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func GetCate(id int) (*Category, error) {
 //获得所有category
 func GetCates() ([]*Category, error) {
 	//查询数据
-	rows, err := db.Query("SELECT id, name, description,posts,created FROM cate")
+	rows, err := db.Query("SELECT id, name, description, posts, created FROM category")
 	if err != nil {
 		return nil, err
 	}

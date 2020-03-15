@@ -2,6 +2,17 @@ Title string 标题
 Css [string] css文件
 Js [string] js文件
 
+首页
 Data &interface{} 不同页面不一样
 home.go index.gohtml
+    TabIndex tab栏目前的位置
     Posts [Post] 文章列表
+
+分类
+category.go category.gohtml
+    TabIndex tab栏目前的位置
+    Categories [Category] 文章列表
+
+关于
+about.go about.gohtml
+    TabIndex tab栏目前的位置
