@@ -29,6 +29,10 @@ type Config struct {
 	QQConnectSecret   string `json:"QQConnectSecret"`
 	QQConnectRedirect string `json:"QQConnectRedirect"`
 
+	GitHubClientId      string `json:"GitHubClientId"`
+	GitHubClientSecret  string `json:"GitHubClientSecret"`
+	GitHubLoginRedirect string `json:"GitHubLoginRedirect"`
+
 	MailUsername string `json:"MailUsername"`
 	MailPassword string `json:"MailPassword"`
 	MailHost     string `json:"MailHost"`

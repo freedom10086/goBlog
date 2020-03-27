@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        th, td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="container">
+<!--上线的时候将 redirect_uri 修改为 https://xdluoyang.com/oauth GitHub同样需要修改 https://github.com/settings/applications/1252547 -->
+<a href="https://github.com/login/oauth/authorize?client_id=8a0d755b293596511b62&redirect_uri=https://localhost:10443/oauth&scope=read%3auser&state=github_login">GitHub登陆</a>
+<br>
+<a href="https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101462035&redirect_uri=https://xdluoyang.com/oauth&scope=get_user_info&state=qq_login">QQ登陆</a>
+</body>
+
+
+</html>

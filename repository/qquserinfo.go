@@ -23,3 +23,18 @@ type QQConnectUserInfoResult struct {
 	Level           string `json:"level"`
 	IsYellowYearVip string `json:"is_yellow_year_vip"`
 }
+
+type GitHubUserInfoResult struct {
+	LoginName string `json:"freedom10086"` // 账户名
+	Id        int    `json:"id"`
+	NodeId    string `json:"node_id"`
+	Avatar    string `json:"avatar_url"`
+	PageUrl   string `json:"html_url"`
+	Nickname  string `json:"name"` // 昵称可修改
+	Company   string `json:"company"`
+	Blog      string `json:"blog"`
+	Location  string `json:"location"` // eg. Shanghai, China
+	Email     string `json:"email"`
+	Bio       string `json:"bio"`        // 简介
+	CreatedAt string `json:"created_at"` // eg. 2015-01-15T08:55:19Z
+}

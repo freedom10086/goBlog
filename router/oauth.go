@@ -9,10 +9,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
 )
+
+// GitHub登陆文档
+// https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
 
 type OauthHandler struct {
 	BaseHandler
@@ -25,9 +29,9 @@ func (*OauthHandler) DoAuth(method int, r *http.Request) error {
 func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 	if code := r.FormValue("code"); strings.HasPrefix(r.FormValue("state"), "qq_login") { //qq登陆
 		// get access_token
-		url := fmt.Sprintf("https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s",
+		getUrl := fmt.Sprintf("https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s",
 			config.QQConnectAppId, config.QQConnectSecret, code, config.QQConnectRedirect)
-		resp, err := http.Get(url)
+		resp, err := http.Get(getUrl)
 		if err != nil {
 			Unauthorized(w, r, err.Error())
 			return
@@ -55,9 +59,12 @@ func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("token:", token)
 
-		// get openId
-		url = fmt.Sprintf("https://graph.qq.com/oauth2.0/me?access_token=%s", token)
-		resp, err = http.Get(url)
+		// get openId and unionid
+		// 开发者可通过openID来获取用户的基本信息。
+		// 特别需要注意的是，如果开发者拥有多个移动应用、网站应用，可通过获取用户的unionID来区分用户的唯一性，因为只要是同一QQ互联平台下的不同应用，unionID是相同的。
+		// 换句话说，同一用户，对同一个QQ互联平台下的不同应用，unionID是相同的
+		getUrl = fmt.Sprintf("https://graph.qq.com/oauth2.0/me?access_token=%s&unionid=1", token)
+		resp, err = http.Get(getUrl)
 		if err != nil {
 			Unauthorized(w, r, err.Error())
 			return
@@ -70,7 +77,7 @@ func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// callback( {"client_id":"101462035","openid":"293ABB49EC26DE30AD105E46E2AA051F"} );
+		// callback( {"client_id":"101462035","openid":"293ABB49EC26DE30AD105E46E2AA051F","unionid":""} );
 		reg := regexp.MustCompile(`"openid":"([0-9A-Z]+)"`)
 		result := reg.FindStringSubmatch(s) //[0] 整个字符串 [1] - ()里面的
 		if result == nil {
@@ -81,9 +88,20 @@ func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		openId := result[1]
 		fmt.Println("openId:", openId)
 
+		// get unionid
+		reg = regexp.MustCompile(`"unionid":"([0-9A-Z]+)"`)
+		result = reg.FindStringSubmatch(s) //[0] 整个字符串 [1] - ()里面的
+		if result == nil {
+			Unauthorized(w, r, s)
+			return
+		}
+
+		unionid := result[1]
+		fmt.Println("unionid:", unionid)
+
 		// get user info
-		url = fmt.Sprintf("https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s", token, config.QQConnectAppId, openId)
-		resp, err = http.Get(url)
+		getUrl = fmt.Sprintf("https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s", token, config.QQConnectAppId, openId)
+		resp, err = http.Get(getUrl)
 		if err != nil {
 			Unauthorized(w, r, err.Error())
 			return
@@ -102,6 +120,67 @@ func (h *OauthHandler) DoGet(w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.Redirect(w, r, config.QQConnectRedirect+"?nickname="+data.Nickname+"&access_token="+token+"&state=qq_login_xdluoyang", http.StatusTemporaryRedirect)
+		return
+	} else if code := r.FormValue("code"); strings.HasPrefix(r.FormValue("state"), "github_login") { // GitHub登陆
+		// get code exchange access token
+		postUrl := "https://github.com/login/oauth/access_token"
+
+		resp, err := http.PostForm(postUrl, url.Values{
+			"client_id":     {config.GitHubClientId},
+			"client_secret": {config.GitHubClientSecret},
+			"code":          {code},
+			"state":         {r.FormValue("state")},
+		})
+		if err != nil {
+			Unauthorized(w, r, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		s := string(body)
+		if strings.Contains(s, "error") {
+			Unauthorized(w, r, s)
+			return
+		}
+
+		//access_token=e72e16c7e42f292c6912e7710c838347ae178b4a&token_type=bearer
+		m := make(map[string]string)
+		for _, v := range strings.Split(s, "&") {
+			m[strings.Split(v, "=")[0]] = strings.Split(v, "=")[1]
+		}
+
+		var token string
+		token, ok := m["access_token"]
+		if !ok {
+			Unauthorized(w, r, "获取access_token出错")
+			return
+		}
+
+		fmt.Println("token:", token)
+
+		// Use the access token to access the API
+		req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
+		if err != nil {
+			Unauthorized(w, r, err.Error())
+			return
+		}
+		req.Header.Add("Authorization", fmt.Sprintf("token %s", token))
+		client := &http.Client{}
+		resp, err = client.Do(req)
+		if err != nil {
+			Unauthorized(w, r, err.Error())
+			return
+		}
+		defer resp.Body.Close()
+
+		data := &repository.GitHubUserInfoResult{}
+		err = json.NewDecoder(resp.Body).Decode(data)
+		if err != nil {
+			InternalError(w, r, err)
+			return
+		}
+
+		w.Write([]byte("hello " + data.Nickname))
 		return
 	}
 

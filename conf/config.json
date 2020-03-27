@@ -16,10 +16,14 @@
   "DirStatic": "static/",
 
   "QQConnectAppId": "101462035",
-  "QQConnectSecret": "f17f756958159967b34157fc30d1f79c",
+  "QQConnectSecret": "你的qq互联Secret",
   "QQConnectRedirect": "https://xdluoyang.com/oauth",
 
+  "GitHubClientId": "8a0d755b293596511b62",
+  "GitHubClientSecret": "你的GitHubSecret",
+  "GitHubLoginRedirect": "https://xdluoyang.com/oauth",
+
   "MailUsername" : "2351386755@qq.com",
-  "MailPassword": "xxxxxxxxxxxxxx",
+  "MailPassword": "QQ邮箱授权码",
   "MailHost": "smtp.qq.com:587"
 }
